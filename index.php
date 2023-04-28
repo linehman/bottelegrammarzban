@@ -4,7 +4,7 @@
     channel => @botpanelmarzban
     */
 
-global $connect, $keyboard, $backuser, $list_marzban_panel_user, $keyboardadmin, $channelkeyboard, $backadmin, $keyboardmarzban, $json_list_marzban_panel, $sendmessageuser, $textbot, $json_list_help, $blockuserkey, $rollkey, $confrimrolls, $keyboardhelpadmin;
+global $connect, $keyboard, $backuser, $list_marzban_panel_user, $keyboardadmin, $channelkeyboard, $backadmin, $keyboardmarzban, $json_list_marzban_panel, $sendmessageuser, $textbot, $json_list_help, $rollkey, $confrimrolls, $keyboardhelpadmin, $request_contact, $User_Services;
 require_once 'config.php';
 require_once 'botapi.php';
 require_once 'apipanel.php';
@@ -24,6 +24,9 @@ $video = $update["message"]["video"] ?? 0;
 $videoid = $video ? $video["file_id"] : 0;
 $forward_from_id = $update["message"]["reply_to_message"]["forward_from"]["id"] ?? 0;
 $datain = $update["callback_query"]["data"] ?? '';
+$username = $update["message"]["from"]["username"] ?? '';
+$user_phone = isset($update["message"]["contact"]["phone_number"]) ? $update["message"]["contact"]["phone_number"] : 0;
+$contact_id = isset($update["message"]["contact"]["user_id"]) ? $update["message"]["contact"]["user_id"] : 0;
 #-----------------------#
 $telegram_ip_ranges = [
     ['lower' => '149.154.160.0', 'upper' => '149.154.175.255'],
@@ -82,6 +85,7 @@ foreach ($datatxtbot as $item) {
         $datatextbot[$item['id_text']] = $item['text'];
     }
 }
+$connect->query("INSERT IGNORE INTO user (id , step,limit_usertest,Processing_value,User_Status,number) VALUES ('$from_id', 'none'," . limit_usertest . ",'none','Active','none')");;
 #---------channel--------------#
 $channels = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM channels  LIMIT 1"));
 $tch = '';
@@ -89,11 +93,10 @@ $tch = '';
     $tch = $response->result->status;
 
 #-----------------------#
-$connect->query("INSERT IGNORE INTO user (id , step,limit_usertest,Processing_value,User_Status) VALUES ('$from_id', 'none'," . limit_usertest . ",'none','Active')");
 if ($user['User_Status'] == "block") {
     $textblock = "
        🚫 شما از طرف مدیریت بلاک شده اید .
-       
+        
     ✍️ دلیل مسدودی : {$user['description_blocking']}
         ";
     sendmessage($from_id, $textblock, null);
@@ -110,7 +113,35 @@ if (!in_array($tch, ['member', 'creator', 'administrator']) && $Channel_locka ==
     sendmessage($from_id, $text_channel, null);
     return;
 }
-if ($text && $setting['roll_Status'] == "✅ روشن" && $user['roll_Status'] == false && $text != "✅ قوانین را می پذیرم") {
+#-----------------------#
+if ($setting['get_number'] == "✅ تایید شماره موبایل روشن است" && $user['step'] != "get_number" && $user['number'] == "none"){
+    sendmessage($from_id, "📞 لطفا شماره موبایل خود را  برای احراز هویت ارسال نمایید", $request_contact);
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'get_number';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif($user['step'] == 'get_number'){
+    if (empty($user_phone)){
+        sendmessage($from_id, "❌ شماره تلفن صحبح نیست شماره تلفن صحبح را ارسال نمایید.", $request_contact);
+        return;
+    }
+    if ($contact_id != $from_id){
+        sendmessage($from_id, "⚠️ خطا در ذخیره سازی شماره تلفن  . شماره باید حتما  برای همین اکانت باشد.",$request_contact );
+        return;
+    }
+    sendmessage($from_id, "✅ شماره موبایل شما با موفقیت تایید شد.", $keyboard);
+    $stmt = $connect->prepare("UPDATE user SET number = ? WHERE id = ?");
+    $stmt->bind_param("ss", $user_phone, $from_id);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = "home";
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+if ($user['number'] == "none" && $setting['get_number'] == "✅ تایید شماره موبایل روشن است" ) return;
+#-----------------------#
+if ($setting['roll_Status'] == "✅  تایید قانون  روشن است" && $user['roll_Status'] == 0 && $text != "✅ قوانین را می پذیرم" && !in_array($from_id, $admin_ids)) {
             sendmessage($from_id, $datatextbot['text_roll'], $confrimrolls);
             return;
 }
@@ -123,7 +154,7 @@ if ($text == "✅ قوانین را می پذیرم"){
 }
 
 #-----------------------#
-if ($setting['Bot_Status'] == "❌ خاموش" && !in_array($from_id, $admin_ids)) {
+if ($setting['Bot_Status'] == "❌  ربات خاموش است" && !in_array($from_id, $admin_ids)) {
     sendmessage($from_id, $datatextbot['text_bot_off'], null);
     return;
 }
@@ -276,12 +307,8 @@ if ($user['step'] == "crateusertest") {
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $Allowedusername = getuser($Processing_value, $Check_token['access_token'], $marzban_list_get['url_panel']);
     if(isset($Allowedusername['username'])){
-        sendmessage($from_id, "نام کاربری در سیستم وجود دارد یک نام کاربری دیگر انتخاب کنید", $keyboard);
-        $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
-        $step = 'home';
-        $stmt->bind_param("ss", $step, $from_id);
-        $stmt->execute();
-        return;
+        $random_number = rand(1000000, 9999999);
+        $Processing_value = $Processing_value . $random_number;
     }
         $date = strtotime("+" . time . "hours");
         $timestamp = strtotime(date("Y-m-d H:i:s", $date));
@@ -289,16 +316,17 @@ if ($user['step'] == "crateusertest") {
         $data_limit = val * 1000000;
         $config_test = adduser($Processing_value, $expire, $data_limit, $Check_token['access_token'], $marzban_list_get['url_panel']);
         $data_test = json_decode($config_test, true);
-        $output_config_link = $data_test['subscription_url'];
+        $output_config_link = isset($data_test['subscription_url']) ? $data_test['subscription_url'] : 'خطا';
         $textcreatuser = "
                         
         🔑 اشتراک شما با موفقیت ساخته شد.
+        
         ⏳ زمان اشتراک تست %d ساعت
         🌐 حجم سرویس تست %d مگابایت
         
         لینک اشتراک شما   :
-
-%s
+        
+        ```%s```
                         ";
         $textcreatuser = sprintf($textcreatuser, time, val, $output_config_link);
         sendmessage($from_id, $textcreatuser, $keyboard);
@@ -310,15 +338,28 @@ if ($user['step'] == "crateusertest") {
         $stmt = $connect->prepare("UPDATE user SET limit_usertest = ? WHERE id = ?");
         $stmt->bind_param("ss", $limit_usertest, $from_id);
         $stmt->execute();
+        $count_usertest = $setting['count_usertest'] + 1;
+        $stmt = $connect->prepare("UPDATE setting SET count_usertest = ?");
+        $stmt->bind_param("s", $count_usertest);
+        $stmt->execute();
+        $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+        $step = 'home';
+        $stmt->bind_param("ss", $step, $from_id);
+        $stmt->execute();
+        $text_report = " 
+  📣 پیام جدید 
 
-    $count_usertest = $setting['count_usertest'] + 1;
-    $stmt = $connect->prepare("UPDATE setting SET count_usertest = ?");
-    $stmt->bind_param("s", $count_usertest);
-    $stmt->execute();
-    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
-    $step = 'home';
-    $stmt->bind_param("ss", $step, $from_id);
-    $stmt->execute();
+⚙️ یک کاربر اکانت تست با نام کانفیگ ```$Processing_value``` دریافت کرد
+
+اطلاعات کامل 👇👇
+
+👤 آیدی عددی کاربر :  $from_id
+ ☎️  شماره تلفن کاربر : {$user['number']}
+🖥  نام پنل : $text
+⚜️ نام کاربری کاربر : @$username";
+    if (strlen($setting['Channel_Report'] )> 0){
+    sendmessage($setting['Channel_Report'], $text_report, null);
+}
 }
 //_________________________________________________
 if ($text == "📚  آموزش") {
@@ -399,7 +440,7 @@ if ($text == "📣 تنظیم کانال جوین اجباری") {
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 }
-if ($user['step'] == "addchannel") {
+elseif ($user['step'] == "addchannel") {
     $text_set_channel = "
         🔰 کانال با موفقیت تنظیم گردید.
          برای  روشن کردن عضویت اجباری از منوی ادمین دکمه 📣 تنظیم کانال جوین اجباری  را بزنید
@@ -1033,23 +1074,21 @@ $Bot_Status = json_encode([
 if ($text == "📡 وضعیت  ربات") {
     sendmessage($from_id, "وضعیت ربات ", $Bot_Status);
 }
-if ($datain == "✅ روشن") {
+if ($datain == "✅  ربات روشن است") {
     $stmt = $connect->prepare("UPDATE setting SET Bot_Status = ?");
-    $Status = '❌ خاموش';
+    $Status = '❌  ربات خاموش است';
     $stmt->bind_param("s", $Status);
     $stmt->execute();
     Editmessagetext($from_id, $message_id, "ربات خاموش گردید.❌", null);
-} elseif ($datain == "❌ خاموش") {
+} elseif ($datain == "❌  ربات خاموش است") {
     $stmt = $connect->prepare("UPDATE setting SET Bot_Status = ?");
-    $Status = '✅ روشن';
+    $Status = '✅  ربات روشن است';
     $stmt->bind_param("s", $Status);
     $stmt->execute();
     Editmessagetext($from_id, $message_id, "🤖 ربات روشن گردید.", null);
 }
 //_________________________________________________
-if ($text == "🚫 مسدودی کاربر") {
-    sendmessage($from_id, "یکی از گزینه های زیر را انتخاب کنید👇", $blockuserkey);
-} elseif ($text == "🔒 مسدود کردن کاربر") {
+if ($text == "🔒 مسدود کردن کاربر") {
     sendmessage($from_id, "👤 آیدی عددی کاربر را ارسال کنید.", $backadmin);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'getidblock';
@@ -1154,16 +1193,138 @@ elseif ($text == "⚖️ متن قانون") {
 if($text == "💡 روشن / خاموش کردن تایید قوانین"){
         sendmessage($from_id, "وضعیت قانون ", $roll_Status);
     }
-    if ($datain == "✅ روشن") {
+    if ($datain == "✅  تایید قانون  روشن است") {
         $stmt = $connect->prepare("UPDATE setting SET roll_Status = ?");
-        $Status = '❌ خاموش';
+        $Status = '❌ تایید قوانین خاموش است';
         $stmt->bind_param("s", $Status);
         $stmt->execute();
         Editmessagetext($from_id, $message_id, "قانون غیرفعال گردید.❌", null);
-    } elseif ($datain == "❌ خاموش") {
+    } elseif ($datain == "❌ تایید قوانین خاموش است") {
         $stmt = $connect->prepare("UPDATE setting SET roll_Status = ?");
-        $Status = '✅ روشن';
+        $Status = '✅  تایید قانون  روشن است';
         $stmt->bind_param("s", $Status);
         $stmt->execute();
         Editmessagetext($from_id, $message_id, "♨️ قانون فعال  گردید. از این پس اگر کاربری قوانین را تایید نکرده باشد نمی تواند از امکانات ربات استفاده نماید", null);
+    }
+//_________________________________________________
+if($text == "👤 خدمات کاربر"){
+    sendmessage($from_id, "یکی از گزینه های زیر را انتخاب کنید 👇😊", $User_Services);
+}
+#-------------------------#
+
+elseif($text == "📊 وضعیت تایید شماره کاربر"){
+    sendmessage($from_id, "آیدی عددی کاربر را ارسال نمایید", $backadmin);
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'get_status';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif ($user['step'] == "get_status"){
+    if (!in_array($text, $users_ids)) {
+        sendmessage($from_id, "کاربری با این شناسه یافت نشد", $backadmin);
+        return;
+    }
+    $user_phone_status = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '$text' LIMIT 1"));
+    if ($user_phone_status['number'] == "none"){
+        sendmessage($from_id, "🛑شماره موبایل تایید نشده است🛑", $User_Services);
+    }
+    else{
+        sendmessage($from_id,"شماره موبایل کاربر تایید شده است ✅🎉" , $User_Services);
+    }
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+#-------------------------#
+
+$get_number = json_encode([
+    'inline_keyboard' => [
+        [
+            ['text' => $setting['get_number'], 'callback_data' => $setting['get_number']],
+        ],
+    ]
+]);
+if($text == "☎️ وضعیت احراز هویت شماره تماس"){
+    sendmessage($from_id, "📞  وضعیت احراز هویت شماره تماس", $get_number);
+}
+if ($datain == "✅ تایید شماره موبایل روشن است") {
+    $stmt = $connect->prepare("UPDATE setting SET get_number = ?");
+    $Status = '❌ احرازهویت شماره تماس غیرفعال است';
+    $stmt->bind_param("s", $Status);
+    $stmt->execute();
+    Editmessagetext($from_id, $message_id, "احرازهویت شماره تماس غیرفعال گردید.❌", null);
+} elseif ($datain == "❌ احرازهویت شماره تماس غیرفعال است") {
+    $stmt = $connect->prepare("UPDATE setting SET get_number = ?");
+    $Status = '✅ تایید شماره موبایل روشن است';
+    $stmt->bind_param("s", $Status);
+    $stmt->execute();
+    Editmessagetext($from_id, $message_id, "🥳 احرازهویت شماره تماس فعال گردید. از این پس هرکاربری بخواهد از خدمات ربات استفاده کند باید شماره تماس خود را ارسال کند.", null);
+}
+#-------------------------#
+if ($text == "👀 مشاهده شماره تلفن کاربر"){
+    sendmessage($from_id, "آیدی عددی کاربر را ارسال نمایید", $backadmin);
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'get_number_admin';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif ($user['step'] == "get_number_admin"){
+    if (!in_array($text, $users_ids)) {
+        sendmessage($from_id, "کاربری با این شناسه یافت نشد", $backadmin);
+        return;
+    }
+    $user_phone_number = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '$text' LIMIT 1"));
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+    if ($user_phone_number['number'] == "none"){
+        sendmessage($from_id, "کاربر شماره موبایل خود را ارسال نکرده است", $User_Services);
+        return;
+    }
+    $text_number = "
+    ☎️ شماره تلفن کاربر :{$user_phone_number['number']}
+     ";
+    sendmessage($from_id, $text_number, $User_Services);
+}
+#-------------------------#
+if ($text == "👈 تایید دستی شماره"){
+    sendmessage($from_id, "آیدی عددی کاربر را ارسال نمایید", $backadmin);
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'confrim_number';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif ($user['step'] == "confrim_number"){
+    $stmt = $connect->prepare("UPDATE user SET number  = ? WHERE id = ?");
+    $confrimnum = 'confrim number by admin';
+    $stmt->bind_param("ss", $confrimnum, $text);
+    $stmt->execute();
+    sendmessage($from_id, "✅ شماره موبایل کاربر  تایید شد", $User_Services);
+}
+if($text == "📣 تنظیم کانال گزارش"){
+        $text_channel = "
+        📣 آیدی عددی کانال گزارش خود را ارسال نمایید.
+
+برای دریافت آیدی عددی کانال می توانید پیامی داخل کانال ارسال کرده و پیام ارسال شده را برای آیدی زیر فوروارد کنید تا ایدی عددی  دریافت کنید.
+@myidbot
+        
+     آیدی عددی کانال فعلی شما:" . $setting['Channel_Report'];
+        sendmessage($from_id, $text_channel, $backadmin);
+        $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+        $step = 'addchannelid';
+        $stmt->bind_param("ss", $step, $from_id);
+        $stmt->execute();
+    }
+    elseif ($user['step'] == "addchannelid") {
+        sendmessage($from_id, "🔰 کانال با موفقیت تنظیم گردید.", $keyboardadmin);
+            $stmt = $connect->prepare("UPDATE setting SET Channel_Report = ?");
+            $stmt->bind_param("s", $text);
+        $stmt->execute();
+        $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+        $step = 'home';
+        $stmt->bind_param("ss", $step, $from_id);
+        $stmt->execute();
+        sendmessage($setting['Channel_Report'], "تست ارسال کانال گزارش", null);
     }
