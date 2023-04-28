@@ -13,7 +13,8 @@ try {
         roll_Status bool NOT NULL,
         Processing_value varchar(1000) NOT NULL,
         step varchar(5000) NOT NULL,
-        description_blocking varchar(5000) NOT NULL,
+        description_blocking varchar(5000) NULL,
+        number varchar(5000) NOT null ,
         User_Status varchar(500) NOT NULL)");
         echo "table user✅</br>";
     } else {
@@ -22,6 +23,12 @@ try {
             $connect->query("ALTER TABLE user ADD Processing_value VARCHAR(1000)");
             $connect->query("UPDATE user SET Processing_value = 'none'");
             echo "The Processing_Value field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'number'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE user ADD number VARCHAR(1000)");
+            $connect->query("UPDATE user SET number = 'none'");
+            echo "The number field was added ✅";
         }
         $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'roll_Status'");
         if (mysqli_num_rows($Check_filde) != 1) {
@@ -175,13 +182,27 @@ try {
 
     if (!$table_exists) {
         $connect->query("CREATE TABLE setting (
-        Bot_Status varchar(200) NOT NULL,
-        roll_Status varchar(200) NOT NULL,
+        Bot_Status varchar(200)  NULL,
+        roll_Status varchar(200)  NULL,
+        get_number varchar(200)  NULL,
+        Channel_Report varchar(600)  NULL,
         count_usertest varchar(5000) NOT NULL)");
         echo "table setting✅</br>";
-        $active_text = "✅ روشن";
-        $connect->query("INSERT INTO setting (count_usertest,Bot_Status,roll_Status) VALUES ('0','$active_text','$active_text')");
+        $active_bot_text = "✅  ربات روشن است";
+        $active_roll_text = "✅  تایید قانون  روشن است";
+        $active_phone_text = "✅ تایید شماره موبایل روشن است";
+        $connect->query("INSERT INTO setting (count_usertest,Bot_Status,roll_Status,get_number) VALUES ('0','$active_bot_text','$active_roll_text','$active_phone_text')");
     } else {
+        $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'get_number'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE setting ADD get_number VARCHAR(200)");
+            echo "The get_number field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'Channel_Report'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE setting ADD Channel_Report VARCHAR(200)");
+            echo "The Channel_Report field was added ✅";
+        }
         $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'Bot_Status'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE setting ADD Bot_Status VARCHAR(200)");
