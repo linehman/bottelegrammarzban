@@ -101,3 +101,10 @@ TMRaoveUu1pprEvaibk7w3DqVFhEpbfwjz
 
 
 </h2>
+
+
+
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/mahdigholipour3/bottelegrammarzban.svg)](https://starchart.cc/mahdigholipour3/bottelegrammarzban)
