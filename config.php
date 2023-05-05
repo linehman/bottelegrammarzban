@@ -16,10 +16,12 @@ defined('val') or define('val', 100);// حجم اکانت تست واحد مگا
 defined('time') or define('time', 1); // زمان اکانت تست  واحد ساعت
 defined('adminnumber') or define('adminnumber', 5522424631);// آیدی عددی ادمین
 //-----------------------------text panel-------------------------------
-$textdatabot = mysqli_query($connect, "SELECT * FROM textbot");
-$datatxtbot = array();
+$result = $connect->query("SHOW TABLES LIKE 'textbot'");
+$table_exists = ($result->num_rows > 0);
+$textdatabot = ($table_exists) ? mysqli_query($connect, "SELECT * FROM textbot") : ' ';
+$data_text_bot = array();
 foreach ($textdatabot as $row) {
-    $datatxtbot[] = array(
+    $data_text_bot[] = array(
         'id_text' => $row['id_text'],
         'text' => $row['text']
     );
@@ -33,9 +35,11 @@ $datatextbot = array(
     'text_bot_off' => '',
     'text_dec_info' => '',
     'text_dec_usertest' => '',
-    'text_fq' => ''
+    'text_fq' => '',
+    'text_account' => '',
+
 );
-foreach ($datatxtbot as $item) {
+foreach ($data_text_bot as $item) {
     if (isset($datatextbot[$item['id_text']])) {
         $datatextbot[$item['id_text']] = $item['text'];
     }
