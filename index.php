@@ -59,6 +59,16 @@ $users_ids = [];
 while ($row = mysqli_fetch_assoc($id_user)) {
     $users_ids[] = $row['id'];
 }
+$loc_marzban = mysqli_query($connect, "SELECT * FROM marzban_panel");
+$marzban_list = [];
+while ($row = mysqli_fetch_assoc($loc_marzban)) {
+    $marzban_list[] = $row['name_panel'];
+}
+$list_product = mysqli_query($connect, "SELECT * FROM product");
+$name_product = [];
+while ($row = mysqli_fetch_assoc($list_product)) {
+    $name_product[] = $row['name_product'];
+}
 $datatxtbot = array();
 foreach ($datatextbotget as $row) {
     $datatxtbot[] = array(
@@ -429,6 +439,11 @@ if ($text == "🔐 خرید VPN") {
     $stmt->execute();
 }
 elseif ($user['step'] == "get_product"){
+    if (!in_array($text , $marzban_list)){
+        sendmessage($from_id, "❌ خطا 
+📝 موقعیت سرویس نامعتبر است", null);
+        return;
+    }
     $stmt = $connect->prepare("UPDATE user SET Processing_value = ? WHERE id = ?");
     $stmt->bind_param("ss", $text, $from_id);
     $stmt->execute();
@@ -439,6 +454,11 @@ elseif ($user['step'] == "get_product"){
     $stmt->execute();
 }
 elseif ($user['step'] == "get_username"){
+    if (!in_array($text , $name_product)){
+        sendmessage($from_id, "❌ خطا 
+📝 محصول انتخابی وجود ندارد", null);
+        return;
+    }
     $stmt = $connect->prepare("UPDATE user SET Processing_value_one = ? WHERE id = ?");
     $stmt->bind_param("ss", $text, $from_id);
     $stmt->execute();
@@ -654,6 +674,7 @@ if ($text == "🔑 روشن / خاموش کردن قفل کانال") {
         $stmt = $connect->prepare("UPDATE channels SET Channel_lock = ?");
         $Channel_lock = 'on';
         $stmt->bind_param("s", $Channel_lock);
+        $stmt->execute();
     } else {
         sendmessage($from_id, "عضویت اجباری خاموش گردید", $channelkeyboard);
         $stmt = $connect->prepare("UPDATE channels SET Channel_lock = ?");
