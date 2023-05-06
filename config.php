@@ -1,7 +1,7 @@
 <?php
 /*
 pv  => @gholipour3
-channel => @botpanelmarzban
+channel => @mirzapanel
 */
 //-----------------------------database-------------------------------
 $dbname = "databasename"; //  نام دیتابیس
