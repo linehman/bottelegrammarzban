@@ -100,8 +100,8 @@ foreach ($datatxtbot as $item) {
 }
 $connect->query("INSERT IGNORE INTO user (id , step,limit_usertest,User_Status,number,Balance) VALUES ('$from_id', 'none','{$setting['limit_usertest_all']}','Active','none','0')");
 #---------channel--------------#
-if (isset($channels['link'])) {
 $tch = '';
+if (isset($channels['link'])) {
     $response = json_decode(file_get_contents('https://api.telegram.org/bot' . API_KEY . "/getChatMember?chat_id=@{$channels['link']}&user_id=$from_id"));
     $tch = $response->result->status;
 }
@@ -700,19 +700,21 @@ elseif ($user['step'] == "addchannel") {
          برای  روشن کردن عضویت اجباری از منوی ادمین دکمه 📣 تنظیم کانال جوین اجباری  را بزنید
         ";
     sendmessage($from_id, $text_set_channel, $keyboardadmin);
-    if (isset($channels['link'])) {
-        $stmt = $connect->prepare("UPDATE channels SET link = ?");
-        $stmt->bind_param("s", $text);
-    } else {
-        $stmt = $connect->prepare("INSERT INTO channels (link,Channel_lock) VALUES (?)");
-        $Channel_lock = 'off';
-        $stmt->bind_param("ss", $text, $Channel_lock);
-    }
-    $stmt->execute();
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'home';
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
+    if (isset($channels['link'])) {
+        $stmt = $connect->prepare("UPDATE channels SET link = ?");
+        $stmt->bind_param("s", $text);
+        $stmt->execute();
+    } else {
+        $stmt = $connect->prepare("INSERT INTO channels (link,Channel_lock) VALUES (?,?)");
+        $Channel_lock = 'off';
+        $stmt->bind_param("ss", $text, $Channel_lock);
+        $stmt->execute();
+    }
+
 }
 if ($text == "👨‍💻 اضافه کردن ادمین") {
     sendmessage($from_id, "🌟آیدی عددی ادمین جدید را ارسال نمایید.", $backadmin);
