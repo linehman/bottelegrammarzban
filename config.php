@@ -11,10 +11,9 @@ $connect = mysqli_connect("localhost", $username, $password, $dbname);
 //-----------------------------info-------------------------------
 
 defined('API_KEY') or define('API_KEY', 'توکن ربات');// توکن ربات خود را وارد کنید
-defined('limit_usertest') or define('limit_usertest', 10);//   محدودیت ساخت اکانت تست 
 defined('val') or define('val', 100);// حجم اکانت تست واحد مگابایت
 defined('time') or define('time', 1); // زمان اکانت تست  واحد ساعت
-defined('adminnumber') or define('adminnumber', 5522424631);// آیدی عددی ادمین
+$adminnumber =5522424631;// آیدی عددی ادمین
 //-----------------------------text panel-------------------------------
 $result = $connect->query("SHOW TABLES LIKE 'textbot'");
 $table_exists = ($result->num_rows > 0);
@@ -37,6 +36,8 @@ $datatextbot = array(
     'text_dec_usertest' => '',
     'text_fq' => '',
     'text_account' => '',
+    'text_sell' => '',
+    'text_Add_Balance' => '',
 
 );
 foreach ($data_text_bot as $item) {
@@ -46,32 +47,69 @@ foreach ($data_text_bot as $item) {
 }
 $keyboard = json_encode([
     'keyboard' => [
-            [['text' => $datatextbot['text_info']], ['text' => $datatextbot['text_usertest']]],
-            [['text' => $datatextbot['text_support']],['text' => $datatextbot['text_help']]],
-            [['text' => $datatextbot['text_fq']]]
+        [['text' => $datatextbot['text_sell']]],
+        [['text' => $datatextbot['text_info']],['text' => $datatextbot['text_usertest']]],
+        [['text' => $datatextbot['text_Add_Balance']],['text' => $datatextbot['text_account']]],
+        [['text' => $datatextbot['text_support']],['text' => $datatextbot['text_help']]],
+        [['text' => $datatextbot['text_fq']]],
     ],
     'resize_keyboard' => true
 ]);
 $keyboardadmin = json_encode([
     'keyboard' => [
-        [['text' => "📯 تنظیمات کانال"],['text' => "📊 آمار ربات"]],
-        [['text' => "📡 وضعیت  ربات"]],
-        [['text' => "📨 ارسال پیام به کاربر"],['text' => "📝 تنظیم متون ربات"]],
-        [['text' => "📜 مشاهده لیست  ادمین ها"]],
-        [['text' => "👨‍💻 اضافه کردن ادمین"],['text' => "❌ حذف ادمین"]],
+        [['text' => "📯 تنظیمات کانال"],['text' => "📊 بخش گزارشات"]],
+        [['text' => "🏬  بخش فروشگاه "]],
+        [['text' => "👨‍🔧 بخش ادمین"],['text' => "📝 تنظیم متن ربات"]],
         [['text' => "👤 خدمات کاربر"]],
         [['text' => "📚 بخش آموزش "],['text' => "🖥 پنل مرزبان"]],
-        [['text' => "♨️بخش قوانین"]],
+        [['text' => "⚙️ تنظیمات"]],
         [['text' => "🏠 بازگشت به منوی اصلی"]]
+    ],
+    'resize_keyboard' => true
+]);
+$admin_section_panel =  json_encode([
+    'keyboard' => [
+        [['text' => "👨‍💻 اضافه کردن ادمین"],['text' => "❌ حذف ادمین"]],
+        [['text' => "📜 مشاهده لیست  ادمین ها"]],
+        [['text' => "🏠 بازگشت به منوی مدیریت"]]
+    ],
+    'resize_keyboard' => true
+]);
+$reports =  json_encode([
+    'keyboard' => [
+        [['text' => "📊 آمار ربات"]],
+        [['text' => "🏠 بازگشت به منوی مدیریت"]]
+    ],
+    'resize_keyboard' => true
+]);
+$setting_panel =  json_encode([
+    'keyboard' => [
+        [['text' => "📡 وضعیت  ربات"],['text' => "♨️بخش قوانین"]],
+        [['text' =>"📣 تنظیم کانال گزارش"]],
+        [['text' => "🏠 بازگشت به منوی مدیریت"]]
+    ],
+    'resize_keyboard' => true
+]);
+$valid_Number =  json_encode([
+    'keyboard' => [
+        [['text' => "📊 وضعیت تایید شماره کاربر"],['text' => "👈 تایید دستی شماره"]],
+        [['text' => "☎️ وضعیت احراز هویت شماره تماس"]],
+        [['text' => "👀 مشاهده شماره تلفن کاربر"]],
+        [['text' => "🏠 بازگشت به منوی مدیریت"]]
+    ],
+    'resize_keyboard' => true
+]);
+$step_payment = json_encode([
+    'keyboard' => [
+        [['text' => "💳 کارت به کارت"]],
+        [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true
 ]);
 $User_Services = json_encode([
     'keyboard' => [
-        [['text' => "📊 وضعیت تایید شماره کاربر"],['text' => "👈 تایید دستی شماره"]],
-        [['text' => "☎️ وضعیت احراز هویت شماره تماس"]],
-        [['text' => "👀 مشاهده شماره تلفن کاربر"]],
-        [['text' => "🔒 مسدود کردن کاربر"],['text' => "🔓 باز کردن مسدود کاربر"]],
+        [['text' => "📱 احراز هویت شماره "],['text' => "📨 ارسال پیام به کاربر"]],
+        [['text' => "🔒 مسدود کردن کاربر"],['text' => "🔓 رفع  مسدودی کاربر"]],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true
@@ -79,6 +117,13 @@ $User_Services = json_encode([
 $keyboardhelpadmin = json_encode([
     'keyboard' => [
         [['text' => "📚 اضافه کردن آموزش"],['text' => "❌ حذف آموزش "]],
+        [['text' => "🏠 بازگشت به منوی مدیریت"]]
+    ],
+    'resize_keyboard' => true
+]);
+$shopkeyboard = json_encode([
+    'keyboard' => [
+        [['text' => "🛍 اضافه کردن محصول "]],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true
@@ -120,10 +165,10 @@ $Feature_status = json_encode([
 ]);
 $keyboardmarzban =  json_encode([
     'keyboard' => [
-        [['text' => "➕محدودیت ساخت اکانت تست برای کاربر"]],
-        [['text' =>"➕محدودیت ساخت اکانت تست برای همه"]],
+        [['text' => "➕ محدودیت ساخت اکانت تست برای کاربر"]],
+        [['text' => "➕ محدودیت ساخت اکانت تست برای همه"]],
         [['text' => '🔌 وضعیت پنل '],['text' => "🖥 اضافه کردن پنل  مرزبان "]],
-        [['text' => "❌ حذف پنل"],['text' => "📣 تنظیم کانال گزارش"]],
+        [['text' => "❌ حذف پنل"]],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true
@@ -150,8 +195,8 @@ $backadmin = json_encode([
 ]);
 $result = $connect->query("SHOW TABLES LIKE 'marzban_panel'");
 $table_exists = ($result->num_rows > 0);
+$namepanel = [];
 if ($table_exists) {
-    $namepanel = [];
     $marzbnget = mysqli_query($connect, "SELECT * FROM marzban_panel");
     while ($row = mysqli_fetch_assoc($marzbnget)) {
         $namepanel[] = [$row['name_panel']];
@@ -169,24 +214,29 @@ if ($table_exists) {
         ];
     }
     $json_list_marzban_panel = json_encode($list_marzban_panel);
-    $help = [];
-    $helpname = mysqli_query($connect, "SELECT * FROM help");
-    while ($row = mysqli_fetch_assoc($helpname)) {
-        $help[] = [$row['name_os']];
-    }
-    $help_arr = [
-        'keyboard' => [],
-        'resize_keyboard' => true,
-    ];
-    $help_arr['keyboard'][] = [
-        ['text' => "🏠 بازگشت به منوی اصلی"],
-    ];
-    foreach ($help as $button) {
-        $help_arr['keyboard'][] = [
-            ['text' => $button[0]]
+    $result = $connect->query("SHOW TABLES LIKE 'help'");
+    $table_exists = ($result->num_rows > 0);
+
+    if ($table_exists) {
+        $help = [];
+        $helpname = mysqli_query($connect, "SELECT * FROM help");
+        while ($row = mysqli_fetch_assoc($helpname)) {
+            $help[] = [$row['name_os']];
+        }
+        $help_arr = [
+            'keyboard' => [],
+            'resize_keyboard' => true,
         ];
+        $help_arr['keyboard'][] = [
+            ['text' => "🏠 بازگشت به منوی اصلی"],
+        ];
+        foreach ($help as $button) {
+            $help_arr['keyboard'][] = [
+                ['text' => $button[0]]
+            ];
+        }
+        $json_list_help = json_encode($help_arr);
     }
-    $json_list_help = json_encode($help_arr);
 }
 $list_marzban_panel_users = [
     'keyboard' => [],
@@ -206,10 +256,49 @@ $textbot = json_encode([
         [['text' => "تنظیم متن شروع"],['text' => "دکمه اطلاعات سرویس"]],
         [['text' => "دکمه اکانت تست"],['text' => "دکمه سوالات متداول"]],
         [['text' => "متن دکمه 📚  آموزش"],['text' => "متن دکمه ☎️ پشتیبانی "]],
+        [['text' => "متن دکمه حساب کاربری"],['text' => "دکمه افزایش موجودی"]],
         [['text' => "📝 تنظیم متن توضیحات اطلاعات سرویس "]],
         [['text' => "📝 تنظیم متن توضیحات  سوالات متداول"]],
         [['text' => "📝 تنظیم متن توضیحات پشتیبانی"]],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true
+]);
+//--------------------------------------------------
+$result = $connect->query("SHOW TABLES LIKE 'product'");
+$table_exists = ($result->num_rows > 0);
+if ($table_exists) {
+    $product = [];
+    $getdataproduct = mysqli_query($connect, "SELECT * FROM product");
+    while ($row = mysqli_fetch_assoc($getdataproduct)) {
+        $product[] = [$row['name_product']];
+    }
+    $list_product = [
+        'keyboard' => [],
+        'resize_keyboard' => true,
+    ];
+    $list_product['keyboard'][] = [
+        ['text' => "🏠 بازگشت به منوی اصلی"],
+    ];
+    foreach ($product as $button) {
+        $list_product['keyboard'][] = [
+            ['text' => $button[0]]
+        ];
+    }
+    $json_list_product_list= json_encode($list_product);
+}
+$payment = json_encode([
+    'keyboard' => [
+        [['text' => "💰 پرداخت و دریافت سرویس"]],
+        [['text' => "🏠 بازگشت به منوی اصلی"]]
+    ],
+    'resize_keyboard' => true
+]);
+$Confirm_pay = json_encode([
+    'inline_keyboard' => [
+        [
+            ['text' => "✅ تایید پرداخت", 'callback_data' => 'Confirm_pay'],
+            ['text' => '❌ رد پرداخت', 'callback_data' => 'reject_pay'],
+        ]
+    ]
 ]);
