@@ -44,7 +44,6 @@ if (!$ok) die("false");
 
 $user = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '$from_id' LIMIT 1"));
 $Processing_value =  $user['Processing_value'];
-$Processing_value_one =  $user['Processing_value_one'];
 $setting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM setting"));
 $helpdata = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM help"));
 $datatextbotget = mysqli_query($connect, "SELECT * FROM textbot");
@@ -91,7 +90,8 @@ $datatextbot = array(
     'text_dec_fq' => '',
     'text_account'  => '',
     'text_sell' => '',
-    'text_Add_Balance' => ''
+    'text_Add_Balance' => '',
+    'text_cart_to_cart' => '',
 );
 foreach ($datatxtbot as $item) {
     if (isset($datatextbot[$item['id_text']])) {
@@ -127,33 +127,6 @@ if (!in_array($tch, ['member', 'creator', 'administrator']) && $channels['Channe
     return;
 }
 #-----------------------#
-if ($setting['get_number'] == "✅ تایید شماره موبایل روشن است" && $user['step'] != "get_number" && $user['number'] == "none"){
-    sendmessage($from_id, "📞 لطفا شماره موبایل خود را  برای احراز هویت ارسال نمایید", $request_contact);
-    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
-    $step = 'get_number';
-    $stmt->bind_param("ss", $step, $from_id);
-    $stmt->execute();
-}
-elseif($user['step'] == 'get_number'){
-    if (empty($user_phone)){
-        sendmessage($from_id, "❌ شماره تلفن صحبح نیست شماره تلفن صحبح را ارسال نمایید.", $request_contact);
-        return;
-    }
-    if ($contact_id != $from_id){
-        sendmessage($from_id, "⚠️ خطا در ذخیره سازی شماره تلفن  . شماره باید حتما  برای همین اکانت باشد.",$request_contact );
-        return;
-    }
-    sendmessage($from_id, "✅ شماره موبایل شما با موفقیت تایید شد.", $keyboard);
-    $stmt = $connect->prepare("UPDATE user SET number = ? WHERE id = ?");
-    $stmt->bind_param("ss", $user_phone, $from_id);
-    $stmt->execute();
-    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
-    $step = "home";
-    $stmt->bind_param("ss", $step, $from_id);
-    $stmt->execute();
-}
-if ($user['number'] == "none" && $setting['get_number'] == "✅ تایید شماره موبایل روشن است" ) return;
-#-----------------------#
 if ($setting['roll_Status'] == "✅  تایید قانون  روشن است" && $user['roll_Status'] == 0 && $text != "✅ قوانین را می پذیرم" && !in_array($from_id, $admin_ids)) {
             sendmessage($from_id, $datatextbot['text_roll'], $confrimrolls);
             return;
@@ -174,6 +147,10 @@ if ($setting['Bot_Status'] == "❌  ربات خاموش است" && !in_array($fr
 #-----------------------#
 if ($text == "/start") {
     sendmessage($from_id, $datatextbot['text_start'], $keyboard);
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
     return;
 }
 if ($text == "🏠 بازگشت به منوی اصلی") {
@@ -185,6 +162,26 @@ if ($text == "🏠 بازگشت به منوی اصلی") {
     $stmt->execute();
     return;
 }
+//_________________________________________________
+if($user['step'] == 'get_number'){
+    if (empty($user_phone)){
+        sendmessage($from_id, "❌ شماره تلفن صحبح نیست شماره تلفن صحبح را ارسال نمایید.", $request_contact);
+        return;
+    }
+    if ($contact_id != $from_id){
+        sendmessage($from_id, "⚠️ خطا در ذخیره سازی شماره تلفن  . شماره باید حتما  برای همین اکانت باشد.",$request_contact );
+        return;
+    }
+    sendmessage($from_id, "✅ شماره موبایل شما با موفقیت تایید شد.", $keyboard);
+    $stmt = $connect->prepare("UPDATE user SET number = ? WHERE id = ?");
+    $stmt->bind_param("ss", $user_phone, $from_id);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = "home";
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+
 //________________________________________________________
 if ($text == $datatextbot['text_info']) {
     sendmessage($from_id, $datatextbot['text_dec_info'], $backuser);
@@ -430,8 +427,18 @@ if($text == $datatextbot['text_account']){
     ";
     sendmessage($from_id,$text_account , null);
 }
-$info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '$Processing_value_one' LIMIT 1"));
-if ($text == "🔐 خرید VPN") {
+$info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '{$user['Processing_value_one']}' LIMIT 1"));
+if ($text == $datatextbot['text_sell']) {
+    if ($setting['get_number'] == "✅ تایید شماره موبایل روشن است" && $user['step'] != "get_number" && $user['number'] == "none"){
+        sendmessage($from_id, "📞 لطفا شماره موبایل خود را  برای احراز هویت ارسال نمایید", $request_contact);
+        $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+        $step = 'get_number';
+        $stmt->bind_param("ss", $step, $from_id);
+        $stmt->execute();
+    }
+    if ($user['number'] == "none" && $setting['get_number'] == "✅ تایید شماره موبایل روشن است" ) return;
+
+
     sendmessage($from_id, "🌏 موقعیت سرویس  را انتخاب نمایید.", $list_marzban_panel_user);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'get_product';
@@ -556,6 +563,14 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
 
 }
 if($text == $datatextbot['text_Add_Balance']){
+    if ($setting['get_number'] == "✅ تایید شماره موبایل روشن است" && $user['step'] != "get_number" && $user['number'] == "none"){
+        sendmessage($from_id, "📞 لطفا شماره موبایل خود را  برای احراز هویت ارسال نمایید", $request_contact);
+        $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+        $step = 'get_number';
+        $stmt->bind_param("ss", $step, $from_id);
+        $stmt->execute();
+    }
+    if ($user['number'] == "none" && $setting['get_number'] == "✅ تایید شماره موبایل روشن است" ) return;
     sendmessage($from_id, "💸 مبلغ را  به تومان وارد کنید:
     
 ✅ حداکثر مبلغ 10.000.000میلیون تومان می باشد", $backuser);
@@ -586,22 +601,7 @@ elseif ($user['step'] == "getprice"){
 }
 elseif($user['step'] == "get_step_payment"){
 if ($text == "💳 کارت به کارت"){
-    $textcarttocart = "
-برای افزایش موجودی به صورت دستی، مبلغ دلخواه را به شماره‌ی حساب زیر واریز کنید 👇🏻
-
-==================== 
-6037000000000000 - bank 
-====================
-
-  عکس رسید خود را در این مرحله ارسال نمایید. 🔮
-
-    
-⚠️ حداکثر واریز مبلغ 10 میلیون تومان می باشد
- ⚠️امکان برداشت وجه از کیف پول ربات نیست
-⚠️ مسئولیت واریز اشتباهی با شماست
-⚠️ بعد پرداخت فقط تصویر رسید را ارسال نمایید
-";
-    sendmessage($from_id, $textcarttocart, $backuser);
+    sendmessage($from_id, $datatextbot['text_cart_to_cart'], $backuser);
 }
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'forward_admin';
@@ -633,7 +633,7 @@ elseif($user['step'] =="forward_admin"){
     ⭕️ یک پرداخت جدید انجام شده است .
 
 👤شناسه کاربر : ```$from_id```
-🛒 کد پیگیری پرداخت : $randomString
+🛒 کد پیگیری پرداخت : ```$randomString```
 ⚜️  نام کاربری : $username
 💸 مبلغ پرداختی : $Processing_value تومان
 
@@ -1222,6 +1222,26 @@ elseif ($text == "دکمه افزایش موجودی") {
 } elseif ($user['step'] == "text_Add_Balance") {
     sendmessage($from_id, "✅ متن با موفقیت ذخیره شد", $textbot);
     $stmt = $connect->prepare("UPDATE textbot SET text = ? WHERE id_text = 'text_Add_Balance'");
+    $stmt->bind_param("s", $text);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif ($text == "📝 تنظیم متن توضیحات شماره کارت") {
+    $textstart = "
+        متن جدید خود راارسال کنید.
+        متن فعلی :
+        ```". $datatextbot['text_cart_to_cart']."```";
+    sendmessage($from_id, $textstart, $backadmin);
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'text_cart_to_cart';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+} elseif ($user['step'] == "text_cart_to_cart") {
+    sendmessage($from_id, "✅ متن با موفقیت ذخیره شد", $textbot);
+    $stmt = $connect->prepare("UPDATE textbot SET text = ? WHERE id_text = 'text_cart_to_cart'");
     $stmt->bind_param("s", $text);
     $stmt->execute();
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
