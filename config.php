@@ -123,7 +123,7 @@ $keyboardhelpadmin = json_encode([
 ]);
 $shopkeyboard = json_encode([
     'keyboard' => [
-        [['text' => "🛍 اضافه کردن محصول "]],
+        [['text' => "🛍 اضافه کردن محصول "],['text' => "❌ حذف محصول"]],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true
@@ -289,6 +289,30 @@ if ($table_exists) {
     }
     $json_list_product_list= json_encode($list_product);
 }
+//--------------------------------------------------
+$result = $connect->query("SHOW TABLES LIKE 'product'");
+$table_exists = ($result->num_rows > 0);
+if ($table_exists) {
+    $product = [];
+    $getdataproduct = mysqli_query($connect, "SELECT * FROM product");
+    while ($row = mysqli_fetch_assoc($getdataproduct)) {
+        $product[] = [$row['name_product']];
+    }
+    $list_product = [
+        'keyboard' => [],
+        'resize_keyboard' => true,
+    ];
+    $list_product['keyboard'][] = [
+        ['text' => "🏠 بازگشت به منوی مدیریت"],
+    ];
+    foreach ($product as $button) {
+        $list_product['keyboard'][] = [
+            ['text' => $button[0]]
+        ];
+    }
+    $json_list_product_list_admin= json_encode($list_product);
+}
+//--------------------------------------------------
 $payment = json_encode([
     'keyboard' => [
         [['text' => "💰 پرداخت و دریافت سرویس"]],
