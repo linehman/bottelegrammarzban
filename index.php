@@ -3,7 +3,7 @@
     pv  => @gholipour3
     channel => @mirzapanel
     */
-global $connect, $keyboard, $backuser, $list_marzban_panel_user, $keyboardadmin, $channelkeyboard, $backadmin, $keyboardmarzban, $json_list_marzban_panel, $sendmessageuser, $textbot, $json_list_help, $rollkey, $confrimrolls, $keyboardhelpadmin, $request_contact, $User_Services, $shopkeyboard,$json_list_product_list, $payment, $admin_section_panel, $setting_panel, $valid_Number, $reports, $step_payment, $Confirm_pay;
+global $connect, $keyboard, $backuser, $list_marzban_panel_user, $keyboardadmin, $channelkeyboard, $backadmin, $keyboardmarzban, $json_list_marzban_panel, $sendmessageuser, $textbot, $json_list_help, $rollkey, $confrimrolls, $keyboardhelpadmin, $request_contact, $User_Services, $shopkeyboard,$json_list_product_list, $payment, $admin_section_panel, $setting_panel, $valid_Number,$json_list_product_list_admin, $reports, $step_payment, $Confirm_pay;
 require_once 'config.php';
 require_once 'botapi.php';
 require_once 'apipanel.php';
@@ -16,15 +16,15 @@ $text = $update["message"]["text"] ?? $update["callback_query"]["message"]["text
 $message_id = $update["message"]["message_id"] ?? $update["callback_query"]["message"]["message_id"] ?? 0;
 $message_id = $update["message"]["message_id"] ?? $update["callback_query"]["message"]["message_id"] ?? 0;
 $photo = $update["message"]["photo"] ?? 0;
-$photoid = $photo ? $photo[count($photo) - 1]["file_id"] : 0;
+$photoid = $photo ? end($photo)["file_id"] : '';
 $caption = $update["message"]["caption"] ?? '';
 $video = $update["message"]["video"] ?? 0;
 $videoid = $video ? $video["file_id"] : 0;
 $forward_from_id = $update["message"]["reply_to_message"]["forward_from"]["id"] ?? 0;
 $datain = $update["callback_query"]["data"] ?? '';
 $username = $update["message"]["from"]["username"] ?? '';
-$user_phone = isset($update["message"]["contact"]["phone_number"]) ? $update["message"]["contact"]["phone_number"] : 0;
-$contact_id = isset($update["message"]["contact"]["user_id"]) ? $update["message"]["contact"]["user_id"] : 0;
+$user_phone =$update["message"]["contact"]["phone_number"] ?? 0;
+$contact_id = $update["message"]["contact"]["user_id"] ?? 0;
 $first_name = $update['message']['from']['first_name']  ?? '';
 $callback_query_id = $update["callback_query"]["id"] ?? 0;
 //#-----------------------#
@@ -42,28 +42,29 @@ foreach ($telegram_ip_ranges as $telegram_ip_range) if (!$ok) {
 if (!$ok) die("false");
 #-----------------------#
 
-$user = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '$from_id' LIMIT 1"));
+$user = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '$from_id' LIMIT 1")) ?? '';
 $Processing_value =  $user['Processing_value'];
-$setting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM setting"));
-$helpdata = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM help"));
-$datatextbotget = mysqli_query($connect, "SELECT * FROM textbot");
-$channels = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM channels  LIMIT 1"));
-$id_admin = mysqli_query($connect, "SELECT * FROM admin");
+$setting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM setting")) ?? '';
+$helpdata = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM help")) ?? '';
+$datatextbotget = mysqli_query($connect, "SELECT * FROM textbot") ?? '';
+$channels = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM channels  LIMIT 1")) ?? '';
+$id_admin = mysqli_query($connect, "SELECT * FROM admin") ?? '';
 $admin_ids = [];
+
 while ($row = mysqli_fetch_assoc($id_admin)) {
     $admin_ids[] = $row['id_admin'];
 }
-$id_user = mysqli_query($connect, "SELECT * FROM user");
+$id_user = mysqli_query($connect, "SELECT * FROM user") ?? '';
 $users_ids = [];
 while ($row = mysqli_fetch_assoc($id_user)) {
     $users_ids[] = $row['id'];
 }
-$loc_marzban = mysqli_query($connect, "SELECT * FROM marzban_panel");
+$loc_marzban = mysqli_query($connect, "SELECT * FROM marzban_panel") ?? '';
 $marzban_list = [];
 while ($row = mysqli_fetch_assoc($loc_marzban)) {
     $marzban_list[] = $row['name_panel'];
 }
-$list_product = mysqli_query($connect, "SELECT * FROM product");
+$list_product = mysqli_query($connect, "SELECT * FROM product") ?? '';
 $name_product = [];
 while ($row = mysqli_fetch_assoc($list_product)) {
     $name_product[] = $row['name_product'];
@@ -147,10 +148,6 @@ if ($setting['Bot_Status'] == "❌  ربات خاموش است" && !in_array($fr
 #-----------------------#
 if ($text == "/start") {
     sendmessage($from_id, $datatextbot['text_start'], $keyboard);
-    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
-    $step = 'home';
-    $stmt->bind_param("ss", $step, $from_id);
-    $stmt->execute();
     return;
 }
 if ($text == "🏠 بازگشت به منوی اصلی") {
@@ -295,7 +292,7 @@ if ($text == $datatextbot['text_usertest']) {
     $stmt->execute();
 }
 elseif ($user['step'] == "selectloc") {
-    if (!preg_match('~^[a-z\d_]{3,32}$~i', $text)) {
+    if (!preg_match('~^[a-z][a-z\d_]{2,32}(?<!_)$~i', $text)) {
         sendmessage($from_id, "⛔️ نام کاربری معتبر نیست", $backuser);
         $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
         $step = 'selectloc';
@@ -495,7 +492,10 @@ elseif ($user['step'] == "invoice"){
     $stmt = $connect->prepare("UPDATE user SET Processing_value_tow = ? WHERE id = ?");
     $stmt->bind_param("ss", $text, $from_id);
     $stmt->execute();
-    $randomString = bin2hex(random_bytes(5));
+    try {
+        $randomString = bin2hex(random_bytes(5));
+    } catch (Exception $e) {
+    }
     $values = array($from_id, $randomString , $text, $Processing_value,$info_product['name_product'],$info_product['price_product'],$info_product['name_product'],$info_product['price_product'],$info_product['Volume_constraint'],$info_product['Service_time']);
     $stmt = $connect->prepare("INSERT IGNORE INTO invoice (id_user, id_invoice, username, Service_location, name_product, price_product, Volume, Service_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("ssssssss", $from_id, $randomString, $text, $Processing_value, $info_product['name_product'], $info_product['price_product'], $info_product['Volume_constraint'], $info_product['Service_time']);
@@ -614,7 +614,10 @@ elseif($user['step'] =="forward_admin"){
         return;
     }
     $dateacc = date('Y/m/d h:i:s');
-    $randomString = bin2hex(random_bytes(5));
+    try {
+        $randomString = bin2hex(random_bytes(5));
+    } catch (Exception $e) {
+    }
     $stmt = $connect->prepare("INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status) VALUES (?,?,?,?,?)");
     $payment_Status = "Unpaid";
     $stmt->bind_param("sssss", $from_id ,$randomString, $dateacc,$Processing_value,$payment_Status);
@@ -669,7 +672,7 @@ if ($text == "🏠 بازگشت به منوی مدیریت") {
     return;
 }
 if ($text == "🔑 روشن / خاموش کردن قفل کانال") {
-    if ($channels['Channel_lock'] == "off") {
+    if($channels['Channel_lock'] == "off") {
         sendmessage($from_id, "عضویت اجباری روشن گردید", $channelkeyboard);
         $stmt = $connect->prepare("UPDATE channels SET Channel_lock = ?");
         $Channel_lock = 'on';
@@ -1776,6 +1779,7 @@ if(preg_match('/Confirm_pay_(\w+)/',$datain, $dataget)) {
 
 🛒 کد  پیگیری شما : {$Payment_report['id_order']}",null);
 }
+#-------------------------#
 if(preg_match('/reject_pay_(\w+)/',$datain, $datagetr)) {
     $id_order= $datagetr[1];
     $Payment_report = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM Payment_report WHERE id_order = '$id_order' LIMIT 1"));
@@ -1821,3 +1825,22 @@ elseif($user['step'] == "reject-dec"){
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 }
+#-------------------------#
+if ($text == "❌ حذف محصول"){
+    sendmessage($from_id,"محصولی که میخوای حذف کنی ر و انتخاب کن",$json_list_product_list_admin);
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'remove-product';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}elseif ($user['step'] == "remove-product"){
+    if (!in_array($text , $name_product)){
+        sendmessage($from_id, "❌ خطا 
+📝 محصول انتخابی وجود ندارد", null);
+        return;
+    }
+    $stmt = $connect->prepare("DELETE FROM product WHERE name_product = ?");
+    $stmt->bind_param("s", $text);
+    $stmt->execute();
+    sendmessage($from_id,"✅ محصول با موفقیت حذف گردید.",$shopkeyboard);
+}
+
