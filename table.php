@@ -98,17 +98,6 @@ try {
     ⚠️ نام کاربری باید بدون کاراکترهای اضافه مانند @، فاصله، خط تیره باشد. 
     ⚠️ نام کاربری باید انگلیسی باشد
       ";
-    $text_usertest = "
-    👤برای ساخت اشتراک تست یک نام کاربری انگلیسی ارسال نمایید.
-    
-    ⚠️ نام کاربری باید دارای شرایط زیر باشد
-    
-    1- فقط انگلیسی باشد و حروف فارسی نباشد.
-    2- کاراکترهای اضافی مانند @،#،% و... را نداشته باشد.
-    3- نام کاربری باید بدون فاصله باشد.
-    
-    🛑 در صورت رعایت نکردن موارد بالا با خطا مواجه خواهید شد.
-      ";
     $support_dec = "
     پیام خود را ارسال کنید:
         ⚠️ برای دریافت پیام حتما باید فوروارد حساب کاربری تان باز باشد تا پاسخ ادمین را دریافت کنید.
@@ -173,6 +162,11 @@ try {
 ⚠️ امکان برداشت وجه از کیف پول  نیست.
 ⚠️ مسئولیت واریز اشتباهی با شماست.
 ";
+    $text_channel = "   
+        ⚠️ کاربر گرامی؛ شما عضو چنل ما نیستید
+از طریق دکمه زیر وارد کانال شده و عضو شوید
+پس از عضویت متن زیر را ارسال کنید
+```/start```";
     if (!$table_exists) {
         $connect->query("CREATE TABLE textbot (
         id_text varchar(2000) NOT NULL,
@@ -180,7 +174,6 @@ try {
         echo "table textbot✅</br>";
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_start','سلام خوش آمدید')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_usertest','🔑 اکانت تست')");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_dec_usertest','$text_usertest')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_info','📊  اطلاعات سرویس')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_dec_info','$text_info')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_support','☎️ پشتیبانی')");
@@ -195,6 +188,7 @@ try {
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_sell','🔐 خرید اشتراک')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Add_Balance','💰 افزایش موجودی')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_cart_to_cart','$cart_to_cart_dec')");
+        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_channel','$text_channel')");
     }
     else{
     }
@@ -209,21 +203,40 @@ try {
     if (!$table_exists) {
         $connect->query("CREATE TABLE setting (
         Bot_Status varchar(200)  NULL,
+        help_Status varchar(200)  NULL,
         roll_Status varchar(200)  NULL,
         get_number varchar(200)  NULL,
         Channel_Report varchar(600)  NULL,
         limit_usertest_all varchar(600)  NULL,
+        time_usertest varchar(600)  NULL,
+        val_usertest varchar(600)  NULL,
         count_usertest varchar(5000) NOT NULL)");
         echo "table setting✅</br>";
         $active_bot_text = "✅  ربات روشن است";
         $active_roll_text = "❌ تایید قوانین خاموش است";
         $active_phone_text = "❌ احرازهویت شماره تماس غیرفعال است";
-        $connect->query("INSERT INTO setting (count_usertest,Bot_Status,roll_Status,get_number,limit_usertest_all) VALUES ('0','$active_bot_text','$active_roll_text','$active_phone_text','1')");
+        $active_help = "❌آموزش غیرفعال است";
+        $connect->query("INSERT INTO setting (count_usertest,Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status) VALUES ('0','$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help')");
     } else {
         $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'get_number'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE setting ADD get_number VARCHAR(200)");
             echo "The get_number field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'time_usertest'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE setting ADD time_usertest VARCHAR(600)");
+            echo "The time_usertest field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'val_usertest'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE setting ADD val_usertest VARCHAR(600)");
+            echo "The val_usertest field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'help_Status'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE setting ADD help_Status VARCHAR(600)");
+            echo "The help_Status field was added ✅";
         }
         $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'limit_usertest_all'");
         if (mysqli_num_rows($Check_filde) != 1) {
