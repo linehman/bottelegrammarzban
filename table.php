@@ -7,7 +7,7 @@ try {
     $table_exists = ($result->num_rows > 0);
 
     if (!$table_exists) {
-        $connect->query("CREATE TABLE user (
+        $result = $connect->query("CREATE TABLE user (
         id varchar(500)  PRIMARY KEY,
         limit_usertest int(100) NOT NULL,
         roll_Status bool NOT NULL,
@@ -19,7 +19,13 @@ try {
         number varchar(2000) NOT null ,
         Balance int(255) NOT null ,
         User_Status varchar(500) NOT NULL)");
-    } else {
+        if (!$result) {
+            echo "table User".mysqli_error($connect);
+        } else {
+            echo "Table 'user' created successfully!"."</br>";
+        }
+    }
+    else {
         $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'Processing_value'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE user ADD Processing_value VARCHAR(1000)");
@@ -76,13 +82,17 @@ try {
     $table_exists = ($result->num_rows > 0);
 
     if (!$table_exists) {
-        $connect->query("CREATE TABLE help (
+        $result = $connect->query("CREATE TABLE help (
         id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
         name_os varchar(500) NOT NULL,
         Media_os varchar(5000) NOT NULL,
         type_Media_os varchar(500) NOT NULL,
         Description_os TEXT NOT NULL)");
-        echo "table help✅</br>";
+        if (!$result) {
+            echo "table help".mysqli_error($connect);
+        } else {
+            echo "Table 'help' created successfully!"."</br>";
+        }
     }
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
@@ -168,10 +178,14 @@ try {
 پس از عضویت متن زیر را ارسال کنید
 ```/start```";
     if (!$table_exists) {
-        $connect->query("CREATE TABLE textbot (
+        $result = $connect->query("CREATE TABLE textbot (
         id_text varchar(2000) NOT NULL,
         text TEXT NOT NULL)");
-        echo "table textbot✅</br>";
+        if (!$result) {
+            echo "table textbot".mysqli_error($connect);
+        } else {
+            echo "Table 'textbot' created successfully!"."</br>";
+        }
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_start','سلام خوش آمدید')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_usertest','🔑 اکانت تست')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_info','📊  اطلاعات سرویس')");
@@ -201,7 +215,7 @@ try {
     $table_exists = ($result->num_rows > 0);
 
     if (!$table_exists) {
-        $connect->query("CREATE TABLE setting (
+        $result = $connect->query("CREATE TABLE setting (
         Bot_Status varchar(200)  NULL,
         help_Status varchar(200)  NULL,
         roll_Status varchar(200)  NULL,
@@ -211,7 +225,11 @@ try {
         time_usertest varchar(600)  NULL,
         val_usertest varchar(600)  NULL,
         count_usertest varchar(5000) NOT NULL)");
-        echo "table setting✅</br>";
+        if (!$result) {
+            echo "table setting".mysqli_error($connect);
+        } else {
+            echo "Table 'setting' created successfully!"."</br>";
+        }
         $active_bot_text = "✅  ربات روشن است";
         $active_roll_text = "❌ تایید قوانین خاموش است";
         $active_phone_text = "❌ احرازهویت شماره تماس غیرفعال است";
@@ -278,11 +296,14 @@ try {
             echo "table admin update✅</br>";
         }
     } else {
-        $connect->query("CREATE TABLE admin (
+        $result =  $connect->query("CREATE TABLE admin (
         id_admin varchar(5000) NOT NULL)");
         $connect->query("INSERT INTO admin (id_admin) VALUES ('$adminnumber')");
-        echo "table admin ✅</br>";
-    }
+        if (!$result) {
+            echo "table admin".mysqli_error($connect);
+        } else {
+            echo "Table 'admin' created successfully!"."</br>";
+        }     }
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
 }
@@ -293,11 +314,14 @@ try {
     $table_exists = ($result->num_rows > 0);
 
     if (!$table_exists) {
-        $connect->query("CREATE TABLE channels (
+        $result =  $connect->query("CREATE TABLE channels (
 Channel_lock varchar(200) NOT NULL,
 link varchar(200) NOT NULL )");
-        echo "table channels ✅ </br>";
-    }
+        if (!$result) {
+            echo "table channels".mysqli_error($connect);
+        } else {
+            echo "Table 'channels' created successfully!"."</br>";
+        }    }
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
 }
@@ -308,14 +332,17 @@ try {
     $table_exists = ($result->num_rows > 0);
 
     if (!$table_exists) {
-        $connect->query("CREATE TABLE marzban_panel (
+        $result = $connect->query("CREATE TABLE marzban_panel (
         id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
         name_panel varchar(2000) NULL,
         url_panel varchar(2000) NULL,
         username_panel varchar(200) NULL,
         password_panel varchar(200) NULL )");
-        echo "table marzban_panel ✅ </br>";
-    }
+        if (!$result) {
+            echo "table marzban_panel".mysqli_error($connect);
+        } else {
+            echo "Table 'marzban_panel' created successfully!"."</br>";
+        }    }
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
 }
@@ -326,14 +353,17 @@ try {
     $table_exists = ($result->num_rows > 0);
 
     if (!$table_exists) {
-        $connect->query("CREATE TABLE product (
+        $result = $connect->query("CREATE TABLE product (
         id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
         name_product varchar(2000) NULL,
         price_product varchar(2000) NULL,
         Volume_constraint varchar(2000) NULL,
         Service_time varchar(200) NULL)");
-        echo "table product ✅ </br>";
-    }
+        if (!$result) {
+            echo "table product".mysqli_error($connect);
+        } else {
+            echo "Table 'product' created successfully!"."</br>";
+        }    }
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
 }
@@ -344,7 +374,7 @@ try {
     $table_exists = ($result->num_rows > 0);
 
     if (!$table_exists) {
-        $connect->query("CREATE TABLE invoice (
+        $result = $connect->query("CREATE TABLE invoice (
         id_invoice varchar(200) PRIMARY KEY,
         id_user varchar(200) NULL,
         username varchar(2000) NULL,
@@ -353,7 +383,11 @@ try {
         price_product varchar(2000) NULL,
         Volume varchar(2000) NULL,
         Service_time varchar(200) NULL)");
-        echo "table invoice ✅ </br>";
+        if (!$result) {
+            echo "table invoice".mysqli_error($connect);
+        } else {
+            echo "Table 'invoice' created successfully!"."</br>";
+        }
     }
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
@@ -365,7 +399,7 @@ try {
     $table_exists = ($result->num_rows > 0);
 
     if (!$table_exists) {
-        $connect->query("CREATE TABLE Payment_report (
+        $result =  $connect->query("CREATE TABLE Payment_report (
         id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
         id_user varchar(200),
         id_order varchar(2000),
@@ -373,7 +407,11 @@ try {
         price varchar(2000) NULL,
         dec_not_confirmed varchar(2000) NULL,
         payment_Status varchar(2000) NULL)");
-        echo "table Payment_report ✅ </br>";
+        if (!$result) {
+            echo "table Payment_report".mysqli_error($connect);
+        } else {
+            echo "Table 'Payment_report' created successfully!"."</br>";
+        }
     }
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
