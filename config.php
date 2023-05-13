@@ -9,12 +9,12 @@ $username = "username"; // نام کاربری دیتابیس
 $password = 'password'; // رمز عبور دیتابیس
 $connect = mysqli_connect("localhost", $username, $password, $dbname);
 //-----------------------------info-------------------------------
-
 defined('API_KEY') or define('API_KEY', 'توکن ربات');// توکن ربات خود را وارد کنید
 $adminnumber =5522424631;// آیدی عددی ادمین
 //-----------------------------text panel-------------------------------
 $result = $connect->query("SHOW TABLES LIKE 'textbot'");
 $table_exists = ($result->num_rows > 0);
+mysqli_set_charset($connect, "utf8mb4");
 $textdatabot = ($table_exists) ? mysqli_query($connect, "SELECT * FROM textbot") : ' ';
 $data_text_bot = array();
 foreach ($textdatabot as $row) {
