@@ -7,7 +7,6 @@ try {
     $table_exists = ($result->num_rows > 0);
 
     if (!$table_exists) {
-        mysqli_set_charset($connect, "utf8mb4");
         $result = $connect->query("CREATE TABLE user (
         id varchar(500)  PRIMARY KEY,
         limit_usertest int(100) NOT NULL,
@@ -15,7 +14,7 @@ try {
         Processing_value  varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
         Processing_value_one varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
         Processing_value_tow varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-        step varchar(2000) NOT NULL,
+        step varchar(1000) NOT NULL,
         description_blocking TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL,
         number varchar(2000) NOT null ,
         Balance int(255) NOT null ,
@@ -105,7 +104,6 @@ try {
     $table_exists = ($result->num_rows > 0);
 
     if (!$table_exists) {
-        mysqli_set_charset($connect, "utf8mb4");
         $result = $connect->query("CREATE TABLE setting (
         Bot_Status varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         help_Status varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
@@ -125,7 +123,7 @@ try {
         $active_bot_text = "✅  ربات روشن است";
         $active_roll_text = "❌ تایید قوانین خاموش است";
         $active_phone_text = "❌ احرازهویت شماره تماس غیرفعال است";
-        $active_help = "❌آموزش غیرفعال است";
+        $active_help = "❌ آموزش غیرفعال است";
         $connect->query("INSERT INTO setting (count_usertest,Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status) VALUES ('0','$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help')");
     } else {
         $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'get_number'");
@@ -224,7 +222,6 @@ try {
     $table_exists = ($result->num_rows > 0);
 
     if (!$table_exists) {
-        mysqli_set_charset($connect, "utf8mb4");
         $result = $connect->query("CREATE TABLE marzban_panel (
         id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
         name_panel varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL,
@@ -247,7 +244,6 @@ try {
     $table_exists = ($result->num_rows > 0);
 
     if (!$table_exists) {
-        mysqli_set_charset($connect, "utf8mb4");
         $result = $connect->query("CREATE TABLE product (
         id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
         name_product varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL,
@@ -270,7 +266,6 @@ try {
     $table_exists = ($result->num_rows > 0);
 
     if (!$table_exists) {
-        mysqli_set_charset($connect, "utf8mb4");
         $result = $connect->query("CREATE TABLE invoice (
         id_invoice varchar(200) PRIMARY KEY,
         id_user varchar(200) NULL,
@@ -395,7 +390,6 @@ try {
 پس از عضویت متن زیر را ارسال کنید
 ```/start```";
     if (!$table_exists) {
-        mysqli_set_charset($connect, "utf8mb4");
         $result = $connect->query("CREATE TABLE textbot (
         id_text varchar(600) PRIMARY KEY NOT NULL,
         text TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL)
@@ -411,8 +405,8 @@ try {
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_dec_info','$text_info')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_support','☎️ پشتیبانی')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_dec_support','$support_dec')");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_help','📚  آموزش')");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_bot_off','❌ربات خاموش است، لطفا دقایقی دیگر مراجعه کنید')");
+        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_help','📚 آموزش')");
+        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_bot_off','❌ ربات خاموش است، لطفا دقایقی دیگر مراجعه کنید')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_roll','$text_roll')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_fq','❓ سوالات متداول')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_dec_fq','$text_dec_fq')");
@@ -423,15 +417,14 @@ try {
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_channel','$text_channel')");
     }
     else{
-        mysqli_set_charset($connect, "utf8mb4");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_start','سلام خوش آمدید')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_usertest','🔑 اکانت تست')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_info','📊  اطلاعات سرویس')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_dec_info','$text_info')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_support','☎️ پشتیبانی')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_dec_support','$support_dec')");
-        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_help','📚  آموزش')");
-        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_bot_off','❌ربات خاموش است، لطفا دقایقی دیگر مراجعه کنید')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_help','📚 آموزش')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_bot_off','❌ ربات خاموش است، لطفا دقایقی دیگر مراجعه کنید')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_roll','$text_roll')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_fq','❓ سوالات متداول')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_dec_fq','$text_dec_fq')");
