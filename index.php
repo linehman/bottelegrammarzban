@@ -176,7 +176,7 @@ if($user['step'] == 'get_number'){
         return;
     }
     if ($contact_id != $from_id){
-        sendmessage($from_id, "⚠️ خطا در ذخیره سازی شماره تلفن  . شماره باید حتما  برای همین اکانت باشد.",$request_contact );
+        sendmessage($from_id, "⚠️ خطا در ذخیره سازی شماره تلفن. شماره باید حتما  برای همین اکانت باشد.",$request_contact );
         return;
     }
     sendmessage($from_id, "✅ شماره موبایل شما با موفقیت تایید شد.", $keyboard);
@@ -200,8 +200,7 @@ if ($text == $datatextbot['text_info']) {
 if ($user['step'] == "getusernameinfo") {
     if (!preg_match('~^[a-z][a-z\d_]{2,32}(?<!_)$~i', $text)) {
         $textusernameinva = " 
-    ❌نام کاربری نامعتبر است
-                    
+    ❌ نام کاربری نامعتبراست.  
     🔄 مجددا نام کاربری خود  را ارسال کنید
                         ";
         sendmessage($from_id, $textusernameinva, $backuser);
@@ -237,9 +236,9 @@ elseif ($user['step'] == "getdata") {
     #-------------status----------------#
     $status = $data_useer['status'];
     $status_var = [
-        'active' => '✅فعال',
-        'limited' => '🚫پایان حجم',
-        'disabled' => '❌غیرفعال',
+        'active' => '✅ فعال',
+        'limited' => '🚫 پایان حجم',
+        'disabled' => '❌ غیرفعال',
         'expired' => '🔚 پایان زمان سرویس'
     ][$status];
     #--------------expire---------------#
@@ -284,7 +283,7 @@ elseif ($user['step'] == "getdata") {
         ]
     ]);
     sendmessage($from_id, "📊  اطلاعات سرویس :", $keyboardinfo);
-    sendmessage($from_id, " یک گزینه را انتخاب کنید", $keyboard);
+    sendmessage($from_id, "یک گزینه را انتخاب کنید", $keyboard);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'home';
     $stmt->bind_param("ss", $step, $from_id);
@@ -353,10 +352,10 @@ elseif ($user['step'] == "createusertest") {
     
     اطلاعات کامل 👇👇
     
-    👤 آیدی عددی کاربر :  $from_id
-     ☎️  شماره تلفن کاربر : {$user['number']}
-    🖥  نام پنل : $text
-    ⚜️ نام کاربری کاربر : @$username";
+    👤 آیدی عددی کاربر:  $from_id
+     ☎️  شماره تلفن کاربر: {$user['number']}
+    🖥  نام پنل: $text
+    ⚜️ نام کاربری کاربر: @$username";
     if (strlen($setting['Channel_Report'] )> 0){
         sendmessage($setting['Channel_Report'], $text_report, null);
     }
@@ -410,11 +409,11 @@ $dateacc = jdate('Y/m/d');
 $timeacc = jdate('h:i:s');
 if($text == $datatextbot['text_account']){
     $text_account = "
-        👨🏻‍💻 وضعیت حساب کاربری شما :
+        👨🏻‍💻 وضعیت حساب کاربری شما:
     
-    👤 نام شما :  $first_name
-    🕴🏻 شناسه شما : $from_id
-    💰 موجودی شما : {$user['Balance']} تومان
+    👤 نام شما:  $first_name
+    🕴🏻 شناسه شما: $from_id
+    💰 موجودی شما: {$user['Balance']} تومان
     
     📆 $dateacc → ⏰ $timeacc
         ";
@@ -470,8 +469,8 @@ elseif ($user['step'] == "endstepuser"){
     $textin = "
      📇  پیش فاکتور شما:
     
-👤 نام  کاربری:$randomString$from_id
-🔐 نام  سرویس:{$info_product['name_product']}
+👤 نام کاربری:$randomString$from_id
+🔐 نام سرویس:{$info_product['name_product']}
 📆 مدت اعتبار:{$info_product['Service_time']} روز
 💶قیمت:{$info_product['price_product']} هزار تومان
 👥 حجم اکانت:{$info_product['Volume_constraint']} گیگ
@@ -844,8 +843,8 @@ if ($user['step'] == "get_panel") {
     $text_marzban = "
             اطلاعات پنل شما👇:
                  
-        🖥 وضعیت اتصال پنل مرزبان  :$Condition_marzban
-        👤 تعداد کاربران فعال  :$active_users
+        🖥 وضعیت اتصال پنل مرزبان:$Condition_marzban
+        👤 تعداد کاربران فعال:$active_users
             ";
     sendmessage($from_id, $text_marzban, $keyboardmarzban);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -869,7 +868,7 @@ if ($text == "🖥 اضافه کردن پنل  مرزبان") {
     $text_add_panel = "
             برای اضافه کردن پنل مرزبان به ربات ابتدا یک نام برای پنل خود ارسال کنید
             
-         ⚠️ توجه : نام پنل نامی است که  در هنگام انجام عملیات جستجو  پنل از طریق نام است.
+         ⚠️ توجه: نام پنل نامی است که در هنگام انجام عملیات جستجو پنل از طریق نام است.
             ";
     sendmessage($from_id, $text_add_panel, $backadmin);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -881,7 +880,7 @@ if ($text == "🖥 اضافه کردن پنل  مرزبان") {
     $stmt->bind_param("s", $text);
     $stmt->execute();
     $text_add_url_panel = "
-                🔗نام پنل ذخیره شد حالا  آدرس  پنل خود ارسال کنید
+                🔗 نام پنل ذخیره شد حالا  آدرس  پنل خود ارسال کنید
             
          ⚠️ توجه :
         🔸 آدرس پنل باید  بدون dashboard ارسال شود.
@@ -2107,7 +2106,7 @@ elseif ($user['step'] == "show_info"){
             ],
             [
                 ['text' => $user['Balance'], 'callback_data' => "Balance"],
-                ['text' => "🔵  موجودی کابر ", 'callback_data' => "Balance"],
+                ['text' => "🔵 موجودی کابر", 'callback_data' => "Balance"],
             ],
         ]
     ]);
