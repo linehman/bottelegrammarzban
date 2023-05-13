@@ -317,9 +317,8 @@ elseif ($user['step'] == "createusertest") {
     $data_limit = $setting['val_usertest'] * 1000000;
     $config_test = adduser($username_ac, $expire, $data_limit, $Check_token['access_token'], $marzban_list_get['url_panel']);
     $data_test = json_decode($config_test, true);
-    $output_config_link = isset($data_test['subscription_url']) ? $data_test['subscription_url'] : 'خطا';
+    $output_config_link = $data_test['subscription_url'] ?? 'خطا';
     $textcreatuser = "
-                            
     🔑 اشتراک شما با موفقیت ساخته شد.
     ⏳ زمان اشتراک تست %d ساعت
     🌐 حجم سرویس تست %d مگابایت
@@ -507,7 +506,7 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
     $data_limit = $info_product['Volume_constraint'] * pow(1024, 3);
     $config = adduser($username_ac, $timestamp, $data_limit, $Check_token['access_token'],$marzban_list_get['url_panel']);
     $data = json_decode($config, true);
-    $output_config_link = isset($data['subscription_url']) ? $data['subscription_url'] : 'خطا';
+    $output_config_link = $data_test['subscription_url'] ?? 'خطا';
     $textcreatuser = "
                             
             🔑 اشتراک شما با موفقیت ساخته شد.
