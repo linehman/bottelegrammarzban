@@ -506,7 +506,7 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
     $data_limit = $info_product['Volume_constraint'] * pow(1024, 3);
     $config = adduser($username_ac, $timestamp, $data_limit, $Check_token['access_token'],$marzban_list_get['url_panel']);
     $data = json_decode($config, true);
-    $output_config_link = $data_test['subscription_url'] ?? 'خطا';
+    $output_config_link = $data['subscription_url'] ?? 'خطا';
     $textcreatuser = "
                             
             🔑 اشتراک شما با موفقیت ساخته شد.
