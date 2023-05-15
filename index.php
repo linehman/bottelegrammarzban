@@ -4,6 +4,7 @@
     channel => @mirzapanel
     */
 global $connect, $keyboard, $backuser, $list_marzban_panel_user, $keyboardadmin, $channelkeyboard, $backadmin, $keyboardmarzban, $json_list_marzban_panel, $sendmessageuser, $textbot, $json_list_help, $rollkey, $confrimrolls, $keyboardhelpadmin, $request_contact, $User_Services, $shopkeyboard,$json_list_product_list, $payment, $admin_section_panel, $setting_panel, $valid_Number, $reports, $step_payment, $Confirm_pay,$json_list_product_list_admin, $change_product, $keyboard_usertest;
+date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
 require_once 'apipanel.php';
@@ -198,7 +199,7 @@ if ($text == $datatextbot['text_info']) {
     $stmt->execute();
 }
 if ($user['step'] == "getusernameinfo") {
-    if (!preg_match('~^[a-z][a-z\d_]{2,32}(?<!_)$~i', $text)) {
+    if (!preg_match('/^\w{3,32}$/', $text)) {
         $textusernameinva = " 
     ❌ نام کاربری نامعتبر است.
                     
@@ -253,7 +254,7 @@ elseif ($user['step'] == "getdata") {
     $usedTrafficGb = $data_useer['used_traffic'] ? formatBytes($data_useer['used_traffic']) : "مصرف نشده";
     #--------------day---------------#
     $timeDiff = $data_useer['expire'] - time();
-    $day = $data_useer['expire'] ? floor($timeDiff / 86400) . " روز" : "نامحدود";
+    $day = $data_useer['expire'] ? floor($timeDiff / 86400) + 1 . " روز" : "نامحدود";
     #-----------------------------#
 
 
@@ -302,7 +303,7 @@ if ($text == $datatextbot['text_usertest']) {
     $stmt->execute();
 }
 elseif ($user['step'] == "createusertest") {
-    $randomString = bin2hex(random_bytes(5));
+    $randomString = bin2hex(random_bytes(4));
     $username_ac = $randomString."_".$from_id;
     $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '$text'"));
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
@@ -460,16 +461,18 @@ elseif ($user['step'] == "endstepuser"){
     $stmt->bind_param("ss", $text, $from_id);
     $stmt->execute();
     $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '$text' LIMIT 1"));
-    $randomString = bin2hex(random_bytes(5));
-    $username_ac = $randomString."_".$from_id;
+    $randomString = bin2hex(random_bytes(4));
+    $username_ac = "$randomString$from_id";
     $stmt = $connect->prepare("INSERT IGNORE INTO invoice (id_user, id_invoice, username, Service_location, name_product, price_product, Volume, Service_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("ssssssss", $from_id, $randomString, $username_ac, $Processing_value, $info_product['name_product'], $info_product['price_product'], $info_product['Volume_constraint'], $info_product['Service_time']);
     $stmt->execute();
     $stmt->close();
+        $stmt = $connect->prepare("UPDATE user SET Processing_value_tow = ? WHERE id = ?");
+    $stmt->bind_param("ss", $username_ac, $from_id);
+    $stmt->execute();
     $textin = "
      📇 پیش فاکتور شما:
-    
-👤 نام کاربری: $randomString$from_id
+👤 نام کاربری: $username_ac
 🔐 نام سرویس: {$info_product['name_product']}
 📆 مدت اعتبار: {$info_product['Service_time']} روز
 💶 قیمت: {$info_product['price_product']} هزار تومان
@@ -484,8 +487,7 @@ elseif ($user['step'] == "endstepuser"){
 }
 elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریافت سرویس"){
     $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '{$user['Processing_value_one']}' LIMIT 1"));
-    $randomString = bin2hex(random_bytes(5));
-    $username_ac = $randomString."_".$from_id;
+    $username_ac = $user['Processing_value_tow'];
     if ($info_product['price_product'] >= $user['Balance']){
         sendmessage($from_id, "🚨 خطایی در هنگام پرداخت رخ داده است.
                 
@@ -508,14 +510,14 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
     $data = json_decode($config, true);
     $output_config_link = $data['subscription_url'] ?? 'خطا';
     $textcreatuser = "
-                            
-            🔑 اشتراک شما با موفقیت ساخته شد.
+👤 نام کاربری شما :
+```$username_ac```
+🔑 اشتراک شما با موفقیت ساخته شد.
             
-    ⏳ زمان اشتراک %d روز
-    🌐 حجم سرویس %d گیگابایت
+⏳ زمان اشتراک %d روز
+🌐 حجم سرویس %d گیگابایت
             
     لینک اشتراک شما:
-            
     ```%s```
                             ";
     $textcreatuser = sprintf($textcreatuser, $info_product['Service_time'], $info_product['Volume_constraint'] , $output_config_link);
