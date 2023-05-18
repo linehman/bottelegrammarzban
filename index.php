@@ -1388,7 +1388,7 @@ $Bot_Status = json_encode([
 if ($text == "📡 وضعیت ربات") {
     sendmessage($from_id, "وضعیت ربات", $Bot_Status);
 }
-if ($datain == "✅ ربات روشن است") {
+if ($datain == "✅  ربات روشن است") {
     $stmt = $connect->prepare("UPDATE setting SET Bot_Status = ?");
     $Status = '❌ ربات خاموش است';
     $stmt->bind_param("s", $Status);
@@ -1397,7 +1397,7 @@ if ($datain == "✅ ربات روشن است") {
 }
 elseif ($datain == "❌ ربات خاموش است") {
     $stmt = $connect->prepare("UPDATE setting SET Bot_Status = ?");
-    $Status = '✅ ربات روشن است';
+    $Status = "✅  ربات روشن است";;
     $stmt->bind_param("s", $Status);
     $stmt->execute();
     Editmessagetext($from_id, $message_id, "🤖 ربات روشن گردید.", null);
@@ -2142,5 +2142,5 @@ elseif ($datain == "❌ آموزش غیرفعال است") {
     $Status = '✅ آموزش فعال است';
     $stmt->bind_param("s", $Status);
     $stmt->execute();
-    Editmessagetext($from_id, $message_id, "🤖 ربات روشن گردید.", null);
+    Editmessagetext($from_id, $message_id, "📚 بخش آموزش روشن گردید", null);
 }
