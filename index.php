@@ -463,10 +463,6 @@ elseif ($user['step'] == "endstepuser"){
     $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '$text' LIMIT 1"));
     $randomString = bin2hex(random_bytes(4));
     $username_ac = "$randomString$from_id";
-    $stmt = $connect->prepare("INSERT IGNORE INTO invoice (id_user, id_invoice, username, Service_location, name_product, price_product, Volume, Service_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssssssss", $from_id, $randomString, $username_ac, $Processing_value, $info_product['name_product'], $info_product['price_product'], $info_product['Volume_constraint'], $info_product['Service_time']);
-    $stmt->execute();
-    $stmt->close();
         $stmt = $connect->prepare("UPDATE user SET Processing_value_tow = ? WHERE id = ?");
     $stmt->bind_param("ss", $username_ac, $from_id);
     $stmt->execute();
@@ -486,8 +482,7 @@ elseif ($user['step'] == "endstepuser"){
     $stmt->execute();
 }
 elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریافت سرویس"){
-    $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '{$user['Processing_value_one']}' LIMIT 1"));
-    $username_ac = $user['Processing_value_tow'];
+        $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '{$user['Processing_value_one']}' LIMIT 1"));
     if ($info_product['price_product'] >= $user['Balance']){
         sendmessage($from_id, "🚨 خطایی در هنگام پرداخت رخ داده است.
                 
@@ -498,6 +493,13 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
         $stmt->execute();
         return;
     }
+    $username_ac = $user['Processing_value_tow'];
+    $randomString = bin2hex(random_bytes(5));
+    $username_ac = "$randomString$from_id";
+    $stmt = $connect->prepare("INSERT IGNORE INTO invoice (id_user, id_invoice, username, Service_location, name_product, price_product, Volume, Service_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("ssssssss", $from_id, $randomString, $username_ac, $Processing_value, $info_product['name_product'], $info_product['price_product'], $info_product['Volume_constraint'], $info_product['Service_time']);
+    $stmt->execute();
+    $stmt->close();
     $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '$Processing_value'"));
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $get_username_Check = getuser($username_ac, $Check_token['access_token'], $marzban_list_get['url_panel']);
@@ -509,36 +511,56 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
     $config = adduser($username_ac, $timestamp, $data_limit, $Check_token['access_token'],$marzban_list_get['url_panel']);
     $data = json_decode($config, true);
     $output_config_link = $data['subscription_url'] ?? 'خطا';
+        $Shoppinginfo = json_encode([
+        'inline_keyboard' => [
+                        [
+                ['text' => $info_product['Service_time']." روز", 'callback_data' => "Service_time"],
+                ['text' => "⏳ زمان اشتراک", 'callback_data' => "Service_time"],
+            ],
+                                    [
+                ['text' => $info_product['Volume_constraint']. " گیگابایت", 'callback_data' => "Volume_constraint"],
+                ['text' => "🌐 حجم سرویس", 'callback_data' => "Volume_constraint"],
+            ]
+        ]
+    ]);
     $textcreatuser = "
 👤 نام کاربری شما :
 ```$username_ac```
 🔑 اشتراک شما با موفقیت ساخته شد.
             
-⏳ زمان اشتراک %d روز
-🌐 حجم سرویس %d گیگابایت
-            
-    لینک اشتراک شما:
-    ```%s```
-                            ";
-    $textcreatuser = sprintf($textcreatuser, $info_product['Service_time'], $info_product['Volume_constraint'] , $output_config_link);
-    sendmessage($from_id, $textcreatuser, $keyboard);
+لینک اشتراک شما:
+    ```%s```";
+    $textcreatuser = sprintf($textcreatuser, $output_config_link);
+    sendmessage($from_id, $textcreatuser, $Shoppinginfo);
+    sendmessage($from_id, "یکی از گزینه های زیر را انتخاب نمایید", $keyboard);
     $stmt = $connect->prepare("UPDATE user SET Balance = ? WHERE id = ?");
     $Balance_prim= $user['Balance']- $info_product['price_product'];
     $stmt->bind_param("ss", $Balance_prim, $from_id);
     $stmt->execute();
-    $text_report = " 
-      📣 پیام جدید 
+    $ShoppingReport = json_encode([
+        'inline_keyboard' => [
+                        [
+                ['text' => $from_id, 'callback_data' => "iduser"],
+                ['text' => "آیدی عددی کاربر", 'callback_data' => "iduser"],
+            ],
+                                    [
+                ['text' => $user['number'], 'callback_data' => "iduser"],
+                ['text' => "شماره تلفن کاربر", 'callback_data' => "iduser"],
+            ],
+                                                [
+                ['text' => $Processing_value, 'callback_data' => "namepanel"],
+                ['text' => "نام پنل", 'callback_data' => "namepanel"],
+            ],
+        ]
+    ]);
+    $text_report = " 🛍 خرید جدید
     
-    ⚙️ یک کاربر اکانت  با نام کانفیگ ```$username_ac``` خریداری کرد
+⚙️ یک کاربر اکانت  با نام کانفیگ ```$username_ac``` خریداری کرد
     
-    اطلاعات کامل 👇👇
-    
-    👤 آیدی عددی کاربر:  $from_id
-    ☎️ شماره تلفن کاربر: {$user['number']}
-    🖥 نام پنل: $Processing_value
-    ⚜️ نام کاربری کاربر: @$username";
+اطلاعات کاربر 👇👇
+⚜️ نام کاربری کاربر: @$username";
     if (strlen($setting['Channel_Report'] )> 0){
-        sendmessage($setting['Channel_Report'], $text_report, null);
+        sendmessage($setting['Channel_Report'], $text_report, $ShoppingReport);
     }
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'home';
