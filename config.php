@@ -16,14 +16,6 @@ $adminnumber =5522424631;// آیدی عددی ادمین
 //-----------------------------text panel-------------------------------
 $result = $connect->query("SHOW TABLES LIKE 'textbot'");
 $table_exists = ($result->num_rows > 0);
-$textdatabot = ($table_exists) ? mysqli_query($connect, "SELECT * FROM textbot") : ' ';
-$data_text_bot = array();
-foreach ($textdatabot as $row) {
-    $data_text_bot[] = array(
-        'id_text' => $row['id_text'],
-        'text' => $row['text']
-    );
-}
 $datatextbot = array(
     'text_usertest' => '',
     'text_info' => '',
@@ -38,11 +30,20 @@ $datatextbot = array(
     'text_sell' => '',
     'text_Add_Balance' => '',
 
-);
+);if($table_exists){
+$textdatabot =  mysqli_query($connect, "SELECT * FROM textbot");
+$data_text_bot = array();
+foreach ($textdatabot as $row) {
+    $data_text_bot[] = array(
+        'id_text' => $row['id_text'],
+        'text' => $row['text']
+    );
+}
 foreach ($data_text_bot as $item) {
     if (isset($datatextbot[$item['id_text']])) {
         $datatextbot[$item['id_text']] = $item['text'];
     }
+}
 }
 $keyboard = json_encode([
     'keyboard' => [
