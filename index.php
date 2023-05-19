@@ -496,7 +496,7 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
     }
     $username_ac = $user['Processing_value_tow'];
     $randomString = bin2hex(random_bytes(5));
-    $username_ac = "$randomString$from_id";
+
     $stmt = $connect->prepare("INSERT IGNORE INTO invoice (id_user, id_invoice, username, Service_location, name_product, price_product, Volume, Service_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("ssssssss", $from_id, $randomString, $username_ac, $Processing_value, $info_product['name_product'], $info_product['price_product'], $info_product['Volume_constraint'], $info_product['Service_time']);
     $stmt->execute();
