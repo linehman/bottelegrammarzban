@@ -483,6 +483,7 @@ elseif ($user['step'] == "endstepuser"){
 }
 elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریافت سرویس"){
         $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '{$user['Processing_value_one']}' LIMIT 1"));
+    if(empty($info_product['price_product']) || empty($info_product['price_product']))return;
     if ($info_product['price_product'] >= $user['Balance']){
         sendmessage($from_id, "🚨 خطایی در هنگام پرداخت رخ داده است.
                 
