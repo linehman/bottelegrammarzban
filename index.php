@@ -461,7 +461,7 @@ elseif ($user['step'] == "endstepuser"){
     $stmt->bind_param("ss", $text, $from_id);
     $stmt->execute();
     $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '$text' LIMIT 1"));
-    $randomString = bin2hex(random_bytes(4));
+    $randomString = bin2hex(random_bytes(2));
     $username_ac = "$randomString$from_id";
         $stmt = $connect->prepare("UPDATE user SET Processing_value_tow = ? WHERE id = ?");
     $stmt->bind_param("ss", $username_ac, $from_id);
