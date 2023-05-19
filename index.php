@@ -638,8 +638,8 @@ elseif($user['step'] =="forward_admin"){
     $textsendrasid = "
         ⭕️ یک پرداخت جدید انجام شده است .
     
-    👤 شناسه کاربر: ```$from_id```
-    🛒 کد پیگیری پرداخت: ```$randomString```
+    👤 شناسه کاربر: $from_id
+    🛒 کد پیگیری پرداخت: $randomString
     ⚜️ نام کاربری: $username
     💸 مبلغ پرداختی: $Processing_value تومان
     
@@ -652,7 +652,7 @@ elseif($user['step'] =="forward_admin"){
             'photo'=> $photoid,
             'reply_markup' => $Confirm_pay,
             'caption'=> $textsendrasid,
-            'parse_mode' => "Markdown",
+            'parse_mode' => "Html",
         ]);
     }
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
