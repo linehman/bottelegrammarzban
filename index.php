@@ -2040,8 +2040,9 @@ elseif ($user['step'] == "get_price_add") {
         sendmessage($from_id,"مبلغ نامعتبر است", $backadmin);
         return;
     }
+    $Balance_user = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '$Processing_value' LIMIT 1"));
     sendmessage($from_id, "✅ مبلغ به موجودی کاربر اضافه شد", $User_Services);
-    $Balance_add_user = $user['Balance'] +$text;
+    $Balance_add_user = $Balance_user['Balance'] + $text;
     $stmt = $connect->prepare("UPDATE user SET Balance = ? WHERE id = ?");
     $stmt->bind_param("ss", $Balance_add_user, $Processing_value);
     $stmt->execute();
@@ -2082,8 +2083,10 @@ elseif ($user['step'] == "get_price_Negative") {
         sendmessage($from_id,"مبلغ نامعتبر است", $backadmin);
         return;
     }
+    $Balance_user = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '$Processing_value' LIMIT 1"));
     sendmessage($from_id, "✅ مبلغ از موجودی کاربر کسر شد", $User_Services);
-    $Balance_add_user = $user['Balance'] - $text;
+    $Balance_user = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '$Processing_value' LIMIT 1"));
+    $Balance_add_user = $Balance_user['Balance'] - $text;
     $stmt = $connect->prepare("UPDATE user SET Balance = ? WHERE id = ?");
     $stmt->bind_param("ss", $Balance_add_user, $Processing_value);
     $stmt->execute();
