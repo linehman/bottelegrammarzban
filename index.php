@@ -812,6 +812,9 @@ elseif ($user['step'] == "limit_usertest_allusers") {
     $stmt = $connect->prepare("UPDATE user SET limit_usertest = ?");
     $stmt->bind_param("s", $text);
     $stmt->execute();
+    $stmt = $connect->prepare("UPDATE setting SET limit_usertest_all = ?");
+    $stmt->bind_param("s", $text);
+    $stmt->execute();
 }
 if ($text == "📯 تنظیمات کانال") {
     sendmessage($from_id, "یکی از گزینه های زیر را انتخاب کنید", $channelkeyboard);
