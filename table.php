@@ -85,10 +85,11 @@ try {
     if (!$table_exists) {
         $result = $connect->query("CREATE TABLE help (
         id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-        name_os varchar(500) NOT NULL,
+        name_os varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
         Media_os varchar(5000) NOT NULL,
         type_Media_os varchar(500) NOT NULL,
-        Description_os TEXT NOT NULL)");
+        Description_os TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL)
+        ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
             echo "table help".mysqli_error($connect);
         } else {
