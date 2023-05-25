@@ -137,7 +137,7 @@ try {
         $active_help = "❌ آموزش غیرفعال است";
         $sublink = "✅ لینک اشتراک فعال است.";
         $configManual = "❌ ارسال کانفیگ دستی خاموش است";
-        $connect->query("INSERT INTO setting (count_usertest,Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,sublink,configManual) VALUES ('0','$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help',$active_phone_iran_text,$sublink,$configManual)");
+$connect->query("INSERT INTO setting (count_usertest,Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,sublink,configManual) VALUES ('0','$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help','$active_phone_iran_text','$sublink','$configManual')");
     } else {
         $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'configManual'");
         if (mysqli_num_rows($Check_filde) != 1) {
