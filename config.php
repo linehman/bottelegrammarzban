@@ -13,12 +13,15 @@ mysqli_set_charset($connect, "utf8mb4");
 
 defined('API_KEY') or define('API_KEY', 'توکن ربات');// توکن ربات خود را وارد کنید
 $adminnumber =5522424631;// آیدی عددی ادمین
+$domainhost = "domain.com/bot";// دامنه  هاست و مسیر سورس
+$apinowpayments = "token_api"; // api سایت nowpayments  
+$usernamebot = "marzbaninfobot"; //نام کاربری ربات  بدون @
 //-----------------------------text panel-------------------------------
 $result = $connect->query("SHOW TABLES LIKE 'textbot'");
 $table_exists = ($result->num_rows > 0);
 $datatextbot = array(
     'text_usertest' => '',
-    'text_info' => '',
+    'text_Purchased_services' => '',
     'text_support' => '',
     'text_help' => '',
     'text_start' => '',
@@ -29,6 +32,7 @@ $datatextbot = array(
     'text_account' => '',
     'text_sell' => '',
     'text_Add_Balance' => '',
+    'text_Discount' => '',
 
 );if($table_exists){
 $textdatabot =  mysqli_query($connect, "SELECT * FROM textbot");
@@ -47,11 +51,11 @@ foreach ($data_text_bot as $item) {
 }
 $keyboard = json_encode([
     'keyboard' => [
-        [['text' => $datatextbot['text_sell']]],
-        [['text' => $datatextbot['text_info']],['text' => $datatextbot['text_usertest']]],
+        [['text' => $datatextbot['text_sell']],['text' => $datatextbot['text_usertest']]],
+        [['text' => $datatextbot['text_Purchased_services']]],
         [['text' => $datatextbot['text_Add_Balance']],['text' => $datatextbot['text_account']]],
         [['text' => $datatextbot['text_support']],['text' => $datatextbot['text_help']]],
-        [['text' => $datatextbot['text_fq']]],
+        [['text' => $datatextbot['text_fq']],['text' => $datatextbot['text_Discount']]],
     ],
     'resize_keyboard' => true
 ]);
@@ -105,6 +109,7 @@ $valid_Number =  json_encode([
         [['text' => "📊 وضعیت تایید شماره کاربر"],['text' => "👈 تایید دستی شماره"]],
         [['text' => "☎️ وضعیت احراز هویت شماره تماس"]],
         [['text' => "👀 مشاهده شماره تلفن کاربر"]],
+        [['text' => "تایید شماره ایرانی 🇮🇷"]],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true
@@ -112,6 +117,7 @@ $valid_Number =  json_encode([
 $step_payment = json_encode([
     'keyboard' => [
         [['text' => "💳 کارت به کارت"]],
+        [['text' => "💵 پرداخت nowpayments"]],
         [['text' => "🏠 بازگشت به منوی اصلی"]]
     ],
     'resize_keyboard' => true
@@ -138,6 +144,7 @@ $shopkeyboard = json_encode([
     'keyboard' => [
         [['text' => "🛍 اضافه کردن محصول"],['text' => "❌ حذف محصول"]],
         [['text' =>"✏️ ویرایش محصول"]],
+        [['text' => "🎁 ساخت کد هدیه"]],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true
@@ -181,7 +188,8 @@ $Feature_status = json_encode([
 $keyboardmarzban =  json_encode([
     'keyboard' => [
         [['text' => '🔌 وضعیت پنل'],['text' => "🖥 اضافه کردن پنل  مرزبان"]],
-        [['text' => "❌ حذف پنل"]],
+        [['text' => "❌ حذف پنل"],['text' => "⚙️ ارسال کانفیگ بعد خرید"]],
+        [['text' => "🔗 ارسال اشتراک لینکی بعد خرید"]],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true
@@ -266,7 +274,7 @@ foreach($namepanel as $button) {
 $list_marzban_panel_user = json_encode($list_marzban_panel_users);
 $textbot = json_encode([
     'keyboard' => [
-        [['text' => "تنظیم متن شروع"],['text' => "دکمه اطلاعات سرویس"]],
+        [['text' => "تنظیم متن شروع"],['text' => "دکمه سرویس خریداری شده"]],
         [['text' => "دکمه اکانت تست"],['text' => "دکمه سوالات متداول"]],
         [['text' => "متن دکمه 📚 آموزش"],['text' => "متن دکمه ☎️ پشتیبانی"]],
         [['text' => "متن دکمه حساب کاربری"],['text' => "دکمه افزایش موجودی"]],
