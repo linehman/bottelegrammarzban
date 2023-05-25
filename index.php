@@ -654,6 +654,8 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
     $data_limit = $info_product['Volume_constraint'] * pow(1024, 3);
     $config = adduser($username_ac, $timestamp, $data_limit, $Check_token['access_token'],$marzban_list_get['url_panel']);
     $data = json_decode($config, true);
+$text_config = "";
+$link_confi = "";
 if($setting['sublink'] == "✅ لینک اشتراک فعال است."){
         $output_config_link = $data['subscription_url'] ?? 'خطا';
         $link_config = "            
@@ -712,7 +714,7 @@ $link_config
     ]);
     $text_report = " 🛍 خرید جدید
     
-⚙️ یک کاربر اکانت  با نام کانفیگ ```$username_ac``` خریداری کرد
+⚙️ یک کاربر اکانت  با نام کانفیگ $username_ac خریداری کرد
     
 اطلاعات کاربر 👇👇
 ⚜️ نام کاربری کاربر: @$username";
@@ -778,9 +780,9 @@ elseif($user['step'] == "get_step_payment"){
     }
     if ($text == "💵 پرداخت nowpayments"){
     $usdprice = round($Processing_value/$usdprice['data']['currencies']['USDT']['price'],2);
-        if($usdprice <= 4){
+        if($usdprice <= 2){
         sendmessage($from_id, "❌ خطا 
-کمترین مبلغ برای  پرداخت در این درگاه 4 دلار می باشد.", null);
+کمترین مبلغ برای  پرداخت در این درگاه 2 دلار می باشد.", null);
 return;
         }
     $dateacc = date('Y/m/d h:i:s');
