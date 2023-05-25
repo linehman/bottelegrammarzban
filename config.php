@@ -8,6 +8,9 @@ $dbname = "databasename"; //  نام دیتابیس
 $username = "username"; // نام کاربری دیتابیس
 $password = 'password'; // رمز عبور دیتابیس
 $connect = mysqli_connect("localhost", $username, $password, $dbname);
+if ($connect->connect_error) {
+    die("اتصال به دیتابیس ناموفق بود: " . $connect->connect_error);
+}
 mysqli_set_charset($connect, "utf8mb4");
 //-----------------------------info-------------------------------
 
