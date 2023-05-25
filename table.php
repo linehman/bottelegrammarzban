@@ -17,6 +17,7 @@ try {
         step varchar(1000) NOT NULL,
         description_blocking TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL,
         number varchar(2000) NOT null ,
+        pagenumber varchar(2000) NOT null ,
         Balance int(255) NOT null ,
         User_Status varchar(500) NOT NULL)
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
@@ -85,11 +86,10 @@ try {
     if (!$table_exists) {
         $result = $connect->query("CREATE TABLE help (
         id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-        name_os varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+        name_os varchar(500) NOT NULL,
         Media_os varchar(5000) NOT NULL,
         type_Media_os varchar(500) NOT NULL,
-        Description_os TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL)
-        ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
+        Description_os TEXT NOT NULL)");
         if (!$result) {
             echo "table help".mysqli_error($connect);
         } else {
@@ -103,7 +103,6 @@ try {
 try {
     $result = $connect->query("SHOW TABLES LIKE 'setting'");
     $table_exists = ($result->num_rows > 0);
-
     if (!$table_exists) {
         $result = $connect->query("CREATE TABLE setting (
         Bot_Status varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
