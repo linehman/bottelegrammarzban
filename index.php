@@ -9,6 +9,7 @@ require_once 'config.php';
 require_once 'botapi.php';
 require_once 'apipanel.php';
 require_once 'jdf.php';
+require_once 'kayboard.php';
 #-----------------------#
 $telegram_ip_ranges = [
     ['lower' => '149.154.160.0', 'upper' => '149.154.175.255'],
@@ -523,7 +524,13 @@ if ($text == $datatextbot['text_help']) {
         } elseif ($helpdata['type_Media_os'] == "photo")
             sendphoto($from_id, $helpdata['Media_os'], $helpdata['Description_os']);
     } else {
-        sendmessage($from_id, $helpdata['Description_os'], $json_list_help);
+        telegram('sendmessage',[
+        'chat_id' => $from_id,
+        'text' => $helpdata['Description_os'],
+        'reply_markup' => $json_list_help,
+        'parse_mode' => "HTML",
+        
+        ]);
     }
 }
 
@@ -926,7 +933,13 @@ if ($text == "📣 تنظیم کانال جوین اجباری") {
 برای تنظیم کانال عضویت اجباری لطفا آیدی کانال خود را بدون @ وارد نمایید.
             
 کانال فعلی شما: @" . $channels['link'];
-    sendmessage($from_id, $text_channel, $backadmin);
+        telegram('sendmessage',[
+        'chat_id' => $from_id,
+        'text' => $text_channel,
+        'reply_markup' => $backadmin,
+        'parse_mode' => "HTML",
+        
+        ]);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'addchannel';
     $stmt->bind_param("ss", $step, $from_id);
@@ -1249,7 +1262,12 @@ if ($text  == "📝 تنظیم متن ربات") {
     $step = 'changetextstart';
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
-} elseif ($user['step'] == "changetextstart") {
+}
+elseif ($user['step'] == "changetextstart") {
+    if(!$text){
+            sendmessage($from_id, "فقط متن می توانید ارسال کنید", $textbot);
+            return;
+    }
     sendmessage($from_id, "✅ متن با موفقیت ذخیره شد", $textbot);
     $stmt = $connect->prepare("UPDATE textbot SET text = ? WHERE id_text = 'text_start'");
     $stmt->bind_param("s", $text);
@@ -1269,6 +1287,10 @@ if ($text  == "📝 تنظیم متن ربات") {
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 } elseif ($user['step'] == "changetextinfo") {
+        if(!$text){
+            sendmessage($from_id, "فقط متن می توانید ارسال کنید", $textbot);
+            return;
+    }
     sendmessage($from_id, "✅ متن با موفقیت ذخیره شد", $textbot);
     $stmt = $connect->prepare("UPDATE textbot SET text = ? WHERE id_text = 'text_Purchased_services'");
     $stmt->bind_param("s", $text);
@@ -1288,6 +1310,10 @@ if ($text  == "📝 تنظیم متن ربات") {
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 } elseif ($user['step'] == "changetextusertest") {
+        if(!$text){
+            sendmessage($from_id, "فقط متن می توانید ارسال کنید", $textbot);
+            return;
+    }
     sendmessage($from_id, "✅ متن با موفقیت ذخیره شد", $textbot);
     $stmt = $connect->prepare("UPDATE textbot SET text = ? WHERE id_text = 'text_usertest'");
     $stmt->bind_param("s", $text);
@@ -1309,6 +1335,10 @@ elseif ($text == "📝 تنظیم متن توضیحات اطلاعات سروی�
     $stmt->execute();
 }
 elseif ($user['step'] == "changetextinfodec") {
+        if(!$text){
+            sendmessage($from_id, "فقط متن می توانید ارسال کنید", $textbot);
+            return;
+    }
     sendmessage($from_id, "✅ متن با موفقیت ذخیره شد", $textbot);
     $stmt = $connect->prepare("UPDATE textbot SET text = ? WHERE id_text = 'text_dec_info'");
     $stmt->bind_param("s", $text);
@@ -1330,6 +1360,10 @@ elseif ($text == "متن دکمه 📚 آموزش") {
     $stmt->execute();
 }
 elseif ($user['step'] == "text_help") {
+        if(!$text){
+            sendmessage($from_id, "فقط متن می توانید ارسال کنید", $textbot);
+            return;
+    }
     sendmessage($from_id, "✅ متن با موفقیت ذخیره شد", $textbot);
     $stmt = $connect->prepare("UPDATE textbot SET text = ? WHERE id_text = 'text_help'");
     $stmt->bind_param("s", $text);
@@ -1351,6 +1385,10 @@ elseif ($text == "متن دکمه ☎️ پشتیبانی") {
     $stmt->execute();
 }
 elseif ($user['step'] == "text_support") {
+        if(!$text){
+            sendmessage($from_id, "فقط متن می توانید ارسال کنید", $textbot);
+            return;
+    }
     sendmessage($from_id, "✅ متن با موفقیت ذخیره شد", $textbot);
     $stmt = $connect->prepare("UPDATE textbot SET text = ? WHERE id_text = 'text_support'");
     $stmt->bind_param("s", $text);
@@ -1372,6 +1410,10 @@ elseif ($text == "📝 تنظیم متن توضیحات پشتیبانی") {
     $stmt->execute();
 }
 elseif ($user['step'] == "text_dec_support") {
+        if(!$text){
+            sendmessage($from_id, "فقط متن می توانید ارسال کنید", $textbot);
+            return;
+    }
     sendmessage($from_id, "✅ متن با موفقیت ذخیره شد", $textbot);
     $stmt = $connect->prepare("UPDATE textbot SET text = ? WHERE id_text = 'text_dec_support'");
     $stmt->bind_param("s", $text);
@@ -1393,6 +1435,10 @@ elseif ($text == "دکمه سوالات متداول") {
     $stmt->execute();
 }
 elseif ($user['step'] == "text_fq") {
+        if(!$text){
+            sendmessage($from_id, "فقط متن می توانید ارسال کنید", $textbot);
+            return;
+    }
     sendmessage($from_id, "✅ متن با موفقیت ذخیره شد", $textbot);
     $stmt = $connect->prepare("UPDATE textbot SET text = ? WHERE id_text = 'text_fq'");
     $stmt->bind_param("s", $text);
@@ -1414,6 +1460,10 @@ elseif ($text == "📝 تنظیم متن توضیحات سوالات متداو�
     $stmt->execute();
 }
 elseif ($user['step'] == "text_dec_fq") {
+        if(!$text){
+            sendmessage($from_id, "فقط متن می توانید ارسال کنید", $textbot);
+            return;
+    }
     sendmessage($from_id, "✅ متن با موفقیت ذخیره شد", $textbot);
     $stmt = $connect->prepare("UPDATE textbot SET text = ? WHERE id_text = 'text_dec_fq'");
     $stmt->bind_param("s", $text);
@@ -1435,6 +1485,10 @@ elseif ($text == "📝 تنظیم متن توضیحات عضویت اجباری"
     $stmt->execute();
 }
 elseif ($user['step'] == "text_channel") {
+        if(!$text){
+            sendmessage($from_id, "فقط متن می توانید ارسال کنید", $textbot);
+            return;
+    }
     sendmessage($from_id, "✅ متن با موفقیت ذخیره شد", $textbot);
     $stmt = $connect->prepare("UPDATE textbot SET text = ? WHERE id_text = 'text_channel'");
     $stmt->bind_param("s", $text);
@@ -1456,6 +1510,10 @@ elseif ($text == "متن دکمه حساب کاربری") {
     $stmt->execute();
 }
 elseif ($user['step'] == "text_account") {
+        if(!$text){
+            sendmessage($from_id, "فقط متن می توانید ارسال کنید", $textbot);
+            return;
+    }
     sendmessage($from_id, "✅ متن با موفقیت ذخیره شد", $textbot);
     $stmt = $connect->prepare("UPDATE textbot SET text = ? WHERE id_text = 'text_account'");
     $stmt->bind_param("s", $text);
@@ -1476,6 +1534,10 @@ elseif ($text == "دکمه افزایش موجودی") {
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 } elseif ($user['step'] == "text_Add_Balance") {
+        if(!$text){
+            sendmessage($from_id, "فقط متن می توانید ارسال کنید", $textbot);
+            return;
+    }
     sendmessage($from_id, "✅ متن با موفقیت ذخیره شد", $textbot);
     $stmt = $connect->prepare("UPDATE textbot SET text = ? WHERE id_text = 'text_Add_Balance'");
     $stmt->bind_param("s", $text);
@@ -1496,6 +1558,10 @@ elseif ($text == "📝 تنظیم متن توضیحات شماره کارت") {
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 } elseif ($user['step'] == "text_cart_to_cart") {
+        if(!$text){
+            sendmessage($from_id, "فقط متن می توانید ارسال کنید", $textbot);
+            return;
+    }
     sendmessage($from_id, "✅ متن با موفقیت ذخیره شد", $textbot);
     $stmt = $connect->prepare("UPDATE textbot SET text = ? WHERE id_text = 'text_cart_to_cart'");
     $stmt->bind_param("s", $text);
