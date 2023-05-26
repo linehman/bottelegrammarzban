@@ -1099,26 +1099,30 @@ if ($text == "🔌 وضعیت پنل") {
     $stmt->execute();
 }
 if ($user['step'] == "get_panel") {
-    $stmt = $connect->prepare("SELECT * FROM marzban_panel WHERE name_panel = ?");
-    $stmt->bind_param("s", $text);
-    $stmt->execute();
-    $marzban_list_get = $stmt->get_result()->fetch_assoc();
+    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '$text' LIMIT 1"));
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     if (isset($Check_token['access_token'])) {
-        $Condition_marzban = "✅ پنل متصل است";
-    } elseif ($Check_token['detail'] == "Incorrect username or password") {
-        $Condition_marzban = "❌ نام کاربری یا رمز عبور پنل اشتباه است";
-    } else {
-        $Condition_marzban = "امکان اتصال به پنل مرزبان وجود ندارد 😔";
-    }
-    $System_Stats = Get_System_Stats($marzban_list_get['url_panel'], $Check_token['access_token']);
-    $active_users = $System_Stats['users_active'];
-    $text_marzban = "
+        $System_Stats = Get_System_Stats($marzban_list_get['url_panel'], $Check_token['access_token']);
+        $active_users = $System_Stats['users_active'];
+        $Condition_marzban = "";
+            $text_marzban = "
             اطلاعات پنل شما👇:
                  
-        🖥 وضعیت اتصال پنل مرزبان: $Condition_marzban
-        👤 تعداد کاربران فعال: $active_users
+🖥 وضعیت اتصال پنل مرزبان: ✅ پنل متصل است
+👤 تعداد کاربران فعال: $active_users
             ";
+    } elseif ($Check_token['detail'] == "Incorrect username or password") {
+        $text_marzban = "❌ نام کاربری یا رمز عبور پنل اشتباه است";
+    } else {
+        $text_marzban = "امکان اتصال به پنل مرزبان وجود ندارد 😔
+        
+        
+⭕️  در صورت وارد کردن دامنه طبق شرایط اعلام شده  این خطا بدلیل  بسته بودن خروجی پورت پنل روی هاست ربات اتفاق می افتد.
+
+راه حل اول : پورت پنل را به پورت های 443 یا 8080 تغییر دهید این پورت ها  همیشه باز هستند
+راه حل دوم : به پشتیبانی هاستینگ تیکت داده و اعلام کنید پورت پنل تان را باز کنند روی سرور";
+    }
+
     sendmessage($from_id, $text_marzban, $keyboardmarzban);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'home';
@@ -1141,7 +1145,7 @@ if ($text == "🖥 اضافه کردن پنل  مرزبان") {
     $text_add_panel = "
             برای اضافه کردن پنل مرزبان به ربات ابتدا یک نام برای پنل خود ارسال کنید
             
-         ⚠️ توجه: نام پنل نامی است که  در هنگام انجام عملیات جستجو  نشان داده می شود.
+⚠️ توجه: نام پنل نامی است که  در هنگام انجام عملیات جستجو  نشان داده می شود.
             ";
     sendmessage($from_id, $text_add_panel, $backadmin);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -1155,9 +1159,9 @@ if ($text == "🖥 اضافه کردن پنل  مرزبان") {
     $text_add_url_panel = "
                 🔗 نام پنل ذخیره شد حالا آدرس پنل خود ارسال کنید
             
-        ⚠️ توجه:
-        🔸 آدرس پنل باید بدون dashboard ارسال شود.
-        🔹 در صورتی که پورت پنل 443 است پورت را نباید وارد کنید.  
+⚠️ توجه:
+🔸 آدرس پنل باید بدون dashboard ارسال شود.
+🔹 در صورتی که پورت پنل 443 است پورت را نباید وارد کنید.  
                 ";
     sendmessage($from_id, $text_add_url_panel, $backadmin);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
