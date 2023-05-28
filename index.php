@@ -1123,6 +1123,7 @@ if ($text == "🔌 وضعیت پنل") {
 }
 if ($user['step'] == "get_panel") {
     $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '$text' LIMIT 1"));
+    ini_set('max_execution_time', 1);
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     if (isset($Check_token['access_token'])) {
         $System_Stats = Get_System_Stats($marzban_list_get['url_panel'], $Check_token['access_token']);
