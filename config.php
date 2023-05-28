@@ -14,7 +14,7 @@ if ($connect->connect_error) {
 mysqli_set_charset($connect, "utf8mb4");
 //-----------------------------info-------------------------------
 
-defined('API_KEY') or define('API_KEY', 'توکن ربات');// توکن ربات خود را وارد کنید
+$APIKEY = "**TOKEN**"; // توکن ربات خود را وارد کنید
 $adminnumber =5522424631;// آیدی عددی ادمین
 $domainhost = "domain.com/bot";// دامنه  هاست و مسیر سورس
 $apinowpayments = "token_api"; // api سایت nowpayments  
