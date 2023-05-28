@@ -1,7 +1,8 @@
 <?php
 function telegram($method, $datas = [])
 {
-    $url = "https://api.telegram.org/bot" . API_KEY . "/" . $method;
+    global $APIKEY;
+    $url = "https://api.telegram.org/bot" . $APIKEY . "/" . $method;
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
