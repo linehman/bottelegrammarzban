@@ -28,7 +28,7 @@ function sendmessage($chat_id,$text,$keyboard){
         'chat_id' => $chat_id,
         'text' => $text,
         'reply_markup' => $keyboard,
-        'parse_mode' => "HTML,
+        'parse_mode' => "HTML",
         
         ]);
 }
