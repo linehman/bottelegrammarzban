@@ -23,7 +23,7 @@ foreach ($telegram_ip_ranges as $telegram_ip_range) if (!$ok) {
     if ($ip_dec >= $lower_dec and $ip_dec <= $upper_dec) $ok = true;
 }
 if (!$ok) die("false");
-#-----------------------#
+#-----------function------------#
 function tomantousd(){
     
 $curl = curl_init();
@@ -47,7 +47,25 @@ curl_close($curl);
 return $response;
 }
 $usdprice = tomantousd();
+function latestRelease(){
+    $url = "https://api.github.com/repos/mahdigholipour3/bottelegrammarzban/releases/latest";
+$curl = curl_init($url);
+curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($curl, CURLOPT_HEADER, false);
+curl_setopt($curl, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3');
+$response = curl_exec($curl);
+curl_close($curl);
+$latestRelease = json_decode($response, true);
+$tagName = "";
+if ($latestRelease) {
+    $tagName = $latestRelease['tag_name'];
+}
+return $tagName;
+
+}
+$latestRelease = latestRelease();
 #-----------------------#
+$version = file_get_contents('install/version');
 $user = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '$from_id' LIMIT 1"));
 $Processing_value =  $user['Processing_value'];
 $setting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM setting"));
@@ -115,7 +133,7 @@ foreach ($datatxtbot as $item) {
 #---------channel--------------#
 $tch = '';
 if (isset($channels['link'])) {
-    $response = json_decode(file_get_contents('https://api.telegram.org/bot' . API_KEY . "/getChatMember?chat_id=@{$channels['link']}&user_id=$from_id"));
+    $response = json_decode(file_get_contents('https://api.telegram.org/bot' . $APIKEY . "/getChatMember?chat_id=@{$channels['link']}&user_id=$from_id"));
     $tch = $response->result->status;
 }
 #-----------------------#
@@ -902,8 +920,13 @@ $Checkcode = [];
 
 #----------------admin------------------#
 if (!in_array($from_id, $admin_ids)) return;
-if ($text == "panel" || $text == "/panel" || $text == "پنل مدیریت" || $text == "ادمین" ) {
-    sendmessage($from_id, "به پنل ادمین خوش آمدید", $keyboardadmin);
+if ($text == "panel" || $text == "/panel" || $text == "پنل مدیریت" || $text == "ادمین" ) 
+{
+    $text_admin="
+سلام مدیر عزیز به پنل ادمین خوش امدی گلم😍
+نسخه فعلی ربات شما : $version
+نسخه آخر منتشر شده : $latestRelease";
+    sendmessage($from_id, $text_admin, $keyboardadmin);
 }
 if ($text == "🏠 بازگشت به منوی مدیریت") {
     sendmessage($from_id, "به پنل ادمین بازگشتید! ", $keyboardadmin);
