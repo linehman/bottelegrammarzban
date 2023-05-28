@@ -42,13 +42,18 @@ $patternidadmin = '/\$adminnumber\s*=\s*".*?";/';
 $newFileContent = preg_replace($patternidadmin, '$adminnumber = "'.$idadmin.'";', $newFileContent);
 
 file_put_contents('../config.php', $newFileContent);
-$connect = new mysqli('localhost', $dbuser,$passworddb,$dbname);
-if ($connect->connect_errno) {
-    $textdatabase = "ارتباط به دیتابیس برقرار نشد";
-}
-else{
-    $textdatabase = "ارتباط به دیتابیس برقرارشد و جداول ساخته شدند";
-    require_once 'table.php';
+try {
+    $connect = new mysqli('localhost', $dbuser, $passworddb, $dbname);
+    
+    if ($connect->connect_errno) {
+        $textdatabase = 'خطا در اتصال به پایگاه داده: ' . $connect->connect_error;
+    } else {
+        $textdatabase = "ارتباط به دیتابیس برقرارشد و جداول ساخته شدند";
+        require_once 'table.php';
+                $connect->close();
+    }
+} catch (Exception $e) {
+    $textdatabase = 'خطا در اتصال به پایگاه داده: ' . $e->getMessage();
 }
 $response = json_decode(file_get_contents("https://api.telegram.org/bot" . $token . "/setWebhook?url=https://" .$domain_hosts."/index.php" ),true);
 if($response['description'] == "Webhook was set"){
