@@ -19,8 +19,8 @@ $patternidbot = '/\$usernamebot\s*=\s*".*?";/';
 $newFileContent = preg_replace($patternidbot, '$usernamebot = "'.$idbot.'";', $fileContent);
 
 // تغییر مقدار $domainhost
-$patterndomain = '/\$domainhosts\s*=\s*".*?";/';
-$newFileContent = preg_replace($patterndomain, '$domainhosts = "'.$domain_hosts.'";', $newFileContent);
+$patterndomain = '/\$domainhost\s*=\s*".*?";/';
+$newFileContent = preg_replace($patterndomain, '$domainhost = "'.$domain_hosts.'";', $newFileContent);
 
 // تغییر مقدار $dbname
 $patterndbname = '/\$dbname\s*=\s*".*?";/';
