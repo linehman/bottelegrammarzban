@@ -428,7 +428,7 @@ if(preg_match('/subscriptionurl_(\w+)/',$datain, $dataget)) {
 🔗 لینک اشتراک شما : 
 
 ```$subscriptionurl```";
-            sendmessage($from_id, $textsub, null);
+            sendmessageMarkdown($from_id, $textsub, null);
 }
 //________________________________________________________
 if ($text == $datatextbot['text_usertest']) {
@@ -479,7 +479,7 @@ elseif ($user['step'] == "createusertest") {
 لینک اشتراک شما:
     ```%s```";
     $textcreatuser = sprintf($textcreatuser, $output_config_link);
-    sendmessage($from_id, $textcreatuser, $usertestinfo);
+    sendmessageMarkdown($from_id, $textcreatuser, $usertestinfo);
     sendmessage($from_id, "یکی از گزینه های زیر را انتخاب نمایید", $keyboard);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'home';
@@ -520,7 +520,7 @@ elseif ($user['step'] == "createusertest") {
 اطلاعات کاربر 👇👇
 ⚜️ نام کاربری کاربر: @$username";
     if (strlen($setting['Channel_Report'] )> 0){
-        sendmessage($setting['Channel_Report'], $text_report, $usertestReport);
+        sendmessageMarkdown($setting['Channel_Report'], $text_report, $usertestReport);
     }
 }
 //_________________________________________________
@@ -563,7 +563,7 @@ if ($text == $datatextbot['text_support']) {
 } elseif ($user['step'] == 'gettextpm') {
     sendmessage($from_id, "🚀 پیام شما ارسال شد منتظر پاسخ مدیریت باشید.", $keyboard);
     foreach ($admin_ids as $id_admin) {
-        sendmessage($id_admin, "📥 یک پیام از کاربر با شناسه ```$from_id``` دریافت شد برای پاسخ ریپلای بزنید و پیام خود را ارسال کنید.", null);
+        sendmessageMarkdown($id_admin, "📥 یک پیام از کاربر با شناسه ```$from_id``` دریافت شد برای پاسخ ریپلای بزنید و پیام خود را ارسال کنید.", null);
         forwardMessage($from_id, $message_id, $id_admin);
     }
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -715,7 +715,7 @@ if($setting['configManual'] == "✅ ارسال کانفیگ بعد خرید فع
 $text_config
 $link_config
 ";
-    sendmessage($from_id, $textcreatuser, $Shoppinginfo);
+    sendmessageMarkdown($from_id, $textcreatuser, $Shoppinginfo);
     sendmessage($from_id, "یکی از گزینه های زیر را انتخاب نمایید", $keyboard);
     $stmt = $connect->prepare("UPDATE user SET Balance = ? WHERE id = ?");
     $Balance_prim= $user['Balance']- $info_product['price_product'];
@@ -1355,7 +1355,7 @@ elseif ($text == "📝 تنظیم متن توضیحات اطلاعات سروی�
             متن جدید خود را ارسال کنید.
             متن فعلی:
             ``` " . $datatextbot['text_dec_info'] . "```";
-    sendmessage($from_id, $textstart, $backadmin);
+    sendmessageMarkdown($from_id, $textstart, $backadmin);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'changetextinfodec';
     $stmt->bind_param("ss", $step, $from_id);
@@ -1430,7 +1430,7 @@ elseif ($text == "📝 تنظیم متن توضیحات پشتیبانی") {
             متن جدید خود راارسال کنید.
             متن فعلی:
             ```". $datatextbot['text_dec_support']."```";
-    sendmessage($from_id, $textstart, $backadmin);
+    sendmessageMarkdown($from_id, $textstart, $backadmin);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'text_dec_support';
     $stmt->bind_param("ss", $step, $from_id);
@@ -1455,7 +1455,7 @@ elseif ($text == "دکمه سوالات متداول") {
             متن جدید خود راارسال کنید.
             متن فعلی:
             ```". $datatextbot['text_fq']."```";
-    sendmessage($from_id, $textstart, $backadmin);
+    sendmessageMarkdown($from_id, $textstart, $backadmin);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'text_fq';
     $stmt->bind_param("ss", $step, $from_id);
@@ -1480,7 +1480,7 @@ elseif ($text == "📝 تنظیم متن توضیحات سوالات متداو�
             متن جدید خود راارسال کنید.
             متن فعلی:
             ```". $datatextbot['text_dec_fq']."```";
-    sendmessage($from_id, $textstart, $backadmin);
+    sendmessageMarkdown($from_id, $textstart, $backadmin);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'text_dec_fq';
     $stmt->bind_param("ss", $step, $from_id);
@@ -1505,7 +1505,7 @@ elseif ($text == "📝 تنظیم متن توضیحات عضویت اجباری"
             متن جدید خود راارسال کنید.
             متن فعلی:
             ```". $datatextbot['text_channel']."```";
-    sendmessage($from_id, $textstart, $backadmin);
+    sendmessageMarkdown($from_id, $textstart, $backadmin);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'text_channel';
     $stmt->bind_param("ss", $step, $from_id);
@@ -1530,7 +1530,7 @@ elseif ($text == "متن دکمه حساب کاربری") {
             متن جدید خود راارسال کنید.
             متن فعلی:
             ```". $datatextbot['text_account']."```";
-    sendmessage($from_id, $textstart, $backadmin);
+    sendmessageMarkdown($from_id, $textstart, $backadmin);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'text_account';
     $stmt->bind_param("ss", $step, $from_id);
@@ -1555,7 +1555,7 @@ elseif ($text == "دکمه افزایش موجودی") {
             متن جدید خود راارسال کنید.
             متن فعلی:
             ```". $datatextbot['text_Add_Balance']."```";
-    sendmessage($from_id, $textstart, $backadmin);
+    sendmessageMarkdown($from_id, $textstart, $backadmin);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'text_Add_Balance';
     $stmt->bind_param("ss", $step, $from_id);
@@ -1579,7 +1579,7 @@ elseif ($text == "📝 تنظیم متن توضیحات شماره کارت") {
             متن جدید خود راارسال کنید.
             متن فعلی:
             ```". $datatextbot['text_cart_to_cart']."```";
-    sendmessage($from_id, $textstart, $backadmin);
+    sendmessageMarkdown($from_id, $textstart, $backadmin);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'text_cart_to_cart';
     $stmt->bind_param("ss", $step, $from_id);
@@ -1834,7 +1834,7 @@ elseif ($text == "⚖️ متن قانون") {
             متن جدید خود راارسال کنید.
             متن فعلی:
             ```". $datatextbot['text_roll']."```";
-    sendmessage($from_id, $textstart, $backadmin);
+    sendmessageMarkdown($from_id, $textstart, $backadmin);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'text_roll';
     $stmt->bind_param("ss", $step, $from_id);
