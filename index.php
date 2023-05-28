@@ -805,11 +805,11 @@ elseif($user['step'] == "get_step_payment"){
     }
     if ($text == "💵 پرداخت nowpayments"){
     $usdprice = round($Processing_value/$usdprice['data']['currencies']['USDT']['price'],2);
-//         if($usdprice <= 2){
-//         sendmessage($from_id, "❌ خطا 
-// کمترین مبلغ برای  پرداخت در این درگاه 2 دلار می باشد.", null);
-// return;
-//         }
+        if($usdprice <= 2){
+        sendmessage($from_id, "❌ خطا 
+کمترین مبلغ برای  پرداخت در این درگاه 2 دلار می باشد.", null);
+return;
+        }
     $dateacc = date('Y/m/d h:i:s');
     $randomString = bin2hex(random_bytes(5));
     $stmt = $connect->prepare("INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status) VALUES (?,?,?,?,?)");
