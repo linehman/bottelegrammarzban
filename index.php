@@ -1195,7 +1195,10 @@ if ($text == "🖥 اضافه کردن پنل  مرزبان") {
     $stmt->bind_param("ss", $text, $from_id);
     $stmt->execute();
 } elseif ($user['step'] == "add_link_panel") {
-    if (filter_var($text, FILTER_VALIDATE_URL)) {
+    if (!filter_var($text, FILTER_VALIDATE_URL)) {
+                sendmessage($from_id, "🔗 آدرس دامنه نامعتبر است", $backadmin);
+                return;
+}
         sendmessage($from_id, "👤 آدرس پنل ذخیره شد حالا نام کاربری  را ارسال کنید.", $backadmin);
         $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
         $step = 'add_username_panel';
@@ -1204,9 +1207,6 @@ if ($text == "🖥 اضافه کردن پنل  مرزبان") {
         $stmt = $connect->prepare("UPDATE marzban_panel SET  url_panel = ? WHERE name_panel = ?");
         $stmt->bind_param("ss", $text, $Processing_value);
         $stmt->execute();
-    } else {
-        sendmessage($from_id, "🔗 آدرس دامنه نامعتبر است", $backadmin);
-    }
 } elseif ($user['step'] == "add_username_panel") {
     sendmessage($from_id, "🔑 نام کاربری ذخیره شد در پایان رمز عبور پنل مرزبان خود را وارد نمایید.", $backadmin);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
