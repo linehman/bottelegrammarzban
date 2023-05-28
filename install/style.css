@@ -1,0 +1,72 @@
+    @font-face {
+    font-family: 'vazir';
+    src: url('/Vazir.eot');
+    src: local('☺'), url('../fonts/Vazir.woff') format('woff'), url('../fonts/Vazir.ttf') format('truetype');
+}
+input,button,body{
+                font-family:vazir;
+}
+
+        body{
+    direction: rtl;
+    font-family:vazir;
+    padding-top: 15px;
+    text-align: center;
+    background: linear-gradient(45deg, #018700, #00ff20);
+}
+.install_btn{
+    background-color: green;                          
+    border: none;
+    font-weight: 600;
+    color:white;
+    cursor: pointer;
+    font-size: 18px;
+    width: 150px;
+    margin-bottom: 0px;
+    border-radius: 50px;
+    padding: 10px;
+    border: 1px solid green;
+}
+.update_btn{
+    margin: 5px;
+    background-color: blue;
+    border: none;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    font-size: 18px;
+    width: 150px;
+    margin-bottom: 10px;
+    border-radius: 50px;
+    padding: 10px;
+}
+.ch_tel_btn{
+    width: 100px;
+    margin: 5px;
+    padding: 3px;
+    font-size: 16px;  
+    cursor: pointer;
+    font-size: 18px;
+    width: 150px;
+    margin-bottom: 10px;
+    border-radius: 50px;
+    padding: 10px;
+    border: 1px #eae1e1 solid;
+}
+.gap_tel_btn{
+    width: 100px;
+    margin: 5px;
+    padding: 3px;
+    font-size: 16px;
+    cursor: pointer;
+    font-size: 18px;
+    width: 150px;
+    margin-bottom: 10px;
+    border-radius: 50px;
+    padding: 10px;
+    border: 1px #eae1e1 solid;
+}
+
+ type[input]{
+    direction: rtl;
+}

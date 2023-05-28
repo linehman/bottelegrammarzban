@@ -1,0 +1,52 @@
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>نصب ربات</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link type="text/css" href="styleset.css" rel="stylesheet" />
+</head>
+
+<body>
+
+    <img class="img" src="../img/logo-dark.png" alt="">
+    <div class="container">
+        <form id="contact" action="../data.php" method="post">
+            <h1 class="h1">MirzaPanel</h1>
+            <fieldset>
+                <input class="form" placeholder="توکن ربات" type="text" id= "tokenbot" name="tokenbot" autocomplete="off" required>
+            </fieldset>
+            <fieldset>
+                <input class="form" placeholder="آیدی عددی ادمین" type="text" id ="idadmin" name="idadmin" autocomplete="off"
+                    required>
+            </fieldset>
+            <fieldset>
+                <input class="form" placeholder="اسم دیتابیس" type="text" name="dbname" autocomplete="off" required>
+            </fieldset>
+            <fieldset>
+                <input class="form" placeholder="یوزرنیم دیتابیس" type="text" name="dbuser" autocomplete="off" required>
+            </fieldset>
+            <fieldset>
+                <input class="form" placeholder="پسورد دیتابیس" type="text" name="dbpassword" autocomplete="off"
+                    required>
+            </fieldset>
+            <fieldset>
+                <input class="form" placeholder="کلید درگاه NowPayment ( در صورت نداشتن عدد 0 وارد کنید )" type="text"
+                    name="nowpaymentkey" autocomplete="off" required>
+            </fieldset>
+                        <fieldset>
+                <input class="form" placeholder="آیدی ربات بدون @" type="text"
+                    name="idbot" autocomplete="off" required>
+            </fieldset>
+            <fieldset>
+                <button class="btninstall" type="submit">نصب ربات</button>
+            </fieldset>
+        </form>
+    </div>
+
+</body>
+
+</html>

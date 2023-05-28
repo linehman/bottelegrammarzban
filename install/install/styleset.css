@@ -1,0 +1,59 @@
+    @font-face {
+    font-family: 'vazir';
+    src: url('/Vazir.eot');
+    src: local('☺'), url('../fonts/Vazir.woff') format('woff'), url('../fonts/Vazir.ttf') format('truetype');
+}
+input,button{
+                font-family:vazir;
+}
+
+        body{
+    direction: rtl;
+    font-family:vazir;
+    padding-top: 15px;
+    text-align: center;
+    background: linear-gradient(45deg, #018700, #00ff20);
+    font-family:vazir;
+}
+
+
+ type[input]{
+    direction: rtl;
+}
+.img{
+    width: 250px;
+}
+.form{
+    width: 100%;
+    height: 30px;
+    border-radius: 10px;
+}
+button{
+    cursor: pointer;
+    font-size: 18px;
+    width: 90%;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    padding: 10px;
+    border: 1px #eae1e1 solid;
+}
+input{
+    padding:20px 10px;
+}
+input:focus{
+    outline:0;
+    border:0;
+}
+.container{
+    width: 70%;
+    margin: 0 auto;
+}
+.container .h1{
+    color:#fff;
+}
+button {
+    background :linear-gradient(45deg, #000678, #5600ff);
+    color:#fff;
+    border-radius:20px;
+    margin:20px 0;
+}
