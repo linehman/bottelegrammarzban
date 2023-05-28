@@ -10,15 +10,15 @@ $domain = $_SERVER['HTTP_HOST'];
 $path = dirname($_SERVER['REQUEST_URI'],2);
 $domainhost = $domain . $path;
 $fileContent = file_get_contents('../config.php');
-// تغییر مقدار $domainhost
+// تغییر مقدار nowpaymentkey
 $patternapi = '/\$apinowpayments\s*=\s*".*?";/';
-$newFileContent = preg_replace($patternapi, '$apinowpayments = "'.$apinowpayments.'";', $fileContent);
+$newFileContent = preg_replace($patternapi, '$apinowpayments = "'.$nowpaymentkey.'";', $fileContent);
 
 // تغییر مقدار $idbot
 $patternidbot = '/\$usernamebot\s*=\s*".*?";/';
 $newFileContent = preg_replace($patternidbot, '$usernamebot = "'.$idbot.'";', $fileContent);
 
-// تغییر مقدار nowpaymentkey
+// تغییر مقدار $domainhost
 $patterndomain = '/\$domainhosts\s*=\s*".*?";/';
 $newFileContent = preg_replace($patterndomain, '$domainhosts = "'.$domainhost.'";', $newFileContent);
 
@@ -50,9 +50,10 @@ else{
     $textdatabase = "ارتباط به دیتابیس برقرارشد و جداول ساخته شدند";
     require_once 'table.php';
 }
-$response = json_decode(file_get_contents("https://api.telegram.org/bot" . $token . "/setWebhook?url=https://" .$domainhost."/index.php" ),true);
+$domainhosts = $domain . $path;
+$response = json_decode(file_get_contents("https://api.telegram.org/bot" . $token . "/setWebhook?url=https://" .$domainhosts."/index.php" ),true);
 if($response['description'] == "Webhook was set"){
-            file_get_contents("https://api.telegram.org/bot" . $token . "/sendMessage?chat_id=" . $idadmin . "&text=✅| ربات میرزا پنل با موفقیت نصب شد");
+            $sendmessage =file_get_contents("https://api.telegram.org/bot" . $token . "/sendMessage?chat_id=" . $idadmin . "&text=✅| ربات میرزا پنل با موفقیت نصب شد");
             $webhook = "ست وبهوک با موفقیت تنظیم شد";
         }
         elseif($response['description'] == "Webhook is already set"){
@@ -61,7 +62,7 @@ if($response['description'] == "Webhook was set"){
         else{
             $webhook = "ست وبهوک ربات با موفقتیت انجام نشد.";
         }
-        unlink('data.php');
+        //unlink('data.php');
 ?>
 
 <html>
