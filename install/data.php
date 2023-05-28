@@ -8,7 +8,7 @@ $idbot = $_POST['idbot'];
 $passworddb = $_POST['dbpassword'];
 $domain = $_SERVER['HTTP_HOST'];
 $path = dirname($_SERVER['REQUEST_URI'],2);
-$domainhost = $domain . $path;
+$domain_hosts = $domain . $path;
 $fileContent = file_get_contents('../config.php');
 // تغییر مقدار nowpaymentkey
 $patternapi = '/\$apinowpayments\s*=\s*".*?";/';
@@ -20,7 +20,7 @@ $newFileContent = preg_replace($patternidbot, '$usernamebot = "'.$idbot.'";', $f
 
 // تغییر مقدار $domainhost
 $patterndomain = '/\$domainhosts\s*=\s*".*?";/';
-$newFileContent = preg_replace($patterndomain, '$domainhosts = "'.$domainhost.'";', $newFileContent);
+$newFileContent = preg_replace($patterndomain, '$domainhosts = "'.$domain_hosts.'";', $newFileContent);
 
 // تغییر مقدار $dbname
 $patterndbname = '/\$dbname\s*=\s*".*?";/';
@@ -50,8 +50,7 @@ else{
     $textdatabase = "ارتباط به دیتابیس برقرارشد و جداول ساخته شدند";
     require_once 'table.php';
 }
-$domainhosts = $domain . $path;
-$response = json_decode(file_get_contents("https://api.telegram.org/bot" . $token . "/setWebhook?url=https://" .$domainhosts."/index.php" ),true);
+$response = json_decode(file_get_contents("https://api.telegram.org/bot" . $token . "/setWebhook?url=https://" .$domain_hosts."/index.php" ),true);
 if($response['description'] == "Webhook was set"){
             $sendmessage =file_get_contents("https://api.telegram.org/bot" . $token . "/sendMessage?chat_id=" . $idadmin . "&text=✅| ربات میرزا پنل با موفقیت نصب شد");
             $webhook = "ست وبهوک با موفقیت تنظیم شد";
@@ -62,7 +61,7 @@ if($response['description'] == "Webhook was set"){
         else{
             $webhook = "ست وبهوک ربات با موفقتیت انجام نشد.";
         }
-        //unlink('data.php');
+        unlink('data.php');
 ?>
 
 <html>
