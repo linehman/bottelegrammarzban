@@ -16,7 +16,7 @@ $newFileContent = preg_replace($patternapi, '$apinowpayments = "'.$nowpaymentkey
 
 // تغییر مقدار $idbot
 $patternidbot = '/\$usernamebot\s*=\s*".*?";/';
-$newFileContent = preg_replace($patternidbot, '$usernamebot = "'.$idbot.'";', $fileContent);
+$newFileContent = preg_replace($patternidbot, '$usernamebot = "'.$idbot.'";', $newFileContent);
 
 // تغییر مقدار $domainhost
 $patterndomain = '/\$domainhost\s*=\s*".*?";/';
