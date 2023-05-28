@@ -15,7 +15,7 @@ mysqli_set_charset($connect, "utf8mb4");
 //-----------------------------info-------------------------------
 
 $APIKEY = "**TOKEN**"; // توکن ربات خود را وارد کنید
-$adminnumber =5522424631;// آیدی عددی ادمین
+$adminnumber = "5522424631";// آیدی عددی ادمین
 $domainhost = "domain.com/bot";// دامنه  هاست و مسیر سورس
 $apinowpayments = "token_api"; // api سایت nowpayments  
 $usernamebot = "marzbaninfobot"; //نام کاربری ربات  بدون @
