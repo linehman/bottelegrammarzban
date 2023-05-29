@@ -47,6 +47,7 @@ foreach ($files as $file) {
     }
     rename($sourceFile, $destinationFile);
 }
+require_once 'table.php';
 $Outputfnish = "آپدیت با موفقیت انجام شد";
 unlink($filezip);
 if (is_dir($sourcePath)) {
