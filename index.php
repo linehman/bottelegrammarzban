@@ -819,7 +819,7 @@ return;
             $paymentkeyboard = json_encode([
         'inline_keyboard' => [
             [
-                    ['text' => "پرداخت", 'url' => "https://$domainhosts/payment/nowpayments/nowpayments.php?price=$usdprice&order_description=Add_Balance&order_id=$randomString"],
+                    ['text' => "پرداخت", 'url' => "https://"."$domainhosts"."/payment/nowpayments/nowpayments.php?price=$usdprice&order_description=Add_Balance&order_id=$randomString"],
             ]
         ]
     ]);
@@ -1087,16 +1087,13 @@ elseif ($user['step'] == "limit_usertest_allusers") {
 if ($text == "📯 تنظیمات کانال") {
     sendmessage($from_id, "یکی از گزینه های زیر را انتخاب کنید", $channelkeyboard);
 }
+#-------------------------#
 if ($text == "📊 آمار ربات") {
-    $stmt = $connect->prepare("SELECT COUNT(id) FROM user");
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $statistics = $result->fetch_array(MYSQLI_NUM);
-    #-------------------------#
+    $statistics = mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(id)  FROM user"));
     $keyboardstatistics = json_encode([
         'inline_keyboard' => [
             [
-                ['text' => $statistics[0], 'callback_data' => 'countusers'],
+                ['text' => $statistics['COUNT(id)'], 'callback_data' => 'countusers'],
                 ['text' => '👤 تعداد کاربران', 'callback_data' => 'countusers'],
             ],
             [
