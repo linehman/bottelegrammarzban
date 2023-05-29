@@ -66,7 +66,7 @@ if($response['description'] == "Webhook was set"){
         else{
             $webhook = "ست وبهوک ربات با موفقتیت انجام نشد.";
         }
-//        unlink('data.php');
+   unlink('data.php');
 ?>
 
 <html>
