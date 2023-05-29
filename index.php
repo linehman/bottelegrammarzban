@@ -22,7 +22,7 @@ foreach ($telegram_ip_ranges as $telegram_ip_range) if (!$ok) {
     $upper_dec = (float) sprintf("%u", ip2long($telegram_ip_range['upper']));
     if ($ip_dec >= $lower_dec and $ip_dec <= $upper_dec) $ok = true;
 }
-if (!$ok) die("false");
+if (!$ok) die("دسترسی غیرمجاز");
 #-----------function------------#
 function tomantousd(){
     
@@ -74,6 +74,11 @@ if (mysqli_num_rows($query) > 0) {
     $user = mysqli_fetch_assoc($query);
 } else {
     $user = array();
+    $user = array(
+    'step' => '',
+    'Processing_value' => '',
+);
+
 }
 $Processing_value =  $user['Processing_value'];
 $setting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM setting"));
@@ -690,7 +695,16 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
 $text_config = "";
 $link_confi = "";
 if($setting['sublink'] == "✅ لینک اشتراک فعال است."){
-        $output_config_link = $data['subscription_url'] ?? 'خطا';
+    if(isset($data['subscription_url'])){
+if (filter_var($domain, FILTER_VALIDATE_DOMAIN)) {
+            $output_config_link = $data['subscription_url'];
+}
+else{
+    $output_config_link = $marzban_list_get['url_panel'].$data['subscription_url'];
+}
+}else{
+    $output_config_link  = "❌ خطایی در ساخت اشتراک رخ داده است برای رفع مشکل با پشتیبانی در ارتباط باشد.";
+}
         $link_config = "            
 لینک اشتراک شما:
     ```$output_config_link```";
@@ -1191,7 +1205,8 @@ if ($text == "🖥 اضافه کردن پنل  مرزبان") {
 ⚠️ توجه:
 🔸 آدرس پنل باید بدون dashboard ارسال شود.
 🔹 در صورتی که پورت پنل 443 است پورت را نباید وارد کنید.  
-                ";
+🔸 آخر آدرس نباید / داشته باشد
+🔹 در صورت وارد کردن آیپی حتما http یا https باید داشته باشد.";
     sendmessage($from_id, $text_add_url_panel, $backadmin);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'add_link_panel';
