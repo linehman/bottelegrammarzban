@@ -57,8 +57,11 @@ $response = curl_exec($curl);
 curl_close($curl);
 $latestRelease = json_decode($response, true);
 $tagName = "";
-if ($latestRelease) {
+if (isset($latestRelease['tag_name'])) {
     $tagName = $latestRelease['tag_name'];
+}
+else {
+        $tagName = 'خطا در دریافت نسخه';
 }
 return $tagName;
 
@@ -66,7 +69,12 @@ return $tagName;
 $latestRelease = latestRelease();
 #-----------------------#
 $version = file_get_contents('install/version');
-$user = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '$from_id' LIMIT 1"));
+$query = mysqli_query($connect, "SELECT * FROM user WHERE id = '$from_id' LIMIT 1");
+if (mysqli_num_rows($query) > 0) {
+    $user = mysqli_fetch_assoc($query);
+} else {
+    $user = array();
+}
 $Processing_value =  $user['Processing_value'];
 $setting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM setting"));
 $helpdata = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM help"));
