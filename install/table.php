@@ -23,6 +23,7 @@ try {
         number varchar(2000) NOT null ,
         Balance int(255) NOT null ,
         User_Status varchar(500) NOT NULL,
+        spam varchar(500) NOT NULL,
         pagenumber int(10) NOT NULL)
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
@@ -35,6 +36,11 @@ try {
             $connect->query("ALTER TABLE user ADD Processing_value VARCHAR(1000)");
             $connect->query("UPDATE user SET Processing_value = 'none'");
             echo "The Processing_Value field was added ✅";
+        }
+                $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'spam'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE user ADD spam VARCHAR(1000)");
+            echo "The spam field was added ✅";
         }
             $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'Processing_value_tow'");
             if (mysqli_num_rows($Check_filde) != 1) {
@@ -378,16 +384,7 @@ try {
 try {
     $result = $connect->query("SHOW TABLES LIKE 'textbot'");
     $table_exists = ($result->num_rows > 0);
-    $text_info = "
-    نام کاربری خود را ارسال نمایید
-            
-    ⚠️ نام کاربری باید بدون کاراکترهای اضافه مانند @، فاصله، خط تیره باشد. 
-    ⚠️ نام کاربری باید انگلیسی باشد
-      ";
-    $support_dec = "
-    پیام خود را ارسال کنید:
-        ⚠️ برای دریافت پیام حتما باید فوروارد حساب کاربری تان باز باشد تا پاسخ ادمین را دریافت کنید.
-    ";
+    $support_dec = "📬 در صورتی که نتوانستید پاسخ سوالات و مشکلات خود را در بخش «سوالات متداول» پیدا کنید، جهت ارتباط بیشتر می توانید به بخش پشتیبانی پیام بدید.";
     $text_roll = "
 ♨️ قوانین استفاده از خدمات ما
 
@@ -464,7 +461,6 @@ try {
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_start','سلام خوش آمدید') ");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_usertest','🔑 اکانت تست')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Purchased_services','🛍 مشاهده سرویس های خریداری شده')");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_dec_info','$text_info')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_support','☎️ پشتیبانی')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_dec_support','$support_dec')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_help','📚 آموزش')");
@@ -483,7 +479,6 @@ try {
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_start','سلام خوش آمدید')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_usertest','🔑 اکانت تست')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Purchased_services','🛍 مشاهده سرویس های خریداری شده')");
-        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_dec_info','$text_info')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_support','☎️ پشتیبانی')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_dec_support','$support_dec')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_help','📚 آموزش')");
