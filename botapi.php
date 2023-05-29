@@ -68,7 +68,6 @@ $from_id = $update['message']['from']['id'] ?? $update['callback_query']['from']
 $Chat_type = $update["message"]["chat"]["type"] ?? '';
 $text = $update["message"]["text"] ?? $update["callback_query"]["message"]["text"] ?? '';
 $message_id = $update["message"]["message_id"] ?? $update["callback_query"]["message"]["message_id"] ?? 0;
-$message_id = $update["message"]["message_id"] ?? $update["callback_query"]["message"]["message_id"] ?? 0;
 $photo = $update["message"]["photo"] ?? 0;
 $photoid = $photo ? end($photo)["file_id"] : '';
 $caption = $update["message"]["caption"] ?? '';
