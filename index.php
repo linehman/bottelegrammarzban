@@ -10,7 +10,7 @@ require_once 'botapi.php';
 require_once 'apipanel.php';
 require_once 'jdf.php';
 require_once 'kayboard.php';
-#-----------------------#
+#-----------telegram_ip_ranges------------#
 $telegram_ip_ranges = [
     ['lower' => '149.154.160.0', 'upper' => '149.154.175.255'],
     ['lower' => '91.108.4.0',    'upper' => '91.108.7.255']
@@ -67,7 +67,7 @@ return $tagName;
 
 }
 $latestRelease = latestRelease();
-#-----------------------#
+#-------------Variable----------#
 $version = file_get_contents('install/version');
 $query = mysqli_query($connect, "SELECT * FROM user WHERE id = '$from_id' LIMIT 1");
 if (mysqli_num_rows($query) > 0) {
@@ -77,6 +77,7 @@ if (mysqli_num_rows($query) > 0) {
     $user = array(
     'step' => '',
     'Processing_value' => '',
+    'User_Status' => ''
 );
 
 }
@@ -149,8 +150,9 @@ if (isset($channels['link'])) {
     $response = json_decode(file_get_contents('https://api.telegram.org/bot' . $APIKEY . "/getChatMember?chat_id=@{$channels['link']}&user_id=$from_id"));
     $tch = $response->result->status;
 }
-#-----------------------#
+#-----------start------------#
 $connect->query("INSERT IGNORE INTO user (id , step,limit_usertest,User_Status,number,Balance,pagenumber) VALUES ('$from_id', 'none','{$setting['limit_usertest_all']}','Active','none','0','1')");
+#-----------User_Status------------#
 if ($user['User_Status'] == "block") {
     $textblock = "
            🚫 شما از طرف مدیریت بلاک شده اید.
@@ -160,6 +162,7 @@ if ($user['User_Status'] == "block") {
     sendmessage($from_id, $textblock, null);
     return;
 }
+#-----------Channel------------#
 if(empty($channels['Channel_lock'])){
     $channels['Channel_lock'] = "off";
     $channels['link'] = "تنظیم نشده";
@@ -175,7 +178,7 @@ if (!in_array($tch, ['member', 'creator', 'administrator']) && $channels['Channe
     sendmessage($from_id, $datatextbot['text_channel'], $link_channel);
     return;
 }
-#-----------------------#
+#-----------roll------------#
 if ($setting['roll_Status'] == "✅ تایید قانون روشن است" && $user['roll_Status'] == 0 && $text != "✅ قوانین را می پذیرم" && !in_array($from_id, $admin_ids)) {
     sendmessage($from_id, $datatextbot['text_roll'], $confrimrolls);
     return;
@@ -188,12 +191,12 @@ if ($text == "✅ قوانین را می پذیرم"){
     $stmt->execute();
 }
 
-#-----------------------#
+#-----------Bot_Status------------#
 if ($setting['Bot_Status'] == "❌ ربات خاموش است" && !in_array($from_id, $admin_ids)) {
     sendmessage($from_id, $datatextbot['text_bot_off'], null);
     return;
 }
-#-----------------------#
+#-----------/start------------#
 if ($text == "/start") {
     sendmessage($from_id, $datatextbot['text_start'], $keyboard);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -202,6 +205,7 @@ if ($text == "/start") {
     $stmt->execute();
     return;
 }
+#-----------back------------#
 if ($text == "🏠 بازگشت به منوی اصلی") {
     $textback = "به صفحه اصلی بازگشتید!";
     sendmessage($from_id, $textback, $keyboard);
@@ -211,7 +215,7 @@ if ($text == "🏠 بازگشت به منوی اصلی") {
     $stmt->execute();
     return;
 }
-//_________________________________________________
+#-----------get_number------------#
 if($user['step'] == 'get_number'){
     if (empty($user_phone)){
         sendmessage($from_id, "❌ شماره تلفن صحبح نیست شماره تلفن صحبح را ارسال نمایید.", $request_contact);
@@ -235,7 +239,7 @@ if($user['step'] == 'get_number'){
     $stmt->execute();
 }
 
-//________________________________________________________
+#-----------Purchased services------------#
 if ($text == $datatextbot['text_Purchased_services'] || $datain == "backorder") {
 $stmt = $connect->prepare("UPDATE user SET pagenumber = ? WHERE id = ?");
 $pages = 1;
@@ -443,7 +447,7 @@ if(preg_match('/subscriptionurl_(\w+)/',$datain, $dataget)) {
 ```$subscriptionurl```";
             sendmessageMarkdown($from_id, $textsub, null);
 }
-//________________________________________________________
+#-----------usertest------------#
 if ($text == $datatextbot['text_usertest']) {
     if ($user['limit_usertest'] == 0) {
         sendmessage($from_id, "⚠️ محدودیت ساخت اشتراک تست شما به پایان رسید.", $keyboard);
@@ -536,7 +540,7 @@ elseif ($user['step'] == "createusertest") {
         sendmessageMarkdown($setting['Channel_Report'], $text_report, $usertestReport);
     }
 }
-//_________________________________________________
+#-----------help------------#
 if ($text == $datatextbot['text_help']) {
     if ($setting['help_Status'] == "❌ آموزش غیرفعال است"){
         sendmessage($from_id, "کاربر گرامی بخش آموزش درحال حاضر غیرفعال است. 😔", null);
@@ -565,7 +569,7 @@ if ($text == $datatextbot['text_help']) {
     }
 }
 
-//________________________________________________________
+#-----------support------------#
 if ($text == $datatextbot['text_support']) {
     sendmessage($from_id, "☎️", $backuser);
     sendmessage($from_id, $datatextbot['text_dec_support'], $backuser);
@@ -575,15 +579,29 @@ if ($text == $datatextbot['text_support']) {
     $stmt->execute();
 } elseif ($user['step'] == 'gettextpm') {
     sendmessage($from_id, "🚀 پیام شما ارسال شد منتظر پاسخ مدیریت باشید.", $keyboard);
+    $textsendadmin = "
+    📥 یک پیام از کاربر دریافت شد برای پاسخ روی دکمه زیر کلیک کنید  و پیام خود را ارسال کنید.
+
+آیدی عددی : $from_id
+نام کاربری کاربر : @$username
+ 📝 متن پیام : $text
+    ";
+    $Response = json_encode([
+    'inline_keyboard' => [
+        [
+            ['text' => 'پاسخ به پیام', 'callback_data' => 'Response_'.$from_id],
+        ],
+    ]
+]);
     foreach ($admin_ids as $id_admin) {
-        sendmessageMarkdown($id_admin, "📥 یک پیام از کاربر با شناسه ```$from_id``` دریافت شد برای پاسخ ریپلای بزنید و پیام خود را ارسال کنید.", null);
-        forwardMessage($from_id, $message_id, $id_admin);
+        sendmessage($id_admin, $textsendadmin, $Response);
     }
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'home';
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 }
+#-----------fq------------#
 if($text == $datatextbot['text_fq']){
     sendmessage($from_id,$datatextbot['text_dec_fq'] , null);
 }
@@ -677,7 +695,6 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
     }
     $username_ac = $user['Processing_value_tow'];
     $randomString = bin2hex(random_bytes(2));
-    $username_ac = "$randomString$from_id";
     $stmt = $connect->prepare("INSERT IGNORE INTO invoice (id_user, id_invoice, username, Service_location, name_product, price_product, Volume, Service_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("ssssssss", $from_id, $randomString, $username_ac, $Processing_value, $info_product['name_product'], $info_product['price_product'], $info_product['Volume_constraint'], $info_product['Service_time']);
     $stmt->execute();
@@ -695,16 +712,7 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
 $text_config = "";
 $link_confi = "";
 if($setting['sublink'] == "✅ لینک اشتراک فعال است."){
-    if(isset($data['subscription_url'])){
-if (filter_var($domain, FILTER_VALIDATE_DOMAIN)) {
-            $output_config_link = $data['subscription_url'];
-}
-else{
-    $output_config_link = $marzban_list_get['url_panel'].$data['subscription_url'];
-}
-}else{
-    $output_config_link  = "❌ خطایی در ساخت اشتراک رخ داده است برای رفع مشکل با پشتیبانی در ارتباط باشد.";
-}
+        $output_config_link = $data['subscription_url'] ?? '❌ خطایی در ساخت اشتراک رخ داده است برای رفع مشکل با پشتیبانی در ارتباط باشد.';
         $link_config = "            
 لینک اشتراک شما:
     ```$output_config_link```";
@@ -1740,14 +1748,29 @@ elseif ($user['step'] == "remove_help") {
     $stmt->execute();
 }
 //_________________________________________________
-if ($forward_from_id != 0) {
-    $textSendAdminToUser = "
+if(preg_match('/Response_(\w+)/',$datain, $dataget)) {
+    $iduser= $dataget[1];
+    $stmt = $connect->prepare("UPDATE user SET Processing_value = ? WHERE id = ?");
+    $stmt->bind_param("ss", $iduser, $from_id);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'getmessageAsAdmin';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+    sendmessage($from_id, "برای پاسخ به کاربر متن خود را ارسال کنید.", $backadin);
+}
+elseif($user['step'] == "getmessageAsAdmin"){
+    sendmessage($from_id, "✅ پیام با موفقیت برای کاربر ارسال گردید.", null);
+   $textSendAdminToUser = "
             📩 یک پیام از سمت مدیریت برای شما ارسال گردید.
         
-        متن پیام : 
-        $text";
-    sendmessage($forward_from_id, $textSendAdminToUser, null);
-    sendmessage($from_id, "✅ پیام با موفقیت برای کاربر ارسال گردید.", null);
+متن پیام : 
+$text";
+            sendmessage($Processing_value, $textSendAdminToUser, null);
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
 }
 //_________________________________________________
 $Bot_Status = json_encode([
