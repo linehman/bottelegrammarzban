@@ -14,12 +14,21 @@ function telegram($method, $datas = [])
         return json_decode($res);
     }
 }
-function sendmessage($chat_id,$text,$keyboard){
+function sendmessageMarkdown($chat_id,$text,$keyboard){
     telegram('sendmessage',[
         'chat_id' => $chat_id,
         'text' => $text,
         'reply_markup' => $keyboard,
         'parse_mode' => "Markdown",
+        
+        ]);
+}
+function sendmessage($chat_id,$text,$keyboard){
+    telegram('sendmessage',[
+        'chat_id' => $chat_id,
+        'text' => $text,
+        'reply_markup' => $keyboard,
+        'parse_mode' => "HTML",
         
         ]);
 }
@@ -58,7 +67,6 @@ $update = json_decode(file_get_contents("php://input"), true);
 $from_id = $update['message']['from']['id'] ?? $update['callback_query']['from']['id'] ?? 0;
 $Chat_type = $update["message"]["chat"]["type"] ?? '';
 $text = $update["message"]["text"] ?? $update["callback_query"]["message"]["text"] ?? '';
-$message_id = $update["message"]["message_id"] ?? $update["callback_query"]["message"]["message_id"] ?? 0;
 $message_id = $update["message"]["message_id"] ?? $update["callback_query"]["message"]["message_id"] ?? 0;
 $photo = $update["message"]["photo"] ?? 0;
 $photoid = $photo ? end($photo)["file_id"] : '';

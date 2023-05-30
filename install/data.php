@@ -8,19 +8,19 @@ $idbot = $_POST['idbot'];
 $passworddb = $_POST['dbpassword'];
 $domain = $_SERVER['HTTP_HOST'];
 $path = dirname($_SERVER['REQUEST_URI'],2);
-$domainhost = $domain . $path;
+$domain_hosts = $domain . $path;
 $fileContent = file_get_contents('../config.php');
-// تغییر مقدار $domainhost
+// تغییر مقدار nowpaymentkey
 $patternapi = '/\$apinowpayments\s*=\s*".*?";/';
-$newFileContent = preg_replace($patternapi, '$apinowpayments = "'.$apinowpayments.'";', $fileContent);
+$newFileContent = preg_replace($patternapi, '$apinowpayments = "'.$nowpaymentkey.'";', $fileContent);
 
 // تغییر مقدار $idbot
 $patternidbot = '/\$usernamebot\s*=\s*".*?";/';
-$newFileContent = preg_replace($patternidbot, '$usernamebot = "'.$idbot.'";', $fileContent);
+$newFileContent = preg_replace($patternidbot, '$usernamebot = "'.$idbot.'";', $newFileContent);
 
-// تغییر مقدار nowpaymentkey
-$patterndomain = '/\$domainhosts\s*=\s*".*?";/';
-$newFileContent = preg_replace($patterndomain, '$domainhosts = "'.$domainhost.'";', $newFileContent);
+// تغییر مقدار $domainhost
+$patterndomain = '/\$domainhost\s*=\s*".*?";/';
+$newFileContent = preg_replace($patterndomain, '$domainhost = "'.$domain_hosts.'";', $newFileContent);
 
 // تغییر مقدار $dbname
 $patterndbname = '/\$dbname\s*=\s*".*?";/';
@@ -42,17 +42,22 @@ $patternidadmin = '/\$adminnumber\s*=\s*".*?";/';
 $newFileContent = preg_replace($patternidadmin, '$adminnumber = "'.$idadmin.'";', $newFileContent);
 
 file_put_contents('../config.php', $newFileContent);
-$connect = new mysqli('localhost', $dbuser,$passworddb,$dbname);
-if ($connect->connect_errno) {
-    $textdatabase = "ارتباط به دیتابیس برقرار نشد";
+try {
+    $connect = new mysqli('localhost', $dbuser, $passworddb, $dbname);
+    
+    if ($connect->connect_errno) {
+        $textdatabase = 'خطا در اتصال به پایگاه داده: ' . $connect->connect_error;
+    } else {
+        $textdatabase = "ارتباط به دیتابیس برقرارشد و جداول ساخته شدند";
+        require_once 'table.php';
+                $connect->close();
+    }
+} catch (Exception $e) {
+    $textdatabase = 'خطا در اتصال به پایگاه داده: ' . $e->getMessage();
 }
-else{
-    $textdatabase = "ارتباط به دیتابیس برقرارشد و جداول ساخته شدند";
-    require_once 'table.php';
-}
-$response = json_decode(file_get_contents("https://api.telegram.org/bot" . $token . "/setWebhook?url=https://" .$domainhost."/index.php" ),true);
+$response = json_decode(file_get_contents("https://api.telegram.org/bot" . $token . "/setWebhook?url=https://" .$domain_hosts."/index.php" ),true);
 if($response['description'] == "Webhook was set"){
-            file_get_contents("https://api.telegram.org/bot" . $token . "/sendMessage?chat_id=" . $idadmin . "&text=✅| ربات میرزا پنل با موفقیت نصب شد");
+            $sendmessage =file_get_contents("https://api.telegram.org/bot" . $token . "/sendMessage?chat_id=" . $idadmin . "&text=✅| ربات میرزا پنل با موفقیت نصب شد");
             $webhook = "ست وبهوک با موفقیت تنظیم شد";
         }
         elseif($response['description'] == "Webhook is already set"){
@@ -61,7 +66,7 @@ if($response['description'] == "Webhook was set"){
         else{
             $webhook = "ست وبهوک ربات با موفقتیت انجام نشد.";
         }
-        unlink('data.php');
+   unlink('data.php');
 ?>
 
 <html>

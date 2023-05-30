@@ -24,7 +24,7 @@ curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode([
             'price_currency' => 'usd',
             'order_id' => $_GET['order_id'],
             'order_description' => $_GET['order_description'],
-            'success_url' => "https://".$domainhost . '/payment/nowpayments/back.php',
+            'success_url' => "https://".$domainhosts . '/payment/nowpayments/back.php',
             'is_fee_paid_by_user' => true
         ]));
 
