@@ -51,7 +51,7 @@ function moveDirectory($source, $destination) {
         }
         
         $sourcePath = $source . '/' . $file;
-        var_dump($destinationPath = $destination . '/' . $file);
+        $destinationPath = $destination . '/' . $file;
         
         if (is_dir($sourcePath)) {
             var_dump(moveDirectory($sourcePath, $destinationPath));
