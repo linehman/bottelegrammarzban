@@ -475,8 +475,23 @@ elseif ($user['step'] == "createusertest") {
     $data_limit = $setting['val_usertest'] * 1000000;
     $config_test = adduser($username_ac, $expire, $data_limit, $Check_token['access_token'], $marzban_list_get['url_panel']);
     $data_test = json_decode($config_test, true);
-    $output_config_link = $data_test['subscription_url'] ?? 'خطا';
-        $usertestinfo = json_encode([
+    $text_config = "";
+    $output_config_link = "";
+if($setting['sublink'] == "✅ لینک اشتراک فعال است."){
+        $output_config_link = $data_test['subscription_url'] ?? '❌ خطایی در ساخت اشتراک رخ داده است برای رفع مشکل با پشتیبانی در ارتباط باشد.';
+        $link_config = "            
+لینک اشتراک شما:
+    ```$output_config_link```";
+    }
+if($setting['configManual'] == "✅ ارسال کانفیگ بعد خرید فعال است."){
+        foreach($data['links'] as $configs){
+            $config .= "\n\n".$configs;
+        }
+        $text_config = "            
+کانفیگ های شما:
+    ```$config```";
+    }
+    $usertestinfo = json_encode([
         'inline_keyboard' => [
                         [
                 ['text' => $setting['time_usertest']." ساعت", 'callback_data' => "Service_time"],
@@ -493,9 +508,8 @@ elseif ($user['step'] == "createusertest") {
 👤 نام کاربری شما :
 ```$username_ac```
 
-لینک اشتراک شما:
-    ```%s```";
-    $textcreatuser = sprintf($textcreatuser, $output_config_link);
+$output_config_link
+$text_config";
     sendmessageMarkdown($from_id, $textcreatuser, $usertestinfo);
     sendmessage($from_id, "یکی از گزینه های زیر را انتخاب نمایید", $keyboard);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -2614,7 +2628,7 @@ $sublinkkeyboard = json_encode([
         ],
     ]
 ]);
-if ($text == "🔗 ارسال اشتراک لینکی بعد خرید") {
+if ($text == "🔗 ارسال لینک سابسکرایبشن") {
     sendmessage($from_id, "در ای قسمت می توانید تنظیم کنید که کاربر بعد از خرید لینک سابسکرایبشن دریافت کند یا نه",$sublinkkeyboard);
 }
 if ($datain == "✅ لینک اشتراک فعال است.") {
@@ -2639,7 +2653,7 @@ $configkeyboard = json_encode([
         ],
     ]
 ]);
-if ($text == "⚙️ ارسال کانفیگ بعد خرید") {
+if ($text == "⚙️ارسال کانفیگ") {
     sendmessage($from_id, "در این قسمت می توانید تعیین کنید که بعد از خرید کاربر کانفیگ های دستی دریافت کند یا خیر",$configkeyboard);
 }
 if ($datain == "✅ ارسال کانفیگ بعد خرید فعال است.") {
