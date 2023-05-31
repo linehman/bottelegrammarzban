@@ -484,7 +484,7 @@ if($setting['sublink'] == "✅ لینک اشتراک فعال است."){
     ```$output_config_link```";
     }
 if($setting['configManual'] == "✅ ارسال کانفیگ بعد خرید فعال است."){
-        foreach($data['links'] as $configs){
+        foreach($data_test['links'] as $configs){
             $config .= "\n\n".$configs;
         }
         $text_config = "            
