@@ -622,6 +622,7 @@ if($text == $datatextbot['text_fq']){
 $dateacc = jdate('Y/m/d');
 $timeacc = jdate('h:i:s');
 if($text == $datatextbot['text_account']){
+    $first_name = htmlspecialchars($first_name);
     $text_account = "
         👨🏻‍💻 وضعیت حساب کاربری شما:
     
