@@ -461,7 +461,7 @@ if ($text == $datatextbot['text_usertest']) {
 }
 elseif ($user['step'] == "createusertest") {
     $randomString = bin2hex(random_bytes(2));
-    $username_ac = $randomString."_".$from_id;
+    $username_ac = $randomString.$from_id;
     $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '$text'"));
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $Allowedusername = getuser($username_ac, $Check_token['access_token'], $marzban_list_get['url_panel']);
