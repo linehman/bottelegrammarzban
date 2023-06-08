@@ -17,6 +17,7 @@ $datatextbot = array(
     'text_sell' => '',
     'text_Add_Balance' => '',
     'text_Discount' => '',
+    'text_Tariff_list' => '',
 
 );
 if($table_exists){
@@ -39,7 +40,7 @@ $keyboard = json_encode([
         [['text' => $datatextbot['text_sell']],['text' => $datatextbot['text_usertest']]],
         [['text' => $datatextbot['text_Purchased_services']]],
         [['text' => $datatextbot['text_Add_Balance']],['text' => $datatextbot['text_account']]],
-        [['text' => $datatextbot['text_support']],['text' => $datatextbot['text_help']]],
+        [['text' => $datatextbot['text_support']],['text' => $datatextbot['text_Tariff_list']],['text' => $datatextbot['text_help']]],
         [['text' => $datatextbot['text_fq']],['text' => $datatextbot['text_Discount']]],
     ],
     'resize_keyboard' => true
@@ -264,7 +265,8 @@ $textbot = json_encode([
         [['text' => "دکمه اکانت تست"],['text' => "دکمه سوالات متداول"]],
         [['text' => "متن دکمه 📚 آموزش"],['text' => "متن دکمه ☎️ پشتیبانی"]],
         [['text' => "متن دکمه حساب کاربری"],['text' => "دکمه افزایش موجودی"]],
-        [['text' => "متن دکمه خرید اشتراک"]],
+        [['text' => "متن دکمه خرید اشتراک"],['text' => "متن دکمه لیست تعرفه"]],
+        [['text' => "متن توضیحات لیست تعرفه"]],
         [['text' => "متن دکمه سرویس های خریداری شده"]],
         [['text' => "📝 تنظیم متن توضیحات عضویت اجباری"]],
         [['text' => "📝 تنظیم متن توضیحات شماره کارت"]],
