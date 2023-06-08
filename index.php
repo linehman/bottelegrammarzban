@@ -3,7 +3,6 @@
     pv  => @gholipour3
     channel => @mirzapanel
     */
-global $connect, $keyboard,$get_username_chack, $backuser, $list_marzban_panel_user, $keyboardadmin, $channelkeyboard, $backadmin, $keyboardmarzban, $json_list_marzban_panel, $sendmessageuser, $textbot, $json_list_help, $rollkey, $confrimrolls, $keyboardhelpadmin, $request_contact, $User_Services, $shopkeyboard,$json_list_product_list, $payment, $admin_section_panel, $setting_panel, $valid_Number, $reports, $step_payment, $Confirm_pay,$json_list_product_list_admin, $change_product, $keyboard_usertest,$domainhost;
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -617,7 +616,7 @@ if($setting['sublink'] == "✅ لینک اشتراک فعال است."){
         $output_config_link = $data_test['subscription_url'];
         $link_config = "            
 لینک اشتراک شما:
-    ```$output_config_link```";
+$output_config_link";
     }
 if($setting['configManual'] == "✅ ارسال کانفیگ بعد خرید فعال است."){
         foreach($data_test['links'] as $configs){
@@ -625,7 +624,7 @@ if($setting['configManual'] == "✅ ارسال کانفیگ بعد خرید فع
         }
         $text_config = "            
 کانفیگ های شما:
-    ```$config```";
+$config";
     }
     $usertestinfo = json_encode([
         'inline_keyboard' => [
@@ -643,8 +642,8 @@ if($setting['configManual'] == "✅ ارسال کانفیگ بعد خرید فع
 
 👤 نام کاربری شما :<code>$username_ac</code>
 
-$output_config_link
-$text_config";
+<code>$output_config_link</code>
+<code>$text_config</code>";
     sendmessage($from_id, $textcreatuser, $usertestinfo);
     sendmessage($from_id, "یکی از گزینه های زیر را انتخاب نمایید", $keyboard);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -996,7 +995,7 @@ elseif($user['step'] == "get_step_payment"){
     if ($text == "💵 پرداخت nowpayments"){
         $USD = $price_rate['result']['USD'];
     $usdprice = round($Processing_value/$USD,2);
-        if($usdprice <= 2){
+        if($usdprice < 2){
         sendmessage($from_id, "❌ خطا 
 کمترین مبلغ برای  پرداخت در این درگاه 2 دلار می باشد.", null);
 return;
@@ -1034,8 +1033,10 @@ return;
         sendmessage($from_id, $textnowpayments, $paymentkeyboard);
     }
     if ($text == "💎درگاه پرداخت ارزی (ریالی )"){
-        $trx =$price_rate['result']['TRX'];
+        $trx = $price_rate['result']['TRX'];
+        $usd = $price_rate['result']['USD'];
     $trxprice = round($Processing_value / $trx,2);
+    $usdprice = round($Processing_value / $usd,2);
         if($trxprice <= 1){
         sendmessage($from_id, "❌ خطا 
 کمترین مبلغ برای  پرداخت در این درگاه 2 ترون می باشد.", null);
@@ -1049,7 +1050,7 @@ return;
     $stmt->bind_param("sssss", $from_id ,$randomString, $dateacc,$Processing_value,$payment_Status);
     $stmt->execute();
     $order_description = "weswap_".$randomString."_".$trxprice;
-    $pay = nowPayments('payment',$trxprice,$randomString,$order_description);
+    $pay = nowPayments('payment',$usdprice,$randomString,$order_description);
     $pay_address = $pay->pay_address;
     $payment_id = $pay->payment_id;
             $paymentkeyboard = json_encode([
