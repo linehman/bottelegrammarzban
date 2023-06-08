@@ -310,6 +310,7 @@ try {
         id_user varchar(200) NULL,
         username varchar(2000) NULL,
         Service_location varchar(2000) NULL,
+        time_sell varchar(2000) NULL,
         name_product varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL,
         price_product varchar(2000) NULL,
         Volume varchar(2000) NULL,
@@ -318,6 +319,12 @@ try {
         if (!$result) {
             echo "table invoice".mysqli_error($connect);
         }
+    }
+    else{
+     $Check_filde = $connect->query("SHOW COLUMNS FROM invoice LIKE 'time_sell'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+           $result = $connect->query("ALTER TABLE invoice ADD time_sell VARCHAR(2000)");
+        }    
     }
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
@@ -478,7 +485,7 @@ try {
     else{
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_start','سلام خوش آمدید')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_usertest','🔑 اکانت تست')");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Purchased_services','🛍 مشاهده سرویس های خریداری شده')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_Purchased_services','🛍 مشاهده سرویس های خریداری شده')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_support','☎️ پشتیبانی')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_dec_support','$support_dec')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_help','📚 آموزش')");
@@ -491,7 +498,7 @@ try {
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_Add_Balance','💰 افزایش موجودی')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_cart_to_cart','$cart_to_cart_dec')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_channel','$text_channel')");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Discount','🎁 کد هدیه')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_Discount','🎁 کد هدیه')");
     }
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
