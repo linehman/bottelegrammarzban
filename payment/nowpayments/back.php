@@ -8,12 +8,12 @@ $botapi = $Pathfiles.'/botapi.php';
 require_once $Pathfile;
 require_once $jdf;
 require_once $botapi;
-function tomantousd(){
+function arzeweswap(){
     
 $curl = curl_init();
 
 curl_setopt_array($curl, [
-  CURLOPT_URL => "https://api.tetherland.com/currencies",
+  CURLOPT_URL => "https://api.weswap.digital/api/rate",
   CURLOPT_RETURNTRANSFER => true,
   CURLOPT_ENCODING => "",
   CURLOPT_MAXREDIRS => 10,
@@ -30,7 +30,7 @@ curl_close($curl);
     $response = json_decode($response, true);
 return $response;
 }
-$usdprice = tomantousd();
+$price_rate = arzeweswap();
     if(isset($_GET['NP_id'])){
 $curl = curl_init();
 curl_setopt_array($curl, array(
@@ -52,7 +52,7 @@ curl_close($curl);
  } 
  if($response['payment_status'] == "finished"){
     $payment_status = "پرداخت موفق";
-    $price = intval($usdprice['data']['currencies']['USDT']['price']*$response['price_amount']);
+    $price = intval($price_rate['result']['USD']*$response['price_amount']);
     $dec_payment_status = "از انجام تراکنش متشکریم!";
     $Payment_report = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM Payment_report WHERE id_order = '{$response['order_id']}' LIMIT 1"));
     if($Payment_report['payment_Status'] != "paid"){
