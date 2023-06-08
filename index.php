@@ -24,29 +24,6 @@ foreach ($telegram_ip_ranges as $telegram_ip_range) if (!$ok) {
 }
 if (!$ok) die("دسترسی غیرمجاز");
 #-----------function------------#
-function tomantousd(){
-    
-$curl = curl_init();
-
-curl_setopt_array($curl, [
-  CURLOPT_URL => "https://api.tetherland.com/currencies",
-  CURLOPT_RETURNTRANSFER => true,
-  CURLOPT_ENCODING => "",
-  CURLOPT_MAXREDIRS => 10,
-  CURLOPT_TIMEOUT => 30,
-  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-  CURLOPT_CUSTOMREQUEST => "GET",
-  CURLOPT_HTTPHEADER => [
-    "Accept: application/json"
-  ],
-]);
-
-$response = curl_exec($curl);
-curl_close($curl);
-    $response = json_decode($response, true);
-return $response;
-}
-$usdprice = tomantousd();
 function tronweswap(){
     
 $curl = curl_init();
@@ -921,7 +898,8 @@ elseif($user['step'] == "get_step_payment"){
         $stmt->execute();
     }
     if ($text == "💵 پرداخت nowpayments"){
-    $usdprice = round($Processing_value/$usdprice['data']['currencies']['USDT']['price'],2);
+        $USD = $price_rate['result']['USD'];
+    $usdprice = round($Processing_value/$USD,2);
         if($usdprice <= 2){
         sendmessage($from_id, "❌ خطا 
 کمترین مبلغ برای  پرداخت در این درگاه 2 دلار می باشد.", null);
@@ -940,9 +918,22 @@ return;
             ]
         ]
     ]);
+    $Processing_value = number_format($Processing_value, 0);
+    $USD = number_format($USD, 0);
     $textnowpayments = "
-    💰 برای پرداخت روی دکمه زیر کلیک کنید
-    مبلغ پرداختی: $usdprice دلار";
+    ✅ فاکتور پرداخت ارزی NOWPayments ایجاد شد.
+
+🔢 شماره فاکتور : $randomString
+💰 مبلغ فاکتور : $Processing_value تومان
+
+📊 قیمت دلار روز : $USD تومان
+💵 نهایی:$usdprice دلار 
+
+
+🌟 امکان پرداخت با ارز های مختلف وجود دارد
+
+جهت پرداخت از دکمه زیر استفاده کنید👇🏻
+";
         sendmessage($from_id, $textnowpayments, $paymentkeyboard);
     }
     if ($text == "💎درگاه پرداخت ارزی (ریالی )"){
