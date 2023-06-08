@@ -1039,9 +1039,9 @@ return;
         $usd = $price_rate['result']['USD'];
     $trxprice = round($Processing_value / $trx,2);
     $usdprice = round($Processing_value / $usd,2);
-        if($trxprice <= 1){
+        if($trxprice <= 38){
         sendmessage($from_id, "❌ خطا 
-کمترین مبلغ برای  پرداخت در این درگاه 2 ترون می باشد.", null);
+کمترین مبلغ برای  پرداخت در این درگاه 38 ترون می باشد.", null);
 return;
         }
     sendmessage($from_id, "درحال ساخت لینک پرداخت...", $keyboard);
