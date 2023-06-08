@@ -47,26 +47,81 @@ curl_close($curl);
 return $response;
 }
 $usdprice = tomantousd();
-function latestRelease(){
-    $url = "https://api.github.com/repos/mahdigholipour3/bottelegrammarzban/releases/latest";
-$curl = curl_init($url);
-curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($curl, CURLOPT_HEADER, false);
-curl_setopt($curl, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3');
+function tronweswap(){
+    
+$curl = curl_init();
+
+curl_setopt_array($curl, [
+  CURLOPT_URL => "https://api.weswap.digital/api/rate",
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_ENCODING => "",
+  CURLOPT_MAXREDIRS => 10,
+  CURLOPT_TIMEOUT => 30,
+  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+  CURLOPT_CUSTOMREQUEST => "GET",
+  CURLOPT_HTTPHEADER => [
+    "Accept: application/json"
+  ],
+]);
+
 $response = curl_exec($curl);
 curl_close($curl);
-$latestRelease = json_decode($response, true);
-$tagName = "";
-if (isset($latestRelease['tag_name'])) {
-    $tagName = $latestRelease['tag_name'];
+    $response = json_decode($response, true);
+return $response;
 }
-else {
-        $tagName = 'خطا در دریافت نسخه';
-}
-return $tagName;
+$price_rate = tronweswap();
+function nowPayments($payment,$price_amount,$order_id,$order_description)
+{
+    global $apinowpayments;
+  $curl = curl_init();
+curl_setopt_array($curl, array(
+  CURLOPT_URL => 'https://api.nowpayments.io/v1/'.$payment,
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_TIMEOUT_MS => 4500,
+  CURLOPT_ENCODING => '',
+  CURLOPT_SSL_VERIFYPEER => 1,
+  CURLOPT_SSL_VERIFYHOST =>2,
+  CURLOPT_POST => true,
+  CURLOPT_HTTPHEADER => array(
+    'x-api-key:'.$apinowpayments,
+    'Content-Type: application/json'
+  ),
+));
+curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode([
+            'price_amount' => $price_amount,
+            'price_currency' => 'usd',
+            'pay_currency' => 'trx',
+            'order_id' => $order_id,
+            'order_description' => $order_description,
+            'is_fee_paid_by_user' => true
+        ]));
 
+$response = curl_exec($curl);
+curl_close($curl);
+$res = json_decode($response);
+return($res);
 }
-$latestRelease = latestRelease();
+function StatusPayment($paymentid){
+    global $apinowpayments;
+    $curl = curl_init();
+curl_setopt_array($curl, array(
+  CURLOPT_URL => 'https://api.nowpayments.io/v1/payment/'.$paymentid,
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_ENCODING => '',
+  CURLOPT_MAXREDIRS => 10,
+  CURLOPT_TIMEOUT => 0,
+  CURLOPT_FOLLOWLOCATION => true,
+  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+  CURLOPT_CUSTOMREQUEST => 'GET',
+  CURLOPT_HTTPHEADER => array(
+    'x-api-key:'.$apinowpayments
+  ),
+));
+$response = curl_exec($curl);
+$response = json_decode($response,true);
+curl_close($curl);
+return $response;
+}
 #-------------Variable----------#
 $version = file_get_contents('install/version');
 $query = mysqli_query($connect, "SELECT * FROM user WHERE id = '$from_id' LIMIT 1");
@@ -467,7 +522,7 @@ elseif ($user['step'] == "createusertest") {
     $Allowedusername = getuser($username_ac, $Check_token['access_token'], $marzban_list_get['url_panel']);
     if(isset($Allowedusername['username'])){
         $random_number = rand(1000000, 9999999);
-        $username_ac = $username_ac . "_". $random_number;
+        $username_ac = $username_ac.$random_number;
     }
     $date = strtotime("+" . $setting['time_usertest'] . "hours");
     $timestamp = strtotime(date("Y-m-d H:i:s", $date));
@@ -475,10 +530,18 @@ elseif ($user['step'] == "createusertest") {
     $data_limit = $setting['val_usertest'] * 1000000;
     $config_test = adduser($username_ac, $expire, $data_limit, $Check_token['access_token'], $marzban_list_get['url_panel']);
     $data_test = json_decode($config_test, true);
+        if(!isset($data_test['username'])){
+            sendmessage($from_id, "❌ خطایی در ساخت اشتراک رخ داده است برای رفع مشکل با پشتیبانی در ارتباط باشد.", $keyboard);
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+            return;
+    }
     $text_config = "";
     $output_config_link = "";
 if($setting['sublink'] == "✅ لینک اشتراک فعال است."){
-        $output_config_link = $data_test['subscription_url'] ?? '❌ خطایی در ساخت اشتراک رخ داده است برای رفع مشکل با پشتیبانی در ارتباط باشد.';
+        $output_config_link = $data_test['subscription_url'];
         $link_config = "            
 لینک اشتراک شما:
     ```$output_config_link```";
@@ -505,12 +568,11 @@ if($setting['configManual'] == "✅ ارسال کانفیگ بعد خرید فع
     ]);
     $textcreatuser = "🔑 اشتراک شما با موفقیت ساخته شد.
 
-👤 نام کاربری شما :
-```$username_ac```
+👤 نام کاربری شما :<code>$username_ac</code>
 
 $output_config_link
 $text_config";
-    sendmessageMarkdown($from_id, $textcreatuser, $usertestinfo);
+    sendmessage($from_id, $textcreatuser, $usertestinfo);
     sendmessage($from_id, "یکی از گزینه های زیر را انتخاب نمایید", $keyboard);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'home';
@@ -539,7 +601,7 @@ $text_config";
                 ['text' => "شماره تلفن کاربر", 'callback_data' => "iduser"],
             ],
                                                 [
-                ['text' => $Processing_value, 'callback_data' => "namepanel"],
+                ['text' => $text, 'callback_data' => "namepanel"],
                 ['text' => "نام پنل", 'callback_data' => "namepanel"],
             ],
         ]
@@ -623,12 +685,13 @@ $dateacc = jdate('Y/m/d');
 $timeacc = jdate('h:i:s');
 if($text == $datatextbot['text_account']){
     $first_name = htmlspecialchars($first_name);
+        $Balanceuser = number_format($user['Balance'], 0);
     $text_account = "
         👨🏻‍💻 وضعیت حساب کاربری شما:
     
-👤 نام شما: $first_name
-🕴🏻 شناسه شما: $from_id
-💰 موجودی شما: {$user['Balance']} تومان
+👤 نام: $first_name
+🕴🏻 شناسه کاربری: <code>$from_id</code>
+💰 موجودی: $Balanceuser تومان
     
 📆 $dateacc → ⏰ $timeacc
         ";
@@ -709,9 +772,10 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
         return;
     }
     $username_ac = $user['Processing_value_tow'];
+    $date = jdate('Y/m/d');
     $randomString = bin2hex(random_bytes(2));
-    $stmt = $connect->prepare("INSERT IGNORE INTO invoice (id_user, id_invoice, username, Service_location, name_product, price_product, Volume, Service_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssssssss", $from_id, $randomString, $username_ac, $Processing_value, $info_product['name_product'], $info_product['price_product'], $info_product['Volume_constraint'], $info_product['Service_time']);
+    $stmt = $connect->prepare("INSERT IGNORE INTO invoice (id_user, id_invoice, username,time_sell, Service_location, name_product, price_product, Volume, Service_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)");
+    $stmt->bind_param("sssssssss", $from_id, $randomString, $username_ac,$date, $Processing_value, $info_product['name_product'], $info_product['price_product'], $info_product['Volume_constraint'], $info_product['Service_time']);
     $stmt->execute();
     $stmt->close();
     $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '$Processing_value'"));
@@ -724,6 +788,14 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
     $data_limit = $info_product['Volume_constraint'] * pow(1024, 3);
     $config = adduser($username_ac, $timestamp, $data_limit, $Check_token['access_token'],$marzban_list_get['url_panel']);
     $data = json_decode($config, true);
+        if(!isset($data['username'])){
+            sendmessage($from_id, "❌ خطایی در ساخت اشتراک رخ داده است برای رفع مشکل با پشتیبانی در ارتباط باشد.", $keyboard);
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+            return;
+    }
 $text_config = "";
 $link_confi = "";
 if($setting['sublink'] == "✅ لینک اشتراک فعال است."){
@@ -873,6 +945,116 @@ return;
     مبلغ پرداختی: $usdprice دلار";
         sendmessage($from_id, $textnowpayments, $paymentkeyboard);
     }
+    if ($text == "💎درگاه پرداخت ارزی (ریالی )"){
+        $trx =$price_rate['result']['TRX'];
+    $trxprice = round($Processing_value / $trx,2);
+        if($trxprice <= 1){
+        sendmessage($from_id, "❌ خطا 
+کمترین مبلغ برای  پرداخت در این درگاه 2 ترون می باشد.", null);
+return;
+        }
+    sendmessage($from_id, "درحال ساخت لینک پرداخت...", $keyboard);
+    $dateacc = date('Y/m/d h:i:s');
+    $randomString = bin2hex(random_bytes(5));
+    $stmt = $connect->prepare("INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status) VALUES (?,?,?,?,?)");
+    $payment_Status = "Unpaid";
+    $stmt->bind_param("sssss", $from_id ,$randomString, $dateacc,$Processing_value,$payment_Status);
+    $stmt->execute();
+    $order_description = "weswap_".$randomString."_".$trxprice;
+    $pay = nowPayments('payment',$trxprice,$randomString,$order_description);
+    $pay_address = $pay->pay_address;
+    $payment_id = $pay->payment_id;
+            $paymentkeyboard = json_encode([
+        'inline_keyboard' => [
+            [
+                    ['text' => "💰 پرداخت", 'url' => "https://weswap.digital/quick?amount=$trxprice&currency=TRX&address=$pay_address"]
+            ],
+            [
+                ['text' => "✅ تایید پرداخت", 'callback_data' => "Confirmpay_user_{$payment_id}_{$randomString}"]
+                ]
+        ]
+    ]);
+    $pricetoman = number_format($Processing_value, 0);
+    $textnowpayments = "
+    ✅ لینک پرداخت شما ساخته شد.
+
+● مبلغ قابل پرداخت به تومان: $pricetoman تومان
+● مبلغ قابل پرداخت به ترون: $trxprice ترون
+● نرخ  ارز  ترون:  $trx تومان
+● شناسه پرداخت و پیگیری: $randomString
+
+⚠️ لینک پرداخت تا 10دقیقه اعتبار خواهد داشت، پرداخت های بعد از این زمان رسیدگی نخواهند شد.
+❗️ پرداخت  حداکثر ۱۵  دقیقه  زمان  میبرد تا به حساب  ما ارسال  شود  پس  از  ۱۵ دقیقه  دکمه  تایید  پرداخت  را  بزنید  تا مبلغ  به  کیف پول  شما اضافه گردد.";
+        sendmessage($from_id, $textnowpayments, $paymentkeyboard);
+    }
+}
+if(preg_match('/Confirmpay_user_(\w+)_(\w+)/',$datain, $dataget)) {
+    $id_payment = $dataget[1];
+    $id_order = $dataget[2];
+        $Payment_report = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM Payment_report WHERE id_order = '$id_order' LIMIT 1"));
+        if($Payment_report['payment_Status'] == "paid"){
+                    telegram('answerCallbackQuery', array(
+            'callback_query_id' => $callback_query_id,
+            'text' => "⭕️  پرداخت از قبل تایید شده است",
+            'show_alert' => true,
+            'cache_time' => 5,
+        ));
+        return;
+        }
+    $StatusPayment = StatusPayment($id_payment);
+    if($StatusPayment['payment_status'] == "finished"){
+        $textweswap = "✅ پرداخت با موفقیت تایید و به کیف پول شما واریزگردید";
+        telegram('answerCallbackQuery', array(
+            'callback_query_id' => $callback_query_id,
+            'text' => $textweswap,
+            'show_alert' => true,
+            'cache_time' => 5,
+        ));
+    $Balance_id = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '{$Payment_report['id_user']}' LIMIT 1"));
+    $stmt = $connect->prepare("UPDATE user SET Balance = ? WHERE id = ?");
+    $Balance_confrim = intval($Balance_id['Balance']) + $Payment_report['pirce'];
+    $stmt->bind_param("ss", $Balance_confrim, $Payment_report['id_user']);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE Payment_report SET payment_Status = ? WHERE id_order = ?");
+    $Status_change = "paid";
+    $stmt->bind_param("ss", $Status_change, $Payment_report['id_order']);
+    $stmt->execute();
+    sendmessage($from_id, "✅ کاربر گرامی پرداخت شما با موفقیت انجام شد و مبلع پرداختی به موجودی شما اضافه گردید", null);
+    }elseif($StatusPayment['payment_status'] == "expired"){
+         $textweswap = "زمان لینک پرداخت منقضی شده و قابل بررسی نیست";
+        telegram('answerCallbackQuery', array(
+            'callback_query_id' => $callback_query_id,
+            'text' => $textweswap,
+            'show_alert' => true,
+            'cache_time' => 5,
+        ));
+    }  
+    elseif($StatusPayment['payment_status'] == "refunded"){
+         $textweswap = "مبلغ به کیف پول شما بازگشته است";
+        telegram('answerCallbackQuery', array(
+            'callback_query_id' => $callback_query_id,
+            'text' => $textweswap,
+            'show_alert' => true,
+            'cache_time' => 5,
+        ));
+    } 
+    elseif($StatusPayment['payment_status'] == "waiting"){
+         $textweswap = "در انتظار تایید پرداخت";
+        telegram('answerCallbackQuery', array(
+            'callback_query_id' => $callback_query_id,
+            'text' => $textweswap,
+            'show_alert' => true,
+            'cache_time' => 5,
+        ));
+    } else{
+         $textweswap = "⭕️ پرداخت شما تایید نگردیده است.";
+        telegram('answerCallbackQuery', array(
+            'callback_query_id' => $callback_query_id,
+            'text' => $textweswap,
+            'show_alert' => true,
+            'cache_time' => 5,
+        ));
+    }  
 }
 elseif($user['step'] =="cart_to_cart_user"){
     if (!$photo){
@@ -921,6 +1103,7 @@ elseif($user['step'] =="cart_to_cart_user"){
     $stmt->execute();
 
 }
+
 #----------------Discount------------------#
 if($text == $datatextbot['text_Discount']){
     sendmessage($from_id, "💝 برای دریافت موجودی کد هدیه خود را ارسال نمایید", $backuser);
@@ -963,14 +1146,26 @@ $Checkcode = [];
     $stmt->execute();
 }
 
-#----------------admin------------------#
-if (!in_array($from_id, $admin_ids)) return;
-if ($text == "panel" || $text == "/panel" || $text == "پنل مدیریت" || $text == "ادمین" ) 
+#----------------[  admin section  ]------------------#
+$textadmin = ["panel","/panel","پنل مدیریت","ادمین"];
+if (!in_array($from_id, $admin_ids) && in_array($text, $textadmin)){ 
+    sendmessage($from_id, "❌ دستور نامعتبر است ❌", null);
+    foreach($admin_ids as $admin){
+        $textadmin = "
+        مدیر عزیز یک کاربر قصد ورود به پنل ادمین را داشت 
+نام کاربری : @$username
+آیدی عددی : $from_id
+نام کاربر  :$first_name
+        ";
+            sendmessage($admin, $textadmin ,null);
+    }
+    return;
+}
+if (in_array($text, $textadmin) ) 
 {
     $text_admin="
 سلام مدیر عزیز به پنل ادمین خوش امدی گلم😍
-نسخه فعلی ربات شما : $version
-نسخه آخر منتشر شده : $latestRelease";
+نسخه فعلی ربات شما : $version";
     sendmessage($from_id, $text_admin, $keyboardadmin);
 }
 if ($text == "🏠 بازگشت به منوی مدیریت") {
@@ -1635,6 +1830,54 @@ elseif ($text == "📝 تنظیم متن توضیحات شماره کارت") {
     }
     sendmessage($from_id, "✅ متن با موفقیت ذخیره شد", $textbot);
     $stmt = $connect->prepare("UPDATE textbot SET text = ? WHERE id_text = 'text_cart_to_cart'");
+    $stmt->bind_param("s", $text);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif ($text == "متن دکمه خرید اشتراک") {
+    $textstart = "
+            متن جدید خود راارسال کنید.
+            متن فعلی:
+            ". $datatextbot['text_sell'];
+    sendmessage($from_id, $textstart, $backadmin);
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'text_sell';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+} elseif ($user['step'] == "text_sell") {
+        if(!$text){
+            sendmessage($from_id, "فقط متن می توانید ارسال کنید", $textbot);
+            return;
+    }
+    sendmessage($from_id, "✅ متن با موفقیت ذخیره شد", $textbot);
+    $stmt = $connect->prepare("UPDATE textbot SET text = ? WHERE id_text = 'text_sell'");
+    $stmt->bind_param("s", $text);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif ($text == "متن دکمه سرویس های خریداری شده") {
+    $textstart = "
+            متن جدید خود راارسال کنید.
+            متن فعلی:
+            ". $datatextbot['text_Purchased_services'];
+    sendmessage($from_id, $textstart, $backadmin);
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'text_Purchased_services';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+} elseif ($user['step'] == "text_Purchased_services") {
+        if(!$text){
+            sendmessage($from_id, "فقط متن می توانید ارسال کنید", $textbot);
+            return;
+    }
+    sendmessage($from_id, "✅ متن با موفقیت ذخیره شد", $textbot);
+    $stmt = $connect->prepare("UPDATE textbot SET text = ? WHERE id_text = 'text_Purchased_services'");
     $stmt->bind_param("s", $text);
     $stmt->execute();
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -2671,4 +2914,39 @@ elseif ($datain == "❌ ارسال کانفیگ دستی خاموش است") {
     $stmt->execute();
     Editmessagetext($from_id, $message_id, "ارسال کانفیگ بعد خرید فعال شد از این پس کاربران کانفیگ دستی هم دریافت خواهند کرد", null);
 }
-#-------------------------#
+#----------------[  view order user  ]------------------#
+if($text == "🛍 مشاهده سفارشات کاربر"){
+    sendmessage($from_id, "👁 برای مشاهده سفارشات کاربر آیدی عددی کاربر را ارسال کنید.",$backadmin);
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'GetIdAndOrdedr';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif($user['step'] == "GetIdAndOrdedr"){
+     if (!in_array($text, $users_ids)) {
+        sendmessage($from_id, "کاربری با این شناسه یافت نشد", $backadmin);
+        return;
+    }   
+    $OrderUsers = mysqli_query($connect, "SELECT * FROM invoice WHERE id_user = '$text'");
+    foreach($OrderUsers as $OrderUser){
+        if(isset($OrderUser['time_sell'])){
+        $datatime = $OrderUser['time_sell'];
+        }
+        else{
+            $datatime = " تاریخ ثبت نشده است";
+        }
+        $text_order = "
+        🛒 شماره سفارش  :  <code>{$OrderUser['id_invoice']}</code>
+🙍‍♂️ شناسه کاربر : <code>{$OrderUser['id_user']}</code>
+👤 نام کاربری اشتراک :  <code>{$OrderUser['username']}</code> 
+📍 لوکیشن سرویس :  {$OrderUser['Service_location']}
+🛍 نام محصول :  {$OrderUser['name_product']}
+💰 قیمت پرداختی سرویس : {$OrderUser['price_product']} تومان
+⚜️ حجم سرویس خریداری شده : {$OrderUser['Volume']}
+⏳ زمان سرویس خریداری شده : {$OrderUser['Service_time']} روزه
+📆 تاریخ خرید : $datatime
+        ";
+                sendmessage($from_id, $text_order, null);
+    }
+        sendmessage($from_id, "لیست سفارشات کاربر ارسال شد", $User_Services);
+}
