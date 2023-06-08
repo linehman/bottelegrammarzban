@@ -169,6 +169,8 @@ $datatextbot = array(
     'text_cart_to_cart' => '',
     'text_channel' => '',
     'text_Discount' =>'',
+    'text_Tariff_list' => '',
+    'text_dec_Tariff_list' => ''
 );
 foreach ($datatxtbot as $item) {
     if (isset($datatextbot[$item['id_text']])) {
@@ -1072,7 +1074,7 @@ return;
 ● نرخ  ارز  ترون:  $trx تومان
 ● شناسه پرداخت و پیگیری: $randomString
 
-⚠️ لینک پرداخت تا 10دقیقه اعتبار خواهد داشت، پرداخت های بعد از این زمان رسیدگی نخواهند شد.
+⚠️ لینک پرداخت تا 13 دقیقه عتبار خواهد داشت، پرداخت های بعد از این زمان رسیدگی نخواهند شد.
 ❗️ پرداخت  حداکثر ۱۵  دقیقه  زمان  میبرد تا به حساب  ما ارسال  شود  پس  از  ۱۵ دقیقه  دکمه  تایید  پرداخت  را  بزنید  تا مبلغ  به  کیف پول  شما اضافه گردد.";
         sendmessage($from_id, $textnowpayments, $paymentkeyboard);
     }
@@ -1234,7 +1236,10 @@ $Checkcode = [];
     $stmt->bind_param("ss", $from_id ,$text);
     $stmt->execute();
 }
-
+#----------------[  text_Tariff_list  ]------------------#
+if($text == $datatextbot['text_Tariff_list']){
+        sendmessage($from_id,$datatextbot['text_dec_Tariff_list'] , null);
+}
 #----------------[  admin section  ]------------------#
 $textadmin = ["panel","/panel","پنل مدیریت","ادمین"];
 if (!in_array($from_id, $admin_ids) && in_array($text, $textadmin)){ 
@@ -1967,6 +1972,54 @@ elseif ($text == "متن دکمه سرویس های خریداری شده") {
     }
     sendmessage($from_id, "✅ متن با موفقیت ذخیره شد", $textbot);
     $stmt = $connect->prepare("UPDATE textbot SET text = ? WHERE id_text = 'text_Purchased_services'");
+    $stmt->bind_param("s", $text);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif ($text == "متن دکمه لیست تعرفه") {
+    $textstart = "
+            متن جدید خود راارسال کنید.
+            متن فعلی:
+            ". $datatextbot['text_Tariff_list'];
+    sendmessage($from_id, $textstart, $backadmin);
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'text_Purchased_services';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+} elseif ($user['step'] == "text_Tariff_list") {
+        if(!$text){
+            sendmessage($from_id, "فقط متن می توانید ارسال کنید", $textbot);
+            return;
+    }
+    sendmessage($from_id, "✅ متن با موفقیت ذخیره شد", $textbot);
+    $stmt = $connect->prepare("UPDATE textbot SET text = ? WHERE id_text = 'text_Tariff_list'");
+    $stmt->bind_param("s", $text);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif ($text == "") {
+    $textstart = "
+            متن جدید خود راارسال کنید.
+            متن فعلی:
+            ". $datatextbot['text_dec_Tariff_list'];
+    sendmessage($from_id, $textstart, $backadmin);
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'text_dec_Tariff_list';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+} elseif ($user['step'] == "text_dec_Tariff_list") {
+        if(!$text){
+            sendmessage($from_id, "فقط متن می توانید ارسال کنید", $textbot);
+            return;
+    }
+    sendmessage($from_id, "✅ متن با موفقیت ذخیره شد", $textbot);
+    $stmt = $connect->prepare("UPDATE textbot SET text = ? WHERE id_text = 'text_dec_Tariff_list'");
     $stmt->bind_param("s", $text);
     $stmt->execute();
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
