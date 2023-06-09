@@ -2020,7 +2020,7 @@ elseif ($text == "متن دکمه لیست تعرفه") {
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 }
-elseif ($text == "متن دکمه سرویس های خریداری شده") {
+elseif ($text == "متن توضیحات لیست تعرفه") {
     $textstart = "
             متن جدید خود راارسال کنید.
             متن فعلی:
