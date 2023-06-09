@@ -869,7 +869,7 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
     $timestamp = strtotime(date("Y-m-d H:i:s", $date));
     $data_limit = $info_product['Volume_constraint'] * pow(1024, 3);
     $configuser = adduser($username_ac, $timestamp, $data_limit, $Check_token['access_token'],$marzban_list_get['url_panel']);
-    $data = json_decode($config, true);
+    $data = json_decode($configuser, true);
         if(!isset($data['username'])){
             sendmessage($from_id, "❌ خطایی در ساخت اشتراک رخ داده است برای رفع مشکل با پشتیبانی در ارتباط باشد.", $keyboard);
     $texterros = "
