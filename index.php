@@ -606,6 +606,15 @@ elseif ($user['step'] == "createusertest") {
     $data_test = json_decode($config_test, true);
         if(!isset($data_test['username'])){
             sendmessage($from_id, "❌ خطایی در ساخت اشتراک رخ داده است برای رفع مشکل با پشتیبانی در ارتباط باشد.", $keyboard);
+    $texterros = "
+⭕️ یک کاربر قصد دریافت اکانت داشت که ساخت کانفیگ با خطا مواجه شده و به کاربر کانفیگ داده نشد
+✍️ دلیل خطا : 
+{$data_test['detail']}
+آیدی کابر : $from_id
+نام کاربری کاربر : @$username";
+            foreach($admin_ids as $admin){
+                    sendmessage($admin, $texterros, null);
+            }
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'home';
     $stmt->bind_param("ss", $step, $from_id);
@@ -864,6 +873,15 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
     $data = json_decode($config, true);
         if(!isset($data['username'])){
             sendmessage($from_id, "❌ خطایی در ساخت اشتراک رخ داده است برای رفع مشکل با پشتیبانی در ارتباط باشد.", $keyboard);
+    $texterros = "
+⭕️ یک کاربر قصد دریافت اکانت داشت که ساخت کانفیگ با خطا مواجه شده و به کاربر کانفیگ داده نشد
+✍️ دلیل خطا : 
+{$data['detail']}
+آیدی کابر : $from_id
+نام کاربری کارب : @$username";
+            foreach($admin_ids as $admin){
+                    sendmessage($admin, $texterros, null);
+            }
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'home';
     $stmt->bind_param("ss", $step, $from_id);
@@ -873,7 +891,7 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
 $text_config = "";
 $link_confi = "";
 if($setting['sublink'] == "✅ لینک اشتراک فعال است."){
-        $output_config_link = $data['subscription_url'] ?? '❌ خطایی در ساخت اشتراک رخ داده است برای رفع مشکل با پشتیبانی در ارتباط باشد.';
+        $output_config_link = $data['subscription_url'];
         $link_config = "            
 لینک اشتراک شما:
     ```$output_config_link```";
@@ -2003,7 +2021,7 @@ elseif ($text == "متن دکمه لیست تعرفه") {
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 }
-elseif ($text == "") {
+elseif ($text == "متن دکمه سرویس های خریداری شده") {
     $textstart = "
             متن جدید خود راارسال کنید.
             متن فعلی:
@@ -2607,6 +2625,7 @@ if(preg_match('/reject_pay_(\w+)/',$datain, $datagetr)) {
     Editmessagetext($from_id, $message_id, $text, null);
 }
 elseif($user['step'] == "reject-dec"){
+        sendmessage($Processing_value,$text,null);
     $stmt = $connect->prepare("UPDATE Payment_report SET dec_not_confirmed = ? WHERE id_order = ?");
     $stmt->bind_param("ss", $text, $user['Processing_value_one']);
     $stmt->execute();
@@ -2819,6 +2838,8 @@ elseif ($user['step'] == "get_price_add") {
     $stmt = $connect->prepare("UPDATE user SET Balance = ? WHERE id = ?");
     $stmt->bind_param("ss", $Balance_add_user, $Processing_value);
     $stmt->execute();
+    $textadd = "💎 کاربر عزیز مبلغ $text تومان به موجودی کیف پول تان اضافه گردید.";
+        sendmessage($Processing_value, $textadd, null);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'home';
     $stmt->bind_param("ss", $step, $from_id);
@@ -2861,6 +2882,8 @@ elseif ($user['step'] == "get_price_Negative") {
     $stmt = $connect->prepare("UPDATE user SET Balance = ? WHERE id = ?");
     $stmt->bind_param("ss", $Balance_add_user, $Processing_value);
     $stmt->execute();
+        $textkam = "❌ کاربر عزیز مبلغ $text تومان از  موجودی کیف پول تان کسر گردید.";
+        sendmessage($Processing_value, $textkam, null);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'home';
     $stmt->bind_param("ss", $step, $from_id);
