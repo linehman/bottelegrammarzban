@@ -69,7 +69,6 @@ curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode([
             'pay_currency' => 'trx',
             'order_id' => $order_id,
             'order_description' => $order_description,
-            'is_fee_paid_by_user' => true
         ]));
 
 $response = curl_exec($curl);
@@ -869,7 +868,7 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
     $date = strtotime("+" . $info_product['Service_time'] . "days");
     $timestamp = strtotime(date("Y-m-d H:i:s", $date));
     $data_limit = $info_product['Volume_constraint'] * pow(1024, 3);
-    $config = adduser($username_ac, $timestamp, $data_limit, $Check_token['access_token'],$marzban_list_get['url_panel']);
+    $configuser = adduser($username_ac, $timestamp, $data_limit, $Check_token['access_token'],$marzban_list_get['url_panel']);
     $data = json_decode($config, true);
         if(!isset($data['username'])){
             sendmessage($from_id, "❌ خطایی در ساخت اشتراک رخ داده است برای رفع مشکل با پشتیبانی در ارتباط باشد.", $keyboard);
@@ -1057,9 +1056,9 @@ return;
         $usd = $price_rate['result']['USD'];
     $trxprice = round($Processing_value / $trx,2);
     $usdprice = round($Processing_value / $usd,2);
-        if($trxprice <= 38){
+        if($trxprice <= 1){
         sendmessage($from_id, "❌ خطا 
-کمترین مبلغ برای  پرداخت در این درگاه 38 ترون می باشد.", null);
+کمترین مبلغ برای  پرداخت در این درگاه 2 ترون می باشد.", null);
 return;
         }
     sendmessage($from_id, "درحال ساخت لینک پرداخت...", $keyboard);
