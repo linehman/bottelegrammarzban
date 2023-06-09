@@ -1120,7 +1120,7 @@ if(preg_match('/Confirmpay_user_(\w+)_(\w+)/',$datain, $dataget)) {
         ));
     $Balance_id = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '{$Payment_report['id_user']}' LIMIT 1"));
     $stmt = $connect->prepare("UPDATE user SET Balance = ? WHERE id = ?");
-    $Balance_confrim = intval($Balance_id['Balance']) + $Payment_report['pirce'];
+    $Balance_confrim = intval($Balance_id['Balance']) + intval($Payment_report['price']);
     $stmt->bind_param("ss", $Balance_confrim, $Payment_report['id_user']);
     $stmt->execute();
     $stmt = $connect->prepare("UPDATE Payment_report SET payment_Status = ? WHERE id_order = ?");
