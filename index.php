@@ -45,7 +45,6 @@ curl_close($curl);
     $response = json_decode($response, true);
 return $response;
 }
-$price_rate = tronweswap();
 function nowPayments($payment,$price_amount,$order_id,$order_description)
 {
     global $apinowpayments;
@@ -1012,6 +1011,7 @@ elseif($user['step'] == "get_step_payment"){
         $stmt->execute();
     }
     if ($text == "💵 پرداخت nowpayments"){
+        $price_rate = tronweswap();
         $USD = $price_rate['result']['USD'];
     $usdprice = round($Processing_value/$USD,2);
         if($usdprice < 2){
@@ -1052,6 +1052,7 @@ return;
         sendmessage($from_id, $textnowpayments, $paymentkeyboard);
     }
     if ($text == "💎درگاه پرداخت ارزی (ریالی )"){
+        $price_rate = tronweswap();
         $trx = $price_rate['result']['TRX'];
         $usd = $price_rate['result']['USD'];
     $trxprice = round($Processing_value / $trx,2);
@@ -1070,6 +1071,24 @@ return;
     $stmt->execute();
     $order_description = "weswap_".$randomString."_".$trxprice;
     $pay = nowPayments('payment',$usdprice,$randomString,$order_description);
+    if(!isset($pay->pay_address)){
+        $text_error = $pay->message;
+        sendmessage($from_id, "❌ خطایی در ساخت لینک پرداخت رخ داده است برای رفع  با پشتیبانی در ارتباط باشید.", $keyboard);
+        $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+        $step = 'home';
+        $stmt->bind_param("ss", $step, $from_id);
+        $stmt->execute();
+        foreach($admin_ids as $admin){
+            $ErrorsLinkPayment = "
+            ⭕️ یک کاربر قصد پرداخت داشت که ساخت لینک پرداخت  با خطا مواجه شده و به کاربر لینک داده نشد
+✍️ دلیل خطا : $text_error
+
+آیدی کابر : $from_id
+نام کاربری کاربر : @$username";
+                    sendmessage($admin,$ErrorsLinkPayment , $keyboard);
+        }
+        return;
+    }
     $pay_address = $pay->pay_address;
     $payment_id = $pay->payment_id;
             $paymentkeyboard = json_encode([
