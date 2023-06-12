@@ -1,4 +1,5 @@
 <?php
+$NP_id = htmlspecialchars($_GET['NP_id'], ENT_QUOTES, 'UTF-8');
 $rootPath = $_SERVER['DOCUMENT_ROOT'];
 $Pathfile = dirname(dirname($_SERVER['PHP_SELF'], 2));
 $Pathfiles = $rootPath.$Pathfile;
@@ -128,7 +129,7 @@ curl_close($curl);
 <body>
     <div class="confirmation-box">
         <h1><?php echo $payment_status ?></h1>
-        <p>شماره تراکنش:<span><?php echo $_GET['NP_id'] ?></span></p>
+        <p>شماره تراکنش:<span><?php echo $NP_id ?></span></p>
         <p>مبلغ پرداختی:  <span><?php echo $response['price_amount'] ?></span> دلار</p>
         <p>تاریخ: <span>  <?php echo jdate('Y/m/d')  ?>  </span></p>
         <p><?php echo $dec_payment_status ?></p>
