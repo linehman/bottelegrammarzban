@@ -123,7 +123,9 @@ try {
         roll_Status varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         get_number varchar(200)  CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         iran_number varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
-        sublink varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
+        iran_number varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
+        NotUser varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
+        two_columns varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         configManual varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         Channel_Report varchar(600)  NULL,
         limit_usertest_all varchar(600)  NULL,
@@ -141,12 +143,22 @@ try {
         $active_help = "❌ آموزش غیرفعال است";
         $sublink = "✅ لینک اشتراک فعال است.";
         $configManual = "❌ ارسال کانفیگ دستی خاموش است";
-$connect->query("INSERT INTO setting (count_usertest,Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,sublink,configManual) VALUES ('0','$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help','$active_phone_iran_text','$sublink','$configManual')");
+$connect->query("INSERT INTO setting (count_usertest,Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,sublink,configManual,NotUser,two_columns) VALUES ('0','$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help','$active_phone_iran_text','$sublink','$configManual','off'),'off'");
     } else {
         $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'configManual'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE setting ADD configManual VARCHAR(200)");
             echo "The configManual field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'two_columns'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE setting ADD two_columns VARCHAR(200)");
+            echo "The two_columns field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'NotUser'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE setting ADD NotUser VARCHAR(200)");
+            echo "The NotUser field was added ✅";
         }
                 $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'sublink'");
         if (mysqli_num_rows($Check_filde) != 1) {
@@ -210,6 +222,14 @@ $connect->query("INSERT INTO setting (count_usertest,Bot_Status,roll_Status,get_
         $stmt->execute();
         $stmt = $connect->prepare("UPDATE setting SET sublink = ?");
         $stmt->bind_param("s", $sublink);
+        $stmt->execute();
+        $stmt = $connect->prepare("UPDATE setting SET NotUser = ?");
+        $text = "on";
+        $stmt->bind_param("s", $text);
+        $stmt->execute();
+        $stmt = $connect->prepare("UPDATE setting SET two_columns = ?");
+        $text = "off";
+        $stmt->bind_param("s", $text);
         $stmt->execute();
     }
 } catch (Exception $e) {
@@ -389,6 +409,45 @@ try {
 }
 //-----------------------------------------------------------------
 try {
+
+    $result = $connect->query("SHOW TABLES LIKE 'TestAccount'");
+    $table_exists = ($result->num_rows > 0);
+
+    if (!$table_exists) {
+        $result =  $connect->query("CREATE TABLE  TestAccount (
+        id_invoice varchar(200) PRIMARY KEY,
+        id_user varchar(200) NULL,
+        username varchar(200) NULL,
+        Service_location varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin
+ NULL,
+        time_sell varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin
+ NULL)
+        ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
+        if (!$result) {
+            echo "table TestAccount".mysqli_error($connect);
+        }
+    }
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage();
+}
+//-----------------------------------------------------------------
+try {
+
+    $result = $connect->query("SHOW TABLES LIKE 'protocol'");
+    $table_exists = ($result->num_rows > 0);
+
+    if (!$table_exists) {
+        $result =  $connect->query("CREATE TABLE  protocol (
+        NameProtocol varchar(200) PRIMARY KEY Not NULL)");
+        if (!$result) {
+            echo "table protocol".mysqli_error($connect);
+        }
+    }
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage();
+}
+//-----------------------------------------------------------------
+try {
     $result = $connect->query("SHOW TABLES LIKE 'textbot'");
     $table_exists = ($result->num_rows > 0);
     $support_dec = "📬 در صورتی که نتوانستید پاسخ سوالات و مشکلات خود را در بخش «سوالات متداول» پیدا کنید، جهت ارتباط بیشتر می توانید به بخش پشتیبانی پیام بدید.";
@@ -483,6 +542,7 @@ try {
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Discount','🎁 کد هدیه')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Tariff_list','💰 تعرفه اشتراک ها')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_dec_Tariff_list','تنظیم نشده است')");
+        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Account_op','🎛 حساب کاربری')");
     }
     else{
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_start','سلام خوش آمدید')");
@@ -503,6 +563,8 @@ try {
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_Discount','🎁 کد هدیه')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_Tariff_list','💰 تعرفه اشتراک ها')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_dec_Tariff_list','تنظیم نشده است')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_Account_op','🎛 حساب کاربری')");
+
 
     }
 } catch (Exception $e) {
