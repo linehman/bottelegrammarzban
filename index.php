@@ -8,7 +8,7 @@ require_once 'config.php';
 require_once 'botapi.php';
 require_once 'apipanel.php';
 require_once 'jdf.php';
-require_once 'kayboard.php';
+require_once 'keyboard.php';
 #-----------telegram_ip_ranges------------#
 $telegram_ip_ranges = [
     ['lower' => '149.154.160.0', 'upper' => '149.154.175.255'],
@@ -141,6 +141,11 @@ $name_product = [];
 while ($row = mysqli_fetch_assoc($list_product)) {
     $name_product[] = $row['name_product'];
 }
+$list_Discounts = mysqli_query($connect, "SELECT * FROM Discount");
+$code_Discount = [];
+while ($row = mysqli_fetch_assoc($list_Discounts)) {
+    $code_Discount[] = $row['code'];
+}
 $datatxtbot = array();
 foreach ($datatextbotget as $row) {
     $datatxtbot[] = array(
@@ -168,7 +173,8 @@ $datatextbot = array(
     'text_channel' => '',
     'text_Discount' =>'',
     'text_Tariff_list' => '',
-    'text_dec_Tariff_list' => ''
+    'text_dec_Tariff_list' => '',
+    'text_Account_op' => ''
 );
 foreach ($datatxtbot as $item) {
     if (isset($datatextbot[$item['id_text']])) {
@@ -272,6 +278,12 @@ if($user['step'] == 'get_number'){
 
 #-----------Purchased services------------#
 if ($text == $datatextbot['text_Purchased_services'] || $datain == "backorder") {
+    $invoices = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE id_user = '$from_id'"));
+    if(is_null($invoices) && $setting['NotUser'] == "off"){
+         sendmessage($from_id, "⛔️ شما هیچ سرویس فعالی ندارید.", null);
+         return;
+    }
+
 $stmt = $connect->prepare("UPDATE user SET pagenumber = ? WHERE id = ?");
 $pages = 1;
 $stmt->bind_param("ss", $pages, $from_id);
@@ -306,7 +318,9 @@ $keyboard_json = json_encode($keyboardlists);
 sendmessage($from_id, "🛍 اشتراک های خریداری شده توسط شما
 
 ⚜️برای مشاهده اطلاعات روی نام کاربری کلیک کنید", $keyboard_json);
+    if($setting['NotUser'] == "on"){
     sendmessage($from_id, "⭕️ کاربر عزیز در صورتی که نام کاربری  شما در لیست بالا وجود ندارد. دکمه زیر را کلیک کنید.", $NotProductUser);
+    }
 }
 if($text == "⭕️ نام کاربری من در لیست نیست ⭕️"){
     sendmessage($from_id, "نام کاربری خود را ارسال نمایید", $backuser);
@@ -596,11 +610,17 @@ elseif ($user['step'] == "createusertest") {
         $random_number = rand(1000000, 9999999);
         $username_ac = $username_ac.$random_number;
     }
+    $nameprotocolsql = mysqli_query($connect, "SELECT * FROM protocol");
+    $nameprotocol = array();
+    while ($row = mysqli_fetch_assoc($nameprotocolsql)) {
+    $protocol = $row['NameProtocol'];
+    $nameprotocol[$protocol] = array();
+    }
     $date = strtotime("+" . $setting['time_usertest'] . "hours");
     $timestamp = strtotime(date("Y-m-d H:i:s", $date));
     $expire = $timestamp;
     $data_limit = $setting['val_usertest'] * 1000000;
-    $config_test = adduser($username_ac, $expire, $data_limit, $Check_token['access_token'], $marzban_list_get['url_panel']);
+    $config_test = adduser($username_ac, $expire, $data_limit, $Check_token['access_token'], $marzban_list_get['url_panel'],$nameprotocol);
     $data_test = json_decode($config_test, true);
         if(!isset($data_test['username'])){
             sendmessage($from_id, "❌ خطایی در ساخت اشتراک رخ داده است برای رفع مشکل با پشتیبانی در ارتباط باشد.", $keyboard);
@@ -617,12 +637,21 @@ elseif ($user['step'] == "createusertest") {
     $step = 'home';
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
-            return;
+    return;
     }
+    $date = jdate('Y/m/d');
+    $randomString = bin2hex(random_bytes(2));
+    $stmt = $connect->prepare("INSERT IGNORE INTO TestAccount (id_user, id_invoice, username,Service_location,time_sell) VALUES (?, ?, ?, ?,?)");
+    $stmt->bind_param("sssss", $from_id, $randomString, $username_ac,$text,$date);
+    $stmt->execute();
+    $stmt->close();
     $text_config = "";
     $output_config_link = "";
 if($setting['sublink'] == "✅ لینک اشتراک فعال است."){
         $output_config_link = $data_test['subscription_url'];
+        if (strpos($output_config_link, $marzban_list_get['url_panel']) === false) {
+    $output_config_link = $marzban_list_get['url_panel']."/". ltrim($output_config_link, "/");
+}
         $link_config = "            
 لینک اشتراک شما:
 $output_config_link";
@@ -867,7 +896,13 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
     $date = strtotime("+" . $info_product['Service_time'] . "days");
     $timestamp = strtotime(date("Y-m-d H:i:s", $date));
     $data_limit = $info_product['Volume_constraint'] * pow(1024, 3);
-    $configuser = adduser($username_ac, $timestamp, $data_limit, $Check_token['access_token'],$marzban_list_get['url_panel']);
+    $nameprotocolsql = mysqli_query($connect, "SELECT * FROM protocol");
+    $nameprotocol = array();
+    while ($row = mysqli_fetch_assoc($nameprotocolsql)) {
+    $protocol = $row['NameProtocol'];
+    $nameprotocol[$protocol] = array();
+    }
+    $configuser = adduser($username_ac, $timestamp, $data_limit, $Check_token['access_token'],$marzban_list_get['url_panel'],$nameprotocolsql);
     $data = json_decode($configuser, true);
         if(!isset($data['username'])){
             sendmessage($from_id, "❌ خطایی در ساخت اشتراک رخ داده است برای رفع مشکل با پشتیبانی در ارتباط باشد.", $keyboard);
@@ -890,6 +925,9 @@ $text_config = "";
 $link_confi = "";
 if($setting['sublink'] == "✅ لینک اشتراک فعال است."){
         $output_config_link = $data['subscription_url'];
+        if (strpos($output_config_link, $marzban_list_get['url_panel']) === false) {
+        $output_config_link = $marzban_list_get['url_panel']."/". ltrim($output_config_link, "/");
+}
         $link_config = "            
 لینک اشتراک شما:
     ```$output_config_link```";
@@ -947,7 +985,8 @@ $link_config
     $text_report = " 🛍 خرید جدید
     
 ⚙️ یک کاربر اکانت  با نام کانفیگ $username_ac خریداری کرد
-    
+قیمت محصول : {$info_product['price_product']} تومان
+حجم محصول : {$info_product['Volume_constraint']} 
 اطلاعات کاربر 👇👇
 ⚜️ نام کاربری کاربر: @$username";
     if (strlen($setting['Channel_Report'] )> 0){
@@ -1110,7 +1149,7 @@ return;
 ● نرخ  ارز  ترون:  $trx تومان
 ● شناسه پرداخت و پیگیری: $randomString
 
-⚠️ لینک پرداخت تا 13 دقیقه عتبار خواهد داشت، پرداخت های بعد از این زمان رسیدگی نخواهند شد.
+⚠️ لینک پرداخت تا 13 دقیقه اعتبار خواهد داشت، پرداخت های بعد از این زمان رسیدگی نخواهند شد.
 ❗️ پرداخت  حداکثر ۱۵  دقیقه  زمان  میبرد تا به حساب  ما ارسال  شود  پس  از  ۱۵ دقیقه  دکمه  تایید  پرداخت  را  بزنید  تا مبلغ  به  کیف پول  شما اضافه گردد.";
         sendmessage($from_id, $textnowpayments, $paymentkeyboard);
     }
@@ -1275,6 +1314,10 @@ $Checkcode = [];
 #----------------[  text_Tariff_list  ]------------------#
 if($text == $datatextbot['text_Tariff_list']){
         sendmessage($from_id,$datatextbot['text_dec_Tariff_list'] , null);
+}
+#----------------[   keyboard Account  ]------------------#
+if($text == $datatextbot['text_Account_op']){
+        sendmessage($from_id,"🗳یک گزینه را انتخاب نمایید", $keyboardPanel);
 }
 #----------------[  admin section  ]------------------#
 $textadmin = ["panel","/panel","پنل مدیریت","ادمین"];
@@ -1772,7 +1815,7 @@ elseif ($user['step'] == "text_help") {
 elseif ($text == "متن دکمه ☎️ پشتیبانی") {
     $textstart = "
             متن جدید خود راارسال کنید.
-            متن فعلی:
+متن فعلی:
             " . $datatextbot['text_support'];
     sendmessage($from_id, $textstart, $backadmin);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -1797,7 +1840,7 @@ elseif ($user['step'] == "text_support") {
 elseif ($text == "📝 تنظیم متن توضیحات پشتیبانی") {
     $textstart = "
             متن جدید خود راارسال کنید.
-            متن فعلی:
+متن فعلی:
             ```". $datatextbot['text_dec_support']."```";
     sendmessageMarkdown($from_id, $textstart, $backadmin);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -1822,7 +1865,7 @@ elseif ($user['step'] == "text_dec_support") {
 elseif ($text == "دکمه سوالات متداول") {
     $textstart = "
             متن جدید خود راارسال کنید.
-            متن فعلی:
+متن فعلی:
             ```". $datatextbot['text_fq']."```";
     sendmessageMarkdown($from_id, $textstart, $backadmin);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -1847,7 +1890,7 @@ elseif ($user['step'] == "text_fq") {
 elseif ($text == "📝 تنظیم متن توضیحات سوالات متداول") {
     $textstart = "
             متن جدید خود راارسال کنید.
-            متن فعلی:
+متن فعلی:
             ```". $datatextbot['text_dec_fq']."```";
     sendmessageMarkdown($from_id, $textstart, $backadmin);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -1872,7 +1915,7 @@ elseif ($user['step'] == "text_dec_fq") {
 elseif ($text == "📝 تنظیم متن توضیحات عضویت اجباری") {
     $textstart = "
             متن جدید خود راارسال کنید.
-            متن فعلی:
+متن فعلی:
             ```". $datatextbot['text_channel']."```";
     sendmessageMarkdown($from_id, $textstart, $backadmin);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -1897,8 +1940,8 @@ elseif ($user['step'] == "text_channel") {
 elseif ($text == "متن دکمه حساب کاربری") {
     $textstart = "
             متن جدید خود راارسال کنید.
-            متن فعلی:
-            ```". $datatextbot['text_account']."```";
+متن فعلی:
+            ". $datatextbot['text_account'];
     sendmessageMarkdown($from_id, $textstart, $backadmin);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'text_account';
@@ -2022,7 +2065,7 @@ elseif ($text == "متن دکمه لیست تعرفه") {
             ". $datatextbot['text_Tariff_list'];
     sendmessage($from_id, $textstart, $backadmin);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
-    $step = 'text_Purchased_services';
+    $step = 'text_Tariff_list';
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 } elseif ($user['step'] == "text_Tariff_list") {
@@ -2056,6 +2099,30 @@ elseif ($text == "متن توضیحات لیست تعرفه") {
     }
     sendmessage($from_id, "✅ متن با موفقیت ذخیره شد", $textbot);
     $stmt = $connect->prepare("UPDATE textbot SET text = ? WHERE id_text = 'text_dec_Tariff_list'");
+    $stmt->bind_param("s", $text);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif ($text ==  "دکمه حساب کاربری") {
+    $textstart = "
+            متن جدید خود راارسال کنید.
+            متن فعلی:
+            ". $datatextbot['text_Account_op'];
+    sendmessage($from_id, $textstart, $backadmin);
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'text_Account_op';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+} elseif ($user['step'] == "text_Account_op") {
+        if(!$text){
+            sendmessage($from_id, "فقط متن می توانید ارسال کنید", $textbot);
+            return;
+    }
+    sendmessage($from_id, "✅ متن با موفقیت ذخیره شد", $textbot);
+    $stmt = $connect->prepare("UPDATE textbot SET text = ? WHERE id_text = 'text_Account_op'");
     $stmt->bind_param("s", $text);
     $stmt->execute();
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -2232,6 +2299,56 @@ elseif ($datain == "❌ ربات خاموش است") {
     $stmt->bind_param("s", $Status);
     $stmt->execute();
     Editmessagetext($from_id, $message_id, "🤖 ربات روشن گردید.", null);
+}
+#-----------------[ not user change status ]-----------------#
+$not_user = json_encode([
+    'inline_keyboard' => [
+        [
+            ['text' => $setting['NotUser'], 'callback_data' => $setting['NotUser']],
+        ],
+    ]
+]);
+if ($text == "👤 دکمه نام کاربری") {
+    sendmessage($from_id, "وضعیت دکمه نام کاربری", $not_user);
+}
+if ($datain == "on"){
+    $stmt = $connect->prepare("UPDATE setting SET NotUser = ?");
+    $Status = 'off';
+    $stmt->bind_param("s", $Status);
+    $stmt->execute();
+    Editmessagetext($from_id, $message_id, "وضعیت دکمه نام کاربری خاموش شد", null);
+}
+elseif ($datain == "off") {
+    $stmt = $connect->prepare("UPDATE setting SET NotUser = ?");
+    $Status = "on";
+    $stmt->bind_param("s", $Status);
+    $stmt->execute();
+    Editmessagetext($from_id, $message_id, "دکمه نام کاربری روشن شد", null);
+}
+#-----------------[ two columns product ]-----------------#
+$two_columns = json_encode([
+    'inline_keyboard' => [
+        [
+            ['text' => $setting['two_columns'], 'callback_data' => $setting['two_columns']],
+        ],
+    ]
+]);
+if ($text == "⚜️ دو ستونه محصول") {
+    sendmessage($from_id, "وضعیت نمایش دو ستونه بودن لیست محصول در هنگام خرید", $two_columns);
+}
+if ($datain == "on"){
+    $stmt = $connect->prepare("UPDATE setting SET two_columns = ?");
+    $Status = 'off';
+    $stmt->bind_param("s", $Status);
+    $stmt->execute();
+    Editmessagetext($from_id, $message_id, "از این پس لیست محصول یک ستونه نمایش می دهد", null);
+}
+elseif ($datain == "off") {
+    $stmt = $connect->prepare("UPDATE setting SET two_columns = ?");
+    $Status = "on";
+    $stmt->bind_param("s", $Status);
+    $stmt->execute();
+    Editmessagetext($from_id, $message_id, "از این پس دو ستونه نمایش میدهد", null);
 }
 //_________________________________________________
 if ($text == "🔒 مسدود کردن کاربر") {
@@ -2723,6 +2840,24 @@ elseif($user['step'] == "change_price"){
     $stmt->execute();
 }
 #-------------------------#
+if($text == "نام محصول"){
+    sendmessage($from_id,"نام جدید را ارسال کنید",$backadmin);
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'change_name';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif($user['step'] == "change_name"){
+    $stmt = $connect->prepare("UPDATE product SET name_product = ? WHERE name_product = ?");
+    $stmt->bind_param("ss", $text, $Processing_value);
+    $stmt->execute();
+    sendmessage($from_id,"✅نام محصول بروزرسانی شد",$shopkeyboard);
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+#-------------------------#
 if($text == "حجم"){
     sendmessage($from_id,"حجم جدید را ارسال کنید",$backadmin);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -3132,4 +3267,81 @@ elseif($user['step'] == "GetIdAndOrdedr"){
                 sendmessage($from_id, $text_order, null);
     }
         sendmessage($from_id, "لیست سفارشات کاربر ارسال شد", $User_Services);
+}
+#----------------[  remove Discount   ]------------------#
+if ($text == "❌ حذف کد هدیه"){
+    sendmessage($from_id,"کد هدیه که میخوای حذف کنی رو انتخاب کن",$json_list_Discount_list_admin);
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'remove-Discount';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}elseif ($user['step'] == "remove-Discount"){
+    if (!in_array($text , $code_Discount)){
+        sendmessage($from_id, "❌ خطا 
+    📝 کد هدیه انتخابی وجود ندارد", null);
+        return;
+    }
+    $stmt = $connect->prepare("DELETE FROM Discount WHERE code = ?");
+    $stmt->bind_param("s", $text);
+    $stmt->execute();
+    sendmessage($from_id,"✅ کد هدیه  با موفقیت حذف گردید.",$shopkeyboard);
+}
+#----------------[  MANAGE protocol   ]------------------#
+if($text == "🌏 مدیریت پروتکل"){
+    $TextSendProtocol = "
+    در این بخش می توانید تعیین کنید که به مشتری چه پروتکل هایی داده شود.
+📨 برای اضافه کردن پروتکل از لیست زیر پروتکل خود را ارسال کنید";
+     sendmessage($from_id,$TextSendProtocol,$keyboardprotocol);
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'Add_protocol';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif($user['step'] == "Add_protocol"){
+    $protocolch = array("vmess","vless","trojan");
+    if(!in_array($text, $protocolch)){
+        sendmessage($from_id,"❌ پروتکل نامعتبر",null);
+        return;
+    }
+    $connect->query("INSERT IGNORE INTO protocol (NameProtocol) VALUES ('$text')");
+            sendmessage($from_id,"✅ پروتکل اضافه شد.",null);
+
+}
+#----------------[  REMOVE protocol   ]------------------#
+if ($text == "🗑 حذف پروتکل"){
+    sendmessage($from_id, "پروتکلی که میخواهید حذف کنید را انتخاب کنید.", $keyboardprotocol);
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'removeprotocol';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+} elseif ($user['step'] == "removeprotocol") {
+    sendmessage($from_id, "پروتکل با موفقیت حذف گردید.", $keyboardmarzban);
+    $stmt = $connect->prepare("DELETE FROM protocol WHERE NameProtocol = ?");
+    $stmt->bind_param("s", $text);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+if($text == "❌ حذف سرویس کاربر"){
+    $textRemoveService = "
+در این بخش می توانید  سرویسی  داخل ربات حذف نمایید.
+برای حذف سرویس نام کاربری که داخل پنل ثبت شده بود را ارسال نمایید";
+    sendmessage($from_id, $textRemoveService , $backadmin);
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'removeservice';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+
+}
+elseif($user['step'] == "removeservice"){
+    $stmt = $connect->prepare("DELETE FROM invoice WHERE username = ?");
+    $stmt->bind_param("s", $text);
+    $stmt->execute();
+    sendmessage($from_id, "✅ سرویس کاربر حذف گردید." , $keyboardadmin);
+        $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
 }
