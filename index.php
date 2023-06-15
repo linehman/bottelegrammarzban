@@ -902,7 +902,7 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
     $protocol = $row['NameProtocol'];
     $nameprotocol[$protocol] = array();
     }
-    $configuser = adduser($username_ac, $timestamp, $data_limit, $Check_token['access_token'],$marzban_list_get['url_panel'],$nameprotocolsql);
+    $configuser = adduser($username_ac, $timestamp, $data_limit, $Check_token['access_token'],$marzban_list_get['url_panel'],$nameprotocol);
     $data = json_decode($configuser, true);
         if(!isset($data['username'])){
             sendmessage($from_id, "❌ خطایی در ساخت اشتراک رخ داده است برای رفع مشکل با پشتیبانی در ارتباط باشد.", $keyboard);
@@ -2653,7 +2653,7 @@ elseif($user['step'] == "get_price"){
     $stmt->bind_param("ss", $text, $Processing_value);
     $stmt->execute();
     sendmessage($from_id,"زمان اشتراک ذخیره شد ✅
-    قیمت اشتراک  را ارسال کنید.
+    قمیت اشتراک  را ارسال کنید.
     توجه: 
     قیمت محصول براساس تومان است و قیمت را بدون هیچ کاراکتر اضافی ارسال نمایید.", $backadmin);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
