@@ -49,16 +49,12 @@ function getuser($username,$token,$url_panel)
 }
 
 #-----------------------------#
-function adduser($username,$expire,$data_limit,$token,$url_panel)
+function adduser($username,$expire,$data_limit,$token,$url_panel,array $protocol)
 {
     $url = $url_panel."/api/user";
     $header_value = 'Bearer ';
     $data = array(
-        "proxies" => array(
-            "vmess" => array( ),
-            "vless" => array(),
-            "trojan" => array()
-        ),
+        "proxies" => $protocol,
         "expire" => $expire,
         "data_limit" => $data_limit,
         "username" => $username
@@ -102,7 +98,27 @@ function Get_System_Stats($url_panel,$token){
     return $Get_System_Stats;
 }
 //----------------------------------
+function removeuser($token,$url_panel,$username)
+{
+    $url =  $url_panel.'/api/user/'.$username;
+    $header_value = 'Bearer ';
 
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+    curl_setopt($ch, CURLOPT_HTTPGET, true);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'Accept: application/json',
+        'Authorization: ' . $header_value .  $token
+    ));
+
+    $output = curl_exec($ch);
+    curl_close($ch);
+    $data_useer = json_decode($output, true);
+    return $data_useer;
+}
+#-----------------------------------------------#
 function formatBytes($bytes, $precision = 2): string
 {
     $base = log($bytes, 1024);
