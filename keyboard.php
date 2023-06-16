@@ -206,13 +206,15 @@ $backuser = json_encode([
     'keyboard' => [
         [['text' => "🏠 بازگشت به منوی اصلی"]]
     ],
-    'resize_keyboard' => true
+    'resize_keyboard' => true,
+    'input_field_placeholder' =>"برای بازگشت روی دکمه زیر کلیک کنید"
 ]);
 $backadmin = json_encode([
     'keyboard' => [
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
-    'resize_keyboard' => true
+    'resize_keyboard' => true,
+    'input_field_placeholder' =>"برای بازگشت روی دکمه زیر کلیک کنید"
 ]);
 $result = $connect->query("SHOW TABLES LIKE 'marzban_panel'");
 $table_exists = ($result->num_rows > 0);
