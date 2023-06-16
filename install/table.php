@@ -123,7 +123,6 @@ try {
         roll_Status varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         get_number varchar(200)  CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         iran_number varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
-        iran_number varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         NotUser varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         two_columns varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         configManual varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
@@ -165,7 +164,7 @@ $connect->query("INSERT INTO setting (count_usertest,Bot_Status,roll_Status,get_
             $connect->query("ALTER TABLE setting ADD sublink VARCHAR(200)");
             echo "The sublink field was added ✅";
         }
-                $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'iran_number'");
+        $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'iran_number'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE setting ADD iran_number VARCHAR(200)");
             echo "The iran_number field was added ✅";
