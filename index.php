@@ -1334,7 +1334,8 @@ if($text == $datatextbot['text_Account_op']){
 }
 #----------------[  admin section  ]------------------#
 $textadmin = ["panel","/panel","پنل مدیریت","ادمین"];
-if (!in_array($from_id, $admin_ids) && in_array($text, $textadmin)){ 
+if (!in_array($from_id, $admin_ids)){ 
+    if(in_array($text, $textadmin)){
     sendmessage($from_id, "❌ دستور نامعتبر است ❌", null);
     foreach($admin_ids as $admin){
         $textadmin = "
@@ -1344,6 +1345,7 @@ if (!in_array($from_id, $admin_ids) && in_array($text, $textadmin)){
 نام کاربر  :$first_name
         ";
             sendmessage($admin, $textadmin ,null);
+    }
     }
     return;
 }
