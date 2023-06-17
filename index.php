@@ -593,6 +593,9 @@ if(preg_match('/subscriptionurl_(\w+)/',$datain, $dataget)) {
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $data_useer = getuser($username, $Check_token['access_token'], $marzban_list_get['url_panel']);
     $subscriptionurl = $data_useer['subscription_url'];
+    if (!preg_match('/^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?((\/[^\s\/]+)+)?$/', $subscriptionurl)) {
+        $subscriptionurl = $marzban_list_get['url_panel']."/". ltrim($subscriptionurl, "/");
+}
     $textsub = "
 🔗 لینک اشتراک شما : 
 
@@ -660,7 +663,7 @@ elseif ($user['step'] == "createusertest") {
     $output_config_link = "";
 if($setting['sublink'] == "✅ لینک اشتراک فعال است."){
         $output_config_link = $data_test['subscription_url'];
-        if (strpos($output_config_link, $marzban_list_get['url_panel']) === false) {
+       if (!preg_match('/^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?((\/[^\s\/]+)+)?$/', $output_config_link)) {
     $output_config_link = $marzban_list_get['url_panel']."/". ltrim($output_config_link, "/");
 }
         $link_config = "            
@@ -938,7 +941,7 @@ $text_config = "";
 $link_confi = "";
 if($setting['sublink'] == "✅ لینک اشتراک فعال است."){
         $output_config_link = $data['subscription_url'];
-        if (strpos($output_config_link, $marzban_list_get['url_panel']) === false) {
+        if (!preg_match('/^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?((\/[^\s\/]+)+)?$/', $output_config_link)) {
         $output_config_link = $marzban_list_get['url_panel']."/". ltrim($output_config_link, "/");
 }
         $link_config = "            
