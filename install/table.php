@@ -143,7 +143,7 @@ try {
         $active_help = "❌ آموزش غیرفعال است";
         $sublink = "✅ لینک اشتراک فعال است.";
         $configManual = "❌ ارسال کانفیگ دستی خاموش است";
-$connect->query("INSERT INTO setting (count_usertest,Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,sublink,configManual,NotUser,two_columns) VALUES ('0','$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help','$active_phone_iran_text','$sublink','$configManual','off','off')");
+$connect->query("INSERT INTO setting (count_usertest,Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,sublink,configManual,NotUser,two_columns) VALUES ('0','$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help','$active_phone_iran_text','$sublink','$configManual','offnotuser','off')");
     } else {
         $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'configManual'");
         if (mysqli_num_rows($Check_filde) != 1) {
@@ -224,7 +224,7 @@ $connect->query("INSERT INTO setting (count_usertest,Bot_Status,roll_Status,get_
         $stmt->bind_param("s", $sublink);
         $stmt->execute();
         $stmt = $connect->prepare("UPDATE setting SET NotUser = ?");
-        $text = "on";
+        $text = "offnotuser";
         $stmt->bind_param("s", $text);
         $stmt->execute();
         $stmt = $connect->prepare("UPDATE setting SET two_columns = ?");
