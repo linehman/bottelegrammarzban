@@ -9,7 +9,7 @@ while ($row = mysqli_fetch_assoc($list_service)) {
     $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$row['Service_location']}'"));
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $get_username_Check = getuser($row['username'], $Check_token['access_token'], $marzban_list_get['url_panel']);
-    if(!isset($get_username_Check['status']))return;
+    if(isset($get_username_Check['status'])){
     $timeservice = $get_username_Check['expire'] - time();
     $day = floor($timeservice / 86400) + 1 ;
     $output =  $get_username_Check['data_limit'] - $get_username_Check['used_traffic'];
@@ -31,6 +31,7 @@ sendmessage($row['id_user'], $text, null);
 نام سرویس : {$row['Service_location']}
 ";
 sendmessage($row['id_user'], $text, null);
+    }
     }
 }
 #-------------[  Notification to the user ]-------------#
