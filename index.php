@@ -288,7 +288,7 @@ if($user['step'] == 'get_number'){
 #-----------Purchased services------------#
 if ($text == $datatextbot['text_Purchased_services'] || $datain == "backorder") {
     $invoices = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE id_user = '$from_id'"));
-    if(is_null($invoices) && $setting['NotUser'] == "off"){
+    if(is_null($invoices) && $setting['NotUser'] == "offnotuser"){
          sendmessage($from_id, "⛔️ شما هیچ سرویس فعالی ندارید.", null);
          return;
     }
@@ -333,7 +333,7 @@ sendmessage($from_id, "🛍 اشتراک های خریداری شده توسط �
 
 ⚜️برای مشاهده اطلاعات روی نام کاربری کلیک کنید", $keyboard_json);
 }
-    if($setting['NotUser'] == "on"){
+    if($setting['NotUser'] == "onnotuser"){
     sendmessage($from_id, "⭕️ کاربر عزیز در صورتی که نام کاربری  شما در لیست بالا وجود ندارد. دکمه زیر را کلیک کنید.", $NotProductUser);
     }
 }
@@ -2335,16 +2335,16 @@ $not_user = json_encode([
 if ($text == "👤 دکمه نام کاربری") {
     sendmessage($from_id, "وضعیت دکمه نام کاربری", $not_user);
 }
-if ($datain == "on"){
+if ($datain == "onnotuser"){
     $stmt = $connect->prepare("UPDATE setting SET NotUser = ?");
-    $Status = 'off';
+    $Status = 'offnotuser';
     $stmt->bind_param("s", $Status);
     $stmt->execute();
     Editmessagetext($from_id, $message_id, "وضعیت دکمه نام کاربری خاموش شد", null);
 }
-elseif ($datain == "off") {
+elseif ($datain == "offnotuser") {
     $stmt = $connect->prepare("UPDATE setting SET NotUser = ?");
-    $Status = "on";
+    $Status = "onnotuser";
     $stmt->bind_param("s", $Status);
     $stmt->execute();
     Editmessagetext($from_id, $message_id, "دکمه نام کاربری روشن شد", null);
