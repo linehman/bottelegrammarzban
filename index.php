@@ -171,7 +171,6 @@ $datatextbot = array(
     'text_start' => '',
     'text_bot_off' => '',
     'text_dec_info' => '',
-    'text_dec_usertest' => '',
     'text_roll' => '',
     'text_dec_support' => '',
     'text_fq' => '',
@@ -638,7 +637,7 @@ elseif ($user['step'] == "createusertest") {
     $date = strtotime("+" . $setting['time_usertest'] . "hours");
     $timestamp = strtotime(date("Y-m-d H:i:s", $date));
     $expire = $timestamp;
-    $data_limit = $setting['val_usertest'] * 1000000;
+    $data_limit = $setting['val_usertest'] * 1048576;
     $config_test = adduser($username_ac, $expire, $data_limit, $Check_token['access_token'], $marzban_list_get['url_panel'],$nameprotocol);
     $data_test = json_decode($config_test, true);
         if(!isset($data_test['username'])){
