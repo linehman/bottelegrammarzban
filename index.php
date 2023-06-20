@@ -637,6 +637,7 @@ elseif ($user['step'] == "createusertest") {
     $config_test = adduser($username_ac, $expire, $data_limit, $Check_token['access_token'], $marzban_list_get['url_panel'],$nameprotocol);
     $data_test = json_decode($config_test, true);
         if(!isset($data_test['username'])){
+         if(isset($data['detail']['proxies']))$data['detail'] = $data['detail']['proxies'];
             sendmessage($from_id, "❌ خطایی در ساخت اشتراک رخ داده است برای رفع مشکل با پشتیبانی در ارتباط باشد.", $keyboard);
     $texterros = "
 ⭕️ یک کاربر قصد دریافت اکانت داشت که ساخت کانفیگ با خطا مواجه شده و به کاربر کانفیگ داده نشد
@@ -921,6 +922,7 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
     $configuser = adduser($username_ac, $timestamp, $data_limit, $Check_token['access_token'],$marzban_list_get['url_panel'],$nameprotocol);
     $data = json_decode($configuser, true);
         if(!isset($data['username'])){
+            if(isset($data['detail']['proxies']))$data['detail'] = $data['detail']['proxies'];
             sendmessage($from_id, "❌ خطایی در ساخت اشتراک رخ داده است برای رفع مشکل با پشتیبانی در ارتباط باشد.", $keyboard);
     $texterros = "
 ⭕️ یک کاربر قصد دریافت اکانت داشت که ساخت کانفیگ با خطا مواجه شده و به کاربر کانفیگ داده نشد
