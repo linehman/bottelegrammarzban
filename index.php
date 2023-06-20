@@ -151,6 +151,11 @@ $code_Discount = [];
 while ($row = mysqli_fetch_assoc($list_Discounts)) {
     $code_Discount[] = $row['code'];
 }
+$list_protocol = mysqli_query($connect, "SELECT * FROM protocol");
+$protocoldata = [];
+while ($row = mysqli_fetch_assoc($list_protocol)) {
+    $protocoldata[] = $row['code'];
+}
 $datatxtbot = array();
 foreach ($datatextbotget as $row) {
     $datatxtbot[] = array(
@@ -3336,6 +3341,10 @@ if ($text == "🗑 حذف پروتکل"){
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 } elseif ($user['step'] == "removeprotocol") {
+        if(!in_array($text, $protocoldata)){
+            sendmessage($from_id, "پروتکل نامعتبر است", null);
+            return;
+    }
     sendmessage($from_id, "پروتکل با موفقیت حذف گردید.", $keyboardmarzban);
     $stmt = $connect->prepare("DELETE FROM protocol WHERE NameProtocol = ?");
     $stmt->bind_param("s", $text);
