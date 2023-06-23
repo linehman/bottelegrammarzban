@@ -117,41 +117,13 @@ require_once 'text.php';
     $datatextbotget = mysqli_query($connect, "SELECT * FROM textbot");
     $channels = array();
     $channels = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM channels  LIMIT 1"));
-    $id_admin = mysqli_query($connect, "SELECT * FROM admin");
-    $admin_ids = [];
-    while ($row = mysqli_fetch_assoc($id_admin)) {
-        $admin_ids[] = $row['id_admin'];
-    }
-    $usernameinvoicesql = mysqli_query($connect, "SELECT * FROM invoice");
-    $usernameinvoice = [];
-    while ($row = mysqli_fetch_assoc($usernameinvoicesql)) {
-        $usernameinvoice[] = $row['username'];
-    }
-    $Discouncodesql = mysqli_query($connect, "SELECT * FROM Discount");
-    $Discouncode = [];
-    while ($row = mysqli_fetch_assoc($Discouncodesql)) {
-        $Discouncode[] = $row['code'];
-    }
-    $id_user = mysqli_query($connect, "SELECT * FROM user");
-    $users_ids = [];
-    while ($row = mysqli_fetch_assoc($id_user)) {
-        $users_ids[] = $row['id'];
-    }
-    $loc_marzban = mysqli_query($connect, "SELECT * FROM marzban_panel");
-    $marzban_list = [];
-    while ($row = mysqli_fetch_assoc($loc_marzban)) {
-        $marzban_list[] = $row['name_panel'];
-    }
-    $list_product = mysqli_query($connect, "SELECT * FROM product");
-    $name_product = [];
-    while ($row = mysqli_fetch_assoc($list_product)) {
-        $name_product[] = $row['name_product'];
-    }
-    $list_protocol = mysqli_query($connect, "SELECT * FROM protocol");
-    $protocoldata = [];
-    while ($row = mysqli_fetch_assoc($list_protocol)) {
-        $protocoldata[] = $row['NameProtocol'];
-    }
+    $admin_ids = array_column(mysqli_fetch_all(mysqli_query($connect, "SELECT (id_admin) FROM admin"), MYSQLI_ASSOC), 'id_admin');
+    $usernameinvoice = array_column(mysqli_fetch_all(mysqli_query($connect, "SELECT (username) FROM invoice"), MYSQLI_ASSOC), 'username');
+    $Discouncode = array_column(mysqli_fetch_all(mysqli_query($connect, "SELECT (code) FROM Discount"), MYSQLI_ASSOC), 'code');
+    $users_ids = array_column(mysqli_fetch_all(mysqli_query($connect, "SELECT (id) FROM user"), MYSQLI_ASSOC), 'id');
+    $marzban_list = array_column(mysqli_fetch_all(mysqli_query($connect, "SELECT (name_panel) FROM marzban_panel"), MYSQLI_ASSOC), 'name_panel');
+    $name_product = array_column(mysqli_fetch_all(mysqli_query($connect, "SELECT (name_product) FROM product"), MYSQLI_ASSOC), 'name_product');
+    $protocoldata = array_column(mysqli_fetch_all(mysqli_query($connect, "SELECT (NameProtocol) FROM protocol"), MYSQLI_ASSOC), 'NameProtocol');
     $datatxtbot = array();
     foreach ($datatextbotget as $row) {
         $datatxtbot[] = array(
