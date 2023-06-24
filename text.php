@@ -80,7 +80,7 @@ $textbotlang['users']['Balance']['errorpricelimit'] = "❌ خطا
         💬 مبلغ باید کمتر 10 میلیون تومان باشد";
 $textbotlang['users']['Balance']['selectPatment'] = "💵 روش پرداخت خود را انتخاب نمایید";
 $textbotlang['users']['Balance']['nowpayments'] = "❌ خطا 
-    کمترین مبلغ برای  پرداخت در این درگاه 2 دلار می باشد.";
+    کمترین مبلغ برای  پرداخت در این درگاه 1 دلار می باشد.";
 $textbotlang['users']['Balance']['linkpayments'] = "درحال ساخت لینک پرداخت...";
 $textbotlang['users']['Balance']['payments'] = "پرداخت";
 $textbotlang['users']['Balance']['weswap'] = "❌ خطا 
@@ -335,3 +335,11 @@ $textbotlang['Admin']['Protocol']['invalidProtocol'] = "❌ پروتکل نام�
 $textbotlang['Admin']['Protocol']['AddedProtocol'] = "✅ پروتکل اضافه شد.";
 $textbotlang['Admin']['Protocol']['RemoveProtocol'] = "پروتکلی که میخواهید حذف کنید را انتخاب کنید.";
 $textbotlang['Admin']['Protocol']['RemovedProtocol'] = "پروتکل با موفقیت حذف گردید.";
+
+
+
+
+
+
+
+$textbotlang['Admin']['AlgortimeUsername']['SaveData'] = "✅روش ساخت نام کاربری با موفقیت آپدیت شد";
