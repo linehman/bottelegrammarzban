@@ -574,8 +574,12 @@ $status = $data_useer['status'];
         $stmt->execute();
     }
     elseif ($user['step'] == "createusertest") {
+        if (!in_array($text , $marzban_list)){
+            sendmessage($from_id, $textbotlang['users']['sell']['Service-Location'], null,'HTML');
+            return;
+        }
         $randomString = bin2hex(random_bytes(2));
-        $username_ac = $randomString.$from_id;
+        $username_ac = generateUsername($from_id,$setting['MethodUsername'],$username,$randomString);
         $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '$text'"));
         $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
         $Allowedusername = getuser($username_ac, $Check_token['access_token'], $marzban_list_get['url_panel']);
@@ -596,7 +600,8 @@ $status = $data_useer['status'];
         $config_test = adduser($username_ac, $expire, $data_limit, $Check_token['access_token'], $marzban_list_get['url_panel'],$nameprotocol);
         $data_test = json_decode($config_test, true);
             if(!isset($data_test['username'])){
-             if(isset($data['detail']['proxies']))$data['detail'] = $data['detail']['proxies'];
+             if(isset($data_test['detail']['proxies']))$data_test['detail'] = $data_test['detail']['proxies'];
+             if(isset($data_test['detail']['username']))$data_test['detail'] = $data_test['detail']['username'];
                 sendmessage($from_id,$textbotlang['users']['usertest']['errorcreat'] ,$keyboard,'html');
         $texterros = "
     ⭕️ یک کاربر قصد دریافت اکانت داشت که ساخت کانفیگ با خطا مواجه شده و به کاربر کانفیگ داده نشد
@@ -692,7 +697,7 @@ $status = $data_useer['status'];
         ]);
         $text_report = " ⚜️ اکانت تست داده شد
         
-    ⚙️ یک کاربر اکانت  با نام کانفیگ ```$username_ac```   اکانت تست دریافت کرد
+    ⚙️ یک کاربر اکانت  با نام کانفیگ <code>$username_ac</code>  اکانت تست دریافت کرد
         
     اطلاعات کاربر 👇👇
     ⚜️ نام کاربری کاربر: @$username";
@@ -815,7 +820,7 @@ $status = $data_useer['status'];
         $stmt->execute();
         $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '$text' LIMIT 1"));
         $randomString = bin2hex(random_bytes(2));
-        $username_ac = "$randomString$from_id";
+        $username_ac = generateUsername($from_id,$setting['MethodUsername'],$username,$randomString);
             $stmt = $connect->prepare("UPDATE user SET Processing_value_tow = ? WHERE id = ?");
         $stmt->bind_param("ss", $username_ac, $from_id);
         $stmt->execute();
@@ -897,7 +902,7 @@ $status = $data_useer['status'];
     }
             $link_config = "            
    {$textbotlang['users']['stateus']['getlinksub']}
-        ```$output_config_link```";
+        <code>$output_config_link</code>";
         }
     if($setting['configManual'] == "✅ ارسال کانفیگ بعد خرید فعال است."){
             foreach($data['links'] as $configs){
@@ -905,7 +910,7 @@ $status = $data_useer['status'];
             }
             $text_config = "            
     {$textbotlang['users']['config']}
-        ```$config```";
+<code>$config</code>";
         }
             $Shoppinginfo = json_encode([
             'inline_keyboard' => [
@@ -1009,7 +1014,7 @@ $status = $data_useer['status'];
             $price_rate = tronweswap();
             $USD = $price_rate['result']['USD'];
         $usdprice = round($Processing_value/$USD,2);
-            if($usdprice < 2){
+            if($usdprice <= 1){
             sendmessage($from_id, $textbotlang['users']['Balance']['nowpayments'], null,'HTML');
     return;
             }
@@ -1734,8 +1739,7 @@ $status = $data_useer['status'];
         $stmt->execute();
     }
     elseif ($text == "📝 تنظیم متن توضیحات پشتیبانی") {
-        $textstart = $textbotlang['Admin']['ManageUser']['ChangeTextGet']. $datatextbot['text_dec_support']."```";
-        sendmessage($from_id, $textstart, $backadmin,'HTML');
+        sendmessage($from_id, $textbotlang['Admin']['ManageUser']['ChangeTextGet']. $datatextbot['text_dec_support'], $backadmin,'HTML');
         $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
         $step = 'text_dec_support';
         $stmt->bind_param("ss", $step, $from_id);
@@ -3113,7 +3117,7 @@ $status = $data_useer['status'];
     }
     #----------------[  REMOVE protocol   ]------------------#
     if ($text == "🗑 حذف پروتکل"){
-        sendmessage($from_id,$textbotlang['Admin']['Protocol']['RemoveProtocol'], $keyboardprotocol,'HTML');
+        sendmessage($from_id,$textbotlang['Admin']['Protocol']['RemoveProtocol'], $keyboardprotocollist,'HTML');
         $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
         $step = 'removeprotocol';
         $stmt->bind_param("ss", $step, $from_id);
@@ -3145,8 +3149,28 @@ $status = $data_useer['status'];
         $stmt->bind_param("s", $text);
         $stmt->execute();
         sendmessage($from_id,$textbotlang['Admin']['ManageUser']['RemovedService'], $keyboardadmin,'HTML');
-            $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+        $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
         $step = 'home';
         $stmt->bind_param("ss", $step, $from_id);
         $stmt->execute();
+    }
+    if($text == "💡 روش ساخت نام کاربری"){
+        $text_username = "⭕️ روش ساخت نام کاربری برای اکانت ها را از دکمه زیر انتخاب نمایید.
+
+⚠️ در صورتی که کاربری نام کاربری نداشته باشه کلمه NOT_USERNAME جای نام کاربری اعمال خواهد شد.
+
+⚠️ در صورتی که نام کاربری وجود داشته باشه یک عدد رندوم به نام کاربری اضافه خواهد شد
+
+روش فعلی : {$setting['MethodUsername']}";
+        sendmessage($from_id,$text_username, $MethodUsername,'HTML');
+        $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+        $step = 'updatemethodusername';
+        $stmt->bind_param("ss", $step, $from_id);
+        $stmt->execute();
+    }
+    elseif($user['step'] =="updatemethodusername"){
+        $stmt = $connect->prepare("UPDATE setting SET MethodUsername = ?");
+        $stmt->bind_param("s", $text);
+        $stmt->execute();
+        sendmessage($from_id,$textbotlang['Admin']['AlgortimeUsername']['SaveData'], $keyboardmarzban,'HTML');
     }
