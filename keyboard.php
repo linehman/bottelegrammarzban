@@ -317,6 +317,19 @@ if ($table_exists) {
         }
  }
 //--------------------------------------------------
+$result = $connect->query("SHOW TABLES LIKE 'protocol'");
+$table_exists = ($result->num_rows > 0);
+if ($table_exists) {
+        $getdataprotocol = mysqli_query($connect, "SELECT * FROM protocol");
+    $protocol = [];
+    foreach($getdataprotocol as $result)
+    {
+        $protocol[] = [['text'=>$result['NameProtocol']]];
+    }
+    $protocol[] = [['text'=>"🏠 بازگشت به منوی مدیریت"]];
+    $keyboardprotocol = json_encode(['resize_keyboard'=>true,'keyboard'=> $protocol]);
+ }
+//--------------------------------------------------
 $result = $connect->query("SHOW TABLES LIKE 'product'");
 $table_exists = ($result->num_rows > 0);
 if ($table_exists) {
@@ -381,13 +394,6 @@ $NotProductUser = json_encode([
     'keyboard' => [
         [['text' => "⭕️ نام کاربری من در لیست نیست ⭕️"]],
         [['text' => "🏠 بازگشت به منوی اصلی"]]
-    ],
-    'resize_keyboard' => true
-]);
-$keyboardprotocol = json_encode([
-    'keyboard' => [
-        [['text' => "vless"],['text' => "vmess"],['text' => "trojan"]],
-        [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true
 ]);
