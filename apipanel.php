@@ -126,3 +126,20 @@ function formatBytes($bytes, $precision = 2): string
     $suffixes = ['بایت', 'کیلوبایت', 'مگابایت', 'گیگابایت', 'ترابایت'];
     return round(pow(1024, $base - $power), $precision) . ' ' . $suffixes[$power];
 }
+#---------------------[ ]--------------------------#
+function generateUsername($from_id,$Metode,$username,$randomString)
+{
+    global $connect;
+    if($Metode == "آیدی عددی + حروف و عدد رندوم"){
+        return $from_id."_".$randomString;
+    }
+    elseif($Metode == "نام کاربری + حروف و عدد رندوم"){
+        return $username."_".$randomString;
+    }
+    elseif($Metode == "نام کاربری + عدد به ترتیب"){
+        $statistics = mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(id_user)  FROM invoice WHERE id_user = '$from_id'"));
+        $countInvoice = intval($statistics['COUNT(id_user)']) + 1 ;
+        return $username."_".$countInvoice;
+        
+    }
+}
