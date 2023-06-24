@@ -131,6 +131,7 @@ try {
         limit_usertest_all varchar(600)  NULL,
         time_usertest varchar(600)  NULL,
         val_usertest varchar(600)  NULL,
+        MethodUsername varchar(900)  NULL,
         count_usertest varchar(5000) NOT NULL)
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
@@ -143,12 +144,19 @@ try {
         $active_help = "❌ آموزش غیرفعال است";
         $sublink = "✅ لینک اشتراک فعال است.";
         $configManual = "❌ ارسال کانفیگ دستی خاموش است";
-$connect->query("INSERT INTO setting (count_usertest,Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,sublink,configManual,NotUser,two_columns) VALUES ('0','$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help','$active_phone_iran_text','$sublink','$configManual','offnotuser','off')");
+        $configManual = "❌ ارسال کانفیگ دستی خاموش است";
+        $MethodUsername ="آیدی عددی + حروف و عدد رندوم";
+$connect->query("INSERT INTO setting (count_usertest,Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,sublink,configManual,NotUser,two_columns,MethodUsername) VALUES ('0','$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help','$active_phone_iran_text','$sublink','$configManual','offnotuser','off','$MethodUsername)");
     } else {
         $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'configManual'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE setting ADD configManual VARCHAR(200)");
             echo "The configManual field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'MethodUsername'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE setting ADD MethodUsername VARCHAR(900)");
+            echo "The MethodUsername field was added ✅";
         }
         $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'two_columns'");
         if (mysqli_num_rows($Check_filde) != 1) {
@@ -214,6 +222,7 @@ $connect->query("INSERT INTO setting (count_usertest,Bot_Status,roll_Status,get_
         $sublink = "✅ لینک اشتراک فعال است.";
         $active_phone_iran_text = "❌ بررسی شماره ایرانی غیرفعال است";
         $configManual = "❌ ارسال کانفیگ دستی خاموش است";
+        $MethodUsernameupdate = "آیدی عددی + حروف و عدد رندوم";
         $stmt = $connect->prepare("UPDATE setting SET configManual = ?");
         $stmt->bind_param("s", $configManual);
         $stmt->execute();
@@ -230,6 +239,9 @@ $connect->query("INSERT INTO setting (count_usertest,Bot_Status,roll_Status,get_
         $stmt = $connect->prepare("UPDATE setting SET two_columns = ?");
         $text = "off";
         $stmt->bind_param("s", $text);
+        $stmt->execute();
+        $stmt = $connect->prepare("UPDATE setting SET MethodUsername = ?");
+        $stmt->bind_param("s", $MethodUsernameupdate);
         $stmt->execute();
     }
 } catch (Exception $e) {
