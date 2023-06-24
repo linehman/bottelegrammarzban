@@ -23,12 +23,12 @@ function sendmessageMarkdown($chat_id,$text,$keyboard){
         
         ]);
 }
-function sendmessage($chat_id,$text,$keyboard){
+function sendmessage($chat_id,$text,$keyboard,$parse_mode){
     telegram('sendmessage',[
         'chat_id' => $chat_id,
         'text' => $text,
         'reply_markup' => $keyboard,
-        'parse_mode' => "HTML",
+        'parse_mode' => $parse_mode,
         
         ]);
 }
