@@ -14,15 +14,6 @@ function telegram($method, $datas = [])
         return json_decode($res);
     }
 }
-function sendmessageMarkdown($chat_id,$text,$keyboard){
-    telegram('sendmessage',[
-        'chat_id' => $chat_id,
-        'text' => $text,
-        'reply_markup' => $keyboard,
-        'parse_mode' => "Markdown",
-        
-        ]);
-}
 function sendmessage($chat_id,$text,$keyboard,$parse_mode){
     telegram('sendmessage',[
         'chat_id' => $chat_id,
