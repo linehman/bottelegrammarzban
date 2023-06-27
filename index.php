@@ -571,18 +571,48 @@ if ($text == $datatextbot['text_usertest']) {
         return;
     }
     sendmessage($from_id, $textbotlang['users']['Service']['Location'], $list_marzban_panel_user, 'html');
+    if($setting['MethodUsername'] == "نام کاربری دلخواه"){
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'selectusername';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+    return;
+    }
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'createusertest';
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
-} elseif ($user['step'] == "createusertest") {
+} elseif ($user['step'] == "selectusername"){
     if (!in_array($text, $marzban_list)) {
         sendmessage($from_id, $textbotlang['users']['sell']['Service-Location'], null, 'HTML');
         return;
     }
+    $stmt = $connect->prepare("UPDATE user SET Processing_value_tow = ? WHERE id = ?");
+    $stmt->bind_param("ss", $text, $from_id);
+    $stmt->execute();
+    sendmessage($from_id, $textbotlang['users']['selectusername'], $backuser, 'html');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'createusertest';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+    elseif ($user['step'] == "createusertest") {
+        if($setting['MethodUsername'] == "نام کاربری دلخواه"){
+            if (!preg_match('~^[a-z][a-z\d_]{2,32}$~i', $text)) {
+        sendmessage($from_id, $textbotlang['users']['invalidusername'], $backuser);
+        return;
+    }
+    $name_panel = $user['Processing_value_tow'];
+        }else{
+    if (!in_array($text, $marzban_list)) {
+        sendmessage($from_id, $textbotlang['users']['sell']['Service-Location'], null, 'HTML');
+        return;
+    }
+    $name_panel =$text ;
+        }
     $randomString = bin2hex(random_bytes(2));
-    $username_ac = generateUsername($from_id, $setting['MethodUsername'], $username, $randomString);
-    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '$text'"));
+    $username_ac = generateUsername($from_id, $setting['MethodUsername'], $username, $randomString,$text);
+    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '$name_panel'"));
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $Allowedusername = getuser($username_ac, $Check_token['access_token'], $marzban_list_get['url_panel']);
     if (isset($Allowedusername['username'])) {
@@ -623,7 +653,7 @@ if ($text == $datatextbot['text_usertest']) {
     $date = jdate('Y/m/d');
     $randomString = bin2hex(random_bytes(2));
     $stmt = $connect->prepare("INSERT IGNORE INTO TestAccount (id_user, id_invoice, username,Service_location,time_sell) VALUES (?, ?, ?, ?,?)");
-    $stmt->bind_param("sssss", $from_id, $randomString, $username_ac, $text, $date);
+    $stmt->bind_param("sssss", $from_id, $randomString, $username_ac, $user['Processing_value_tow'], $date);
     $stmt->execute();
     $stmt->close();
     $text_config = "";
@@ -793,7 +823,8 @@ if ($text == $datatextbot['text_sell']) {
     $step = 'get_product';
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
-} elseif ($user['step'] == "get_product") {
+} 
+elseif ($user['step'] == "get_product") {
     if (!in_array($text, $marzban_list)) {
         sendmessage($from_id, $textbotlang['users']['sell']['Service-Location'], null, 'HTML');
         return;
@@ -802,11 +833,19 @@ if ($text == $datatextbot['text_sell']) {
     $stmt->bind_param("ss", $text, $from_id);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['users']['sell']['Service-select'], $json_list_product_list, 'HTML');
+    if($setting['MethodUsername'] == "نام کاربری دلخواه"){
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'selectusernamesell';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+    return;
+    }
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'endstepuser';
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
-} elseif ($user['step'] == "endstepuser") {
+} 
+elseif ($user['step'] == "selectusernamesell"){
     if (!in_array($text, $name_product)) {
         sendmessage($from_id, $textbotlang['users']['sell']['error-product'], null, 'HTML');
         return;
@@ -814,9 +853,29 @@ if ($text == $datatextbot['text_sell']) {
     $stmt = $connect->prepare("UPDATE user SET Processing_value_one = ? WHERE id = ?");
     $stmt->bind_param("ss", $text, $from_id);
     $stmt->execute();
-    $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '$text' LIMIT 1"));
+    sendmessage($from_id, $textbotlang['users']['selectusername'], $backuser, 'html');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'endstepuser';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif ($user['step'] == "endstepuser") {
+        if($setting['MethodUsername'] == "نام کاربری دلخواه"){
+            if (!preg_match('~^[a-z][a-z\d_]{2,32}$~i', $text)) {
+        sendmessage($from_id, $textbotlang['users']['invalidusername'], $backuser,'HTML');
+        return;
+            }
+        $loc = $user['Processing_value_one'];
+        }else{
+    if (!in_array($text, $name_product)) {
+        sendmessage($from_id, $textbotlang['users']['sell']['error-product'], null, 'HTML');
+        return;
+    }
+    $loc = $text;
+    }
+    $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '$loc' LIMIT 1"));
     $randomString = bin2hex(random_bytes(2));
-    $username_ac = generateUsername($from_id, $setting['MethodUsername'], $username, $randomString);
+    $username_ac = generateUsername($from_id, $setting['MethodUsername'], $username, $randomString,$text);
     $stmt = $connect->prepare("UPDATE user SET Processing_value_tow = ? WHERE id = ?");
     $stmt->bind_param("ss", $username_ac, $from_id);
     $stmt->execute();
@@ -834,7 +893,8 @@ if ($text == $datatextbot['text_sell']) {
     $step = 'payment';
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
-} elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریافت سرویس") {
+} 
+elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریافت سرویس") {
     $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '{$user['Processing_value_one']}' LIMIT 1"));
     if (empty($info_product['price_product']) || empty($info_product['price_product'])) return;
     if ($info_product['price_product'] > $user['Balance']) {
@@ -848,10 +908,6 @@ if ($text == $datatextbot['text_sell']) {
     $username_ac = $user['Processing_value_tow'];
     $date = jdate('Y/m/d');
     $randomString = bin2hex(random_bytes(2));
-    $stmt = $connect->prepare("INSERT IGNORE INTO invoice (id_user, id_invoice, username,time_sell, Service_location, name_product, price_product, Volume, Service_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)");
-    $stmt->bind_param("sssssssss", $from_id, $randomString, $username_ac, $date, $Processing_value, $info_product['name_product'], $info_product['price_product'], $info_product['Volume_constraint'], $info_product['Service_time']);
-    $stmt->execute();
-    $stmt->close();
     $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '$Processing_value'"));
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $get_username_Check = getuser($username_ac, $Check_token['access_token'], $marzban_list_get['url_panel']);
@@ -859,6 +915,10 @@ if ($text == $datatextbot['text_sell']) {
     if (isset($get_username_Check['username']) || in_array($username_ac, $usernameinvoice)) {
         $username_ac = $random_number . $username_ac;
     }
+    $stmt = $connect->prepare("INSERT IGNORE INTO invoice (id_user, id_invoice, username,time_sell, Service_location, name_product, price_product, Volume, Service_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)");
+    $stmt->bind_param("sssssssss", $from_id, $randomString, $username_ac, $date, $Processing_value, $info_product['name_product'], $info_product['price_product'], $info_product['Volume_constraint'], $info_product['Service_time']);
+    $stmt->execute();
+    $stmt->close();
     $date = strtotime("+" . $info_product['Service_time'] . "days");
     $timestamp = strtotime(date("Y-m-d H:i:s", $date));
     $data_limit = $info_product['Volume_constraint'] * pow(1024, 3);
@@ -923,8 +983,8 @@ if ($text == $datatextbot['text_sell']) {
     👤 نام کاربری شما : <code>$username_ac</code>
     🔑 اشتراک شما با موفقیت ساخته شد.
     
-    $text_config
-    $link_config
+$text_config
+$link_config
     ";
     sendmessage($from_id, $textcreatuser, $Shoppinginfo, 'HTML');
     sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
@@ -963,7 +1023,10 @@ if ($text == $datatextbot['text_sell']) {
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 }
-#-------------------text_Add_Balance---------------------#
+
+
+
+#-------------------[ text_Add_Balance ]---------------------#
 if ($text == $datatextbot['text_Add_Balance']) {
     if ($setting['get_number'] == "✅ تایید شماره موبایل روشن است" && $user['step'] != "get_number" && $user['number'] == "none") {
         sendmessage($from_id, $textbotlang['users']['number']['Confirming'], $request_contact, 'HTML');
