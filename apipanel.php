@@ -127,7 +127,7 @@ function formatBytes($bytes, $precision = 2): string
     return round(pow(1024, $base - $power), $precision) . ' ' . $suffixes[$power];
 }
 #---------------------[ ]--------------------------#
-function generateUsername($from_id,$Metode,$username,$randomString)
+function generateUsername($from_id,$Metode,$username,$randomString,$text)
 {
     global $connect;
     if($Metode == "آیدی عددی + حروف و عدد رندوم"){
@@ -140,6 +140,6 @@ function generateUsername($from_id,$Metode,$username,$randomString)
         $statistics = mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(id_user)  FROM invoice WHERE id_user = '$from_id'"));
         $countInvoice = intval($statistics['COUNT(id_user)']) + 1 ;
         return $username."_".$countInvoice;
-        
     }
+    elseif($Metode == "نام کاربری دلخواه")return $text;
 }
