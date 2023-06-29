@@ -47,7 +47,27 @@ function getuser($username,$token,$url_panel)
     $data_useer = json_decode($output, true);
     return $data_useer;
 }
+#-----------------------------#
+function ResetUserDataUsage($username,$token,$url_panel)
+{
+    $usernameac = $username;
+    $url =  $url_panel.'/api/user/' . $usernameac.'/reset';
+    $header_value = 'Bearer ';
 
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_POST , true);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'Accept: application/json',
+        'Authorization: ' . $header_value .  $token
+    ));
+
+    $output = curl_exec($ch);
+    curl_close($ch);
+    $data_useer = json_decode($output, true);
+    return $data_useer;
+}
 #-----------------------------#
 function adduser($username,$expire,$data_limit,$token,$url_panel,array $protocol)
 {
@@ -116,6 +136,31 @@ function removeuser($token,$url_panel,$username)
     $output = curl_exec($ch);
     curl_close($ch);
     $data_useer = json_decode($output, true);
+    return $data_useer;
+}
+//----------------------------------
+function Modifyuser($token,$url_panel,$username,$expire)
+{
+$url =  $url_panel.'/api/user/'.$username;
+    $data = array(
+        "expire" => $expire,
+    );
+
+    $payload = json_encode($data);
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+$headers = array();
+$headers[] = 'Accept: application/json';
+$headers[] = 'Authorization: Bearer '.$token;
+$headers[] = 'Content-Type: application/json';
+curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+$result = curl_exec($ch);
+curl_close($ch);
+    $data_useer = json_decode($result, true);
     return $data_useer;
 }
 #-----------------------------------------------#
