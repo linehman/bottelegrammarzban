@@ -37,7 +37,8 @@ if ($table_exists) {
         }
     }
 }
-$keyboard = json_encode([
+$admin_ids = array_column(mysqli_fetch_all(mysqli_query($connect, "SELECT (id_admin) FROM admin"), MYSQLI_ASSOC), 'id_admin');
+$keyboard = [
     'keyboard' => [
         [['text' => $datatextbot['text_sell']], ['text' => $datatextbot['text_usertest']]],
         [['text' => $datatextbot['text_Purchased_services']]],
@@ -46,7 +47,13 @@ $keyboard = json_encode([
         [['text' => $datatextbot['text_fq']]],
     ],
     'resize_keyboard' => true
-]);
+];
+if(in_array($from_id,$admin_ids)){
+$keyboard['keyboard'][] = [
+        ['text' => "ادمین"],
+    ];
+}
+    $keyboard  = json_encode($keyboard);
 $keyboardPanel = json_encode([
     'keyboard' => [
         [['text' => $datatextbot['text_Discount']],['text' => $datatextbot['text_account']]],
@@ -190,6 +197,7 @@ $keyboardmarzban =  json_encode([
         [['text' => "❌ حذف پنل"], ['text' => "⚙️ارسال کانفیگ"]],
         [['text' => "🔗 ارسال لینک سابسکرایبشن"]],
         [['text' => "🌏 مدیریت پروتکل"],['text' => "🗑 حذف پروتکل "]],
+        [['text' => "💡 روش ساخت نام کاربری"]],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true
@@ -401,6 +409,16 @@ $NotProductUser = json_encode([
 $keyboardprotocol = json_encode([
     'keyboard' => [
         [['text' => "vless"],['text' => "vmess"],['text' => "trojan"]],
+        [['text' => "🏠 بازگشت به منوی مدیریت"]]
+    ],
+    'resize_keyboard' => true
+]);
+$MethodUsername = json_encode([
+    'keyboard' => [
+        [['text' => "نام کاربری + عدد به ترتیب"]],
+        [['text' => "آیدی عددی + حروف و عدد رندوم"]],
+        [['text' => "نام کاربری + حروف و عدد رندوم"]],
+        [['text' => "نام کاربری دلخواه"]],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true
