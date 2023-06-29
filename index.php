@@ -502,8 +502,6 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
     $timeDiff = $data_useer['expire'] - time();
     $day = $data_useer['expire'] ? floor($timeDiff / 86400) + 1 . $textbotlang['users']['stateus']['day'] : $textbotlang['users']['stateus']['Unlimited'];
     #-----------------------------#
-
-
     $keyboardinfo = json_encode([
         'inline_keyboard' => [
             [
@@ -529,7 +527,7 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
                 ['text' => $textbotlang['users']['stateus']['RemainingVolume'], 'callback_data' => 'RemainingVolume'],
             ],
             [
-                ['text' => $textbotlang['users']['stateus']['getlinksub'], 'callback_data' => 'subscriptionurl_' . $usernames],
+                ['text' => $textbotlang['users']['stateus']['manageService'], 'callback_data' => 'settings_' . $usernames],
             ],
             [
                 ['text' => $textbotlang['users']['stateus']['backlist'], 'callback_data' => 'backorder'],
@@ -538,9 +536,24 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
     ]);
     Editmessagetext($from_id, $message_id, $textbotlang['users']['stateus']['info'], $keyboardinfo);
 }
-if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
-    sendmessage($from_id, $textsub, null, 'html');
-
+if (preg_match('/settings_(\w+)/', $datain, $dataget)) {
+        $username = $dataget[1];
+        $keyboardsetting = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $textbotlang['users']['stateus']['linksub'], 'callback_data' => 'subscriptionurl_'.$username],
+                ['text' => $textbotlang['users']['stateus']['config'], 'callback_data' => 'config_'.$username],
+            ],[
+                ['text' => $textbotlang['users']['extend']['title'], 'callback_data' => 'extend_'.$username],
+            ],
+            [
+                ['text' => $textbotlang['users']['stateus']['backservice'], 'callback_data' => "product_" . $username],
+            ]
+        ]
+    ]);
+    Editmessagetext($from_id, $message_id, $textbotlang['users']['stateus']['DecManageService '], $keyboardsetting);
+ }
+elseif (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
     $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$username'"));
     $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$nameloc['Service_location']}'"));
@@ -556,6 +569,79 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     <code>$subscriptionurl</code>";
     sendmessage($from_id, $textsub, null, 'html');
 }
+elseif (preg_match('/config_(\w+)/', $datain, $dataget)) {
+    $username = $dataget[1];
+    $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$username'"));
+    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$nameloc['Service_location']}'"));
+    $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
+    $data_useer = getuser($username, $Check_token['access_token'], $marzban_list_get['url_panel']);
+    foreach ($data_useer['links'] as $configs) {
+            $config .= "\n\n" . $configs;
+        }
+    $textsub = "
+    {$textbotlang['users']['config']}
+<code>$config</code>";
+    sendmessage($from_id, $textsub, null, 'html');
+}
+elseif (preg_match('/extend_(\w+)/', $datain, $dataget)) {
+    $username = $dataget[1];
+    $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$username'"));
+    $prodcut = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '{$nameloc['name_product']}'"));
+            $keyboardextend = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $textbotlang['users']['extend']['confirm'], 'callback_data' => "confirmserivce_".$username],
+            ]
+        ]
+    ]);
+     $prodcut['price_product'] = number_format($prodcut['price_product'],0);
+    $textextend = "🧾 فاکتور تمدید شما برای نام کاربری $username ایجاد شد.
+
+🛍 نام محصول :  {$nameloc['name_product']}
+مبلغ تمدید :  {$prodcut['price_product']}
+مدت زمان تمدید : {$prodcut['Service_time']} روز
+حجم تمدید : {$prodcut['Volume_constraint']} گیگ
+
+⚠️ پس از تمدید حجم شما ریست خواهد شدو اگر حجمی باقی مانده باشد حذف می شود و زمان باقی مانده به زمان تمدید اضافه خواهد شد
+
+✅ برای تایید و تمدید سرویس روی دکمه زیر کلیک کنید
+
+❌ برای تمدید باید کیف پول خود را شارژ کنید.";
+    sendmessage($from_id,$textextend, $keyboardextend, 'HTML');
+}
+elseif (preg_match('/confirmserivce_(\w+)/', $datain, $dataget)) {
+    $username = $dataget[1];
+    $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$username'"));
+    $prodcut = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '{$nameloc['name_product']}'"));
+        if($user['Balance'] <$prodcut['price_product']){
+            sendmessage($from_id, $textbotlang['users']['sell']['None-credit'], $keyboard, 'HTML');
+        }
+    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$nameloc['Service_location']}'"));
+    $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
+    $data_useer = getuser($username, $Check_token['access_token'], $marzban_list_get['url_panel']);
+    ResetUserDataUsage($username, $Check_token['access_token'], $marzban_list_get['url_panel']);
+    if(isset($data_useer['expire'])){
+    $oldTimestamp = $data_useer['expire'];
+    $newDate = $oldTimestamp + ($prodcut['Service_time'] * 86400);
+    }else{
+    $date = strtotime("+" . $prodcut['Service_time'] . "day");
+    $newDate = strtotime(date("Y-m-d H:i:s", $date));
+    }
+    $Modifyuser =Modifyuser($Check_token['access_token'],$marzban_list_get['url_panel'],$username,$newDate);
+            $keyboardextendfnished = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $textbotlang['users']['stateus']['backlist'], 'callback_data' => "backorder"],
+            ],
+            [
+                                ['text' => $textbotlang['users']['stateus']['backservice'], 'callback_data' => "product_" . $username],
+]
+        ]
+    ]);
+    sendmessage($from_id,$textbotlang['users']['extend']['thanks'],$keyboardextendfnished, 'HTML');
+}
+
+
 #-----------usertest------------#
 if ($text == $datatextbot['text_usertest']) {
     if ($setting['get_number'] == "✅ تایید شماره موبایل روشن است" && $user['step'] != "get_number" && $user['number'] == "none") {
@@ -873,6 +959,9 @@ elseif ($user['step'] == "endstepuser") {
     }
     $loc = $text;
     }
+    $stmt = $connect->prepare("UPDATE user SET Processing_value_one = ? WHERE id = ?");
+    $stmt->bind_param("ss", $loc, $from_id);
+    $stmt->execute();
     $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '$loc' LIMIT 1"));
     $randomString = bin2hex(random_bytes(2));
     $username_ac = generateUsername($from_id, $setting['MethodUsername'], $username, $randomString,$text);
