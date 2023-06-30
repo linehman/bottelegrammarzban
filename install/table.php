@@ -218,30 +218,43 @@ $connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_us
             $connect->query("UPDATE setting SET roll_Status = '✅ روشن '");
             echo "The roll_Status field was added ✅";
         }
+        $settingsql = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM setting"));
         $sublink = "✅ لینک اشتراک فعال است.";
         $active_phone_iran_text = "❌ بررسی شماره ایرانی غیرفعال است";
         $configManual = "❌ ارسال کانفیگ دستی خاموش است";
         $MethodUsernameupdate = "آیدی عددی + حروف و عدد رندوم";
+        if(!isset($settingsql['configManual'])){
         $stmt = $connect->prepare("UPDATE setting SET configManual = ?");
         $stmt->bind_param("s", $configManual);
         $stmt->execute();
+        }
+        if(!isset($settingsql['iran_number'])){
         $stmt = $connect->prepare("UPDATE setting SET iran_number = ?");
         $stmt->bind_param("s", $active_phone_iran_text);
         $stmt->execute();
+        }
+        if(!isset($settingsql['sublink'])){
         $stmt = $connect->prepare("UPDATE setting SET sublink = ?");
         $stmt->bind_param("s", $sublink);
         $stmt->execute();
+        }
+        if(!isset($settingsql['NotUser'])){
         $stmt = $connect->prepare("UPDATE setting SET NotUser = ?");
         $text = "offnotuser";
         $stmt->bind_param("s", $text);
         $stmt->execute();
+        }
+        if(!isset($settingsql['two_columns'])){
         $stmt = $connect->prepare("UPDATE setting SET two_columns = ?");
         $text = "off";
         $stmt->bind_param("s", $text);
         $stmt->execute();
+        }
+        if(!isset($settingsql['MethodUsername'])){
         $stmt = $connect->prepare("UPDATE setting SET MethodUsername = ?");
         $stmt->bind_param("s", $MethodUsernameupdate);
         $stmt->execute();
+        }
     }
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
