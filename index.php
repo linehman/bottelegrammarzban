@@ -1,6 +1,6 @@
 <?php
 /*
-pv  => @gholipour3
+pv  => @mahdigh9
 channel => @mirzapanel
 */
 date_default_timezone_set('Asia/Tehran');
@@ -624,6 +624,11 @@ elseif (preg_match('/confirmserivce_(\w+)/', $datain, $dataget)) {
 
 #-----------usertest------------#
 if ($text == $datatextbot['text_usertest']) {
+    $locationproduct = mysqli_query($connect, "SELECT * FROM marzban_panel");
+    if (mysqli_num_rows($locationproduct) == 0) {
+    sendmessage($from_id, $textbotlang['Admin']['managepanel']['nullpanel'], null, 'HTML');
+    return;
+}
     if ($setting['get_number'] == "✅ تایید شماره موبایل روشن است" && $user['step'] != "get_number" && $user['number'] == "none") {
         sendmessage($from_id, $textbotlang['users']['number']['Confirming'], $request_contact, 'HTML');
         $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -875,6 +880,12 @@ if ($text == $datatextbot['text_account']) {
     sendmessage($from_id, $text_account, null, 'HTML');
 }
 if ($text == $datatextbot['text_sell']) {
+        $locationproduct = mysqli_query($connect, "SELECT * FROM marzban_panel");
+
+if (mysqli_num_rows($locationproduct) == 0) {
+    sendmessage($from_id, $textbotlang['Admin']['managepanel']['nullpanel'], null, 'HTML');
+    return;
+}
     if ($setting['get_number'] == "✅ تایید شماره موبایل روشن است" && $user['step'] != "get_number" && $user['number'] == "none") {
         sendmessage($from_id, $textbotlang['users']['number']['Confirming'], $request_contact, 'HTML');
         $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -891,6 +902,12 @@ if ($text == $datatextbot['text_sell']) {
     $stmt->execute();
 } 
 elseif ($user['step'] == "get_product") {
+            $nullproduct = mysqli_query($connect, "SELECT * FROM product");
+
+if (mysqli_num_rows($nullproduct) == 0) {
+    sendmessage($from_id, $textbotlang['Admin']['Product']['nullpProduct'], null, 'HTML');
+    return;
+}
     if (!in_array($text, $marzban_list)) {
         sendmessage($from_id, $textbotlang['users']['sell']['Service-Location'], null, 'HTML');
         return;
