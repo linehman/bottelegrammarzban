@@ -2,6 +2,7 @@
 function telegram($method, $datas = [])
 {
     global $APIKEY;
+    file_get_contents("https://api.telegram.org/bot".$APIKEY."/getwebhookinfo");
     $url = "https://api.telegram.org/bot" . $APIKEY . "/" . $method;
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
