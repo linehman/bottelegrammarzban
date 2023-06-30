@@ -942,7 +942,7 @@ elseif ($user['step'] == "endstepuser") {
     $stmt = $connect->prepare("UPDATE user SET Processing_value_one = ? WHERE id = ?");
     $stmt->bind_param("ss", $loc, $from_id);
     $stmt->execute();
-    $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '$loc' LIMIT 1"));
+    $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '$loc' AND Location = '$Processing_value' LIMIT 1"));
     $randomString = bin2hex(random_bytes(2));
     $username_ac = generateUsername($from_id, $setting['MethodUsername'], $username, $randomString,$text);
     $stmt = $connect->prepare("UPDATE user SET Processing_value_tow = ? WHERE id = ?");
@@ -964,7 +964,7 @@ elseif ($user['step'] == "endstepuser") {
     $stmt->execute();
 } 
 elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریافت سرویس") {
-    $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '{$user['Processing_value_one']}' LIMIT 1"));
+    $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '{$user['Processing_value_one']}' AND Location = '$Processing_value' LIMIT 1"));
     if (empty($info_product['price_product']) || empty($info_product['price_product'])) return;
     if ($info_product['price_product'] > $user['Balance']) {
         sendmessage($from_id, $textbotlang['users']['sell']['None-credit'], $keyboard, 'HTML');
@@ -2527,23 +2527,33 @@ if ($text == "🏬 بخش فروشگاه") {
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 } elseif ($user['step'] == "get_limit") {
-    $stmt = $connect->prepare("INSERT IGNORE INTO product (name_product) VALUES (?)");
-    $stmt->bind_param("s", $text);
+    $randomString = bin2hex(random_bytes(2));
+    $stmt = $connect->prepare("INSERT IGNORE INTO product (name_product,code_product) VALUES (?,?)");
+    $stmt->bind_param("ss", $text,$randomString);
     $stmt->execute();
     $stmt = $connect->prepare("UPDATE user SET Processing_value = ? WHERE id = ?");
-    $stmt->bind_param("ss", $text, $from_id);
+    $stmt->bind_param("ss", $randomString, $from_id);
     $stmt->execute();
-    sendmessage($from_id, $textbotlang['Admin']['Product']['GetLimit'], $backadmin, 'HTML');
+    sendmessage($from_id,$textbotlang['Admin']['Product']['Service_location'], $json_list_marzban_panel, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'get_location';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+} elseif ($user['step'] == "get_location") {
+    $stmt = $connect->prepare("UPDATE product SET Location = ? WHERE code_product = ?");
+    $stmt->bind_param("ss", $text, $Processing_value);
+    $stmt->execute();
+        sendmessage($from_id, $textbotlang['Admin']['Product']['GetLimit'], $backadmin, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'get_time';
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
-} elseif ($user['step'] == "get_time") {
+}elseif ($user['step'] == "get_time") {
     if (!ctype_digit($text)) {
         sendmessage($from_id, $textbotlang['Admin']['Product']['Invalidvolume'], $backadmin, 'HTML');
         return;
     }
-    $stmt = $connect->prepare("UPDATE product SET Volume_constraint = ? WHERE name_product = ?");
+    $stmt = $connect->prepare("UPDATE product SET Volume_constraint = ? WHERE code_product = ?");
     $stmt->bind_param("ss", $text, $Processing_value);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['Product']['GettIime'], $backadmin, 'HTML');
@@ -2551,12 +2561,12 @@ if ($text == "🏬 بخش فروشگاه") {
     $step = 'get_price';
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
-} elseif ($user['step'] == "get_price") {
+}elseif ($user['step'] == "get_price") {
     if (!ctype_digit($text)) {
         sendmessage($from_id, $textbotlang['Admin']['Product']['InvalidTime'], $backadmin, 'HTML');
         return;
     }
-    $stmt = $connect->prepare("UPDATE product SET Service_time = ? WHERE name_product = ?");
+    $stmt = $connect->prepare("UPDATE product SET Service_time = ? WHERE code_product = ?");
     $stmt->bind_param("ss", $text, $Processing_value);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['Product']['GetPrice'], $backadmin, 'HTML');
@@ -2569,7 +2579,7 @@ if ($text == "🏬 بخش فروشگاه") {
         sendmessage($from_id, $textbotlang['Admin']['Product']['InvalidPrice'], $backadmin, 'HTML');
         return;
     }
-    $stmt = $connect->prepare("UPDATE product SET price_product = ? WHERE name_product = ?");
+    $stmt = $connect->prepare("UPDATE product SET price_product = ? WHERE code_product = ?");
     $stmt->bind_param("ss", $text, $Processing_value);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['Product']['SaveProduct'], $shopkeyboard, 'HTML');
@@ -2678,39 +2688,64 @@ if (preg_match('/reject_pay_(\w+)/', $datain, $datagetr)) {
 }
 #-------------------------#
 if ($text == "❌ حذف محصول") {
-    sendmessage($from_id, "محصولی که میخوای حذف کنی ر و انتخاب کن", $json_list_product_list_admin, 'HTML');
+    sendmessage($from_id,$textbotlang['Admin']['Product']['Rmove_location'], $json_list_marzban_panel, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
-    $step = 'remove-product';
+    $step = 'selectloc';
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
-} elseif ($user['step'] == "remove-product") {
+}elseif ($user['step'] == "selectloc") {
+    $stmt = $connect->prepare("UPDATE user SET Processing_value = ? WHERE id = ?");
+    $stmt->bind_param("ss", $text, $from_id);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = "remove-product";
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+    sendmessage($from_id,$textbotlang['Admin']['Product']['selectRemoveProduct'], $json_list_product_list_admin, 'HTML');
+}elseif ($user['step'] == "remove-product") {
     if (!in_array($text, $name_product)) {
-        sendmessage($from_id, "❌ خطا 
-        📝 محصول انتخابی وجود ندارد", null, 'HTML');
+        sendmessage($from_id, $textbotlang['users']['sell']['error-product'], null, 'HTML');
         return;
     }
-    $stmt = $connect->prepare("DELETE FROM product WHERE name_product = ?");
-    $stmt->bind_param("s", $text);
+    $stmt = $connect->prepare("DELETE FROM product WHERE name_product = ? AND Location= ? or Location= '/all'");
+    $stmt->bind_param("ss", $text,$user['Processing_value']);
     $stmt->execute();
-    sendmessage($from_id, "✅ محصول با موفقیت حذف گردید.", $shopkeyboard, 'HTML');
+    sendmessage($from_id, $textbotlang['Admin']['Product']['RemoveedProduct'], $shopkeyboard, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = "home";
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
 }
 #-------------------------#
 if ($text == "✏️ ویرایش محصول") {
-    sendmessage($from_id, "محصولی که میخوای ویرایش کنی رو انتخاب کن", $json_list_product_list_admin, 'HTML');
+    sendmessage($from_id,$textbotlang['Admin']['Product']['Rmove_location'], $json_list_marzban_panel, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'selectlocedite';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif ($user['step'] == "selectlocedite") {
+    $stmt = $connect->prepare("UPDATE user SET Processing_value_one = ? WHERE id = ?");
+    $stmt->bind_param("ss", $text, $from_id);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = "editproduct";
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+    sendmessage($from_id, $textbotlang['Admin']['Product']['selectEditProduct'], $json_list_product_list_admin, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'change_filde';
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 } elseif ($user['step'] == "change_filde") {
     if (!in_array($text, $name_product)) {
-        sendmessage($from_id, "❌ خطا 
-        📝 محصول انتخابی وجود ندارد", null);
+        sendmessage($from_id, $textbotlang['users']['sell']['error-product'], null);
         return;
     }
     $stmt = $connect->prepare("UPDATE user SET Processing_value = ? WHERE id = ?");
     $stmt->bind_param("ss", $text, $from_id);
     $stmt->execute();
-    sendmessage($from_id, "فیلدی که مخیواهید ویرایش کنید را انتخاب کنید", $change_product, 'HTML');
+    sendmessage($from_id, $textbotlang['Admin']['Product']['selectfieldProduct'], $change_product, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'home';
     $stmt->bind_param("ss", $step, $from_id);
@@ -2728,8 +2763,8 @@ if ($text == "قیمت") {
         sendmessage($from_id, $textbotlang['Admin']['Product']['InvalidPrice'], $backadmin, 'HTML');
         return;
     }
-    $stmt = $connect->prepare("UPDATE product SET price_product = ? WHERE name_product = ?");
-    $stmt->bind_param("ss", $text, $Processing_value);
+    $stmt = $connect->prepare("UPDATE product SET price_product = ? WHERE name_product = ? AND Location = ? ");
+    $stmt->bind_param("sss", $text, $Processing_value,$user['Processing_value_one']);
     $stmt->execute();
     sendmessage($from_id, "✅ قیمت محصول بروزرسانی شد", $shopkeyboard, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -2740,13 +2775,13 @@ if ($text == "قیمت") {
 #-------------------------#
 if ($text == "نام محصول") {
     sendmessage($from_id, "نام جدید را ارسال کنید", $backadmin, 'HTML');
-    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ? AND Location = ? ");
     $step = 'change_name';
-    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->bind_param("sss", $step, $from_id,$user['Processing_value_one']);
     $stmt->execute();
 } elseif ($user['step'] == "change_name") {
-    $stmt = $connect->prepare("UPDATE product SET name_product = ? WHERE name_product = ?");
-    $stmt->bind_param("ss", $text, $Processing_value);
+    $stmt = $connect->prepare("UPDATE product SET name_product = ? WHERE name_product = ? AND Location = ? ");
+    $stmt->bind_param("sss", $text, $Processing_value,$user['Processing_value_one']);
     $stmt->execute();
     sendmessage($from_id, "✅نام محصول بروزرسانی شد", $shopkeyboard, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -2766,8 +2801,8 @@ if ($text == "حجم") {
         sendmessage($from_id, $textbotlang['Admin']['Product']['Invalidvolume'], $backadmin, 'HTML');
         return;
     }
-    $stmt = $connect->prepare("UPDATE product SET Volume_constraint = ? WHERE name_product = ?");
-    $stmt->bind_param("ss", $text, $Processing_value);
+    $stmt = $connect->prepare("UPDATE product SET Volume_constraint = ? WHERE name_product = ?  AND Location = ? ");
+    $stmt->bind_param("sss", $text, $Processing_value,$user['Processing_value_one']);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['Product']['volumeUpdated'], $shopkeyboard, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -2787,8 +2822,8 @@ if ($text == "زمان") {
         sendmessage($from_id, $textbotlang['Admin']['Product']['InvalidTime'], $backadmin, 'HTML');
         return;
     }
-    $stmt = $connect->prepare("UPDATE product SET Service_time = ? WHERE name_product = ?");
-    $stmt->bind_param("ss", $text, $Processing_value);
+    $stmt = $connect->prepare("UPDATE product SET Service_time = ? WHERE name_product = ? AND Location = ? ");
+    $stmt->bind_param("sss", $text, $Processing_value,$user['Processing_value_one']);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['Product']['TimeUpdated'], $shopkeyboard, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
