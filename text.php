@@ -199,6 +199,7 @@ $textbotlang['Admin']['managepanel']['getpassword'] = "🔑 نام کاربری 
 $textbotlang['Admin']['managepanel']['addedpanel'] = "تبریک پنل شما با موفقیت اضافه گردید";
 $textbotlang['Admin']['managepanel']['GetRemoveNamePanel'] = "پنلی که میخواهید حذف کنید را انتخاب کنید.";
 $textbotlang['Admin']['managepanel']['RemovedPanel'] = "پنل با موفقیت حذف گردید";
+$textbotlang['Admin']['managepanel']['nullpanel'] = "⭕️ موقعیتی یافت نشد برای رفع مشکل با پشتیبانی در ارتباط باشید";
 
 
 
@@ -302,6 +303,7 @@ $textbotlang['Admin']['Channel']['TestChannel'] = "تست ارسال کانال 
 $textbotlang['Admin']['Product']['Service_location'] ="📌 موقعیت محصول خود را انتخاب کنید
 
  ⭕️ برای تعریف محصول در همه موقعیت ها دستور /all را ارسال کنید";
+$textbotlang['Admin']['Product']['nullpProduct']   = "⭕️ محصولی یافت نشد برای رفع مشکل با پشتیبانی در ارتباط باشید";
 $textbotlang['Admin']['Product']['Rmove_location'] ="📌 موقعیت محصول خود را انتخاب کنید";
 $textbotlang['Admin']['Product']['selectRemoveProduct'] ="محصولی که میخوای حذف کنی ر و انتخاب کن";
 $textbotlang['Admin']['Product']['selectEditProduct'] ="محصولی که میخوای ویرایش کنی رو انتخاب کن";
