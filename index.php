@@ -965,6 +965,7 @@ elseif ($user['step'] == "endstepuser") {
     $stmt = $connect->prepare("UPDATE user SET Processing_value_tow = ? WHERE id = ?");
     $stmt->bind_param("ss", $username_ac, $from_id);
     $stmt->execute();
+    if($info_product['Volume_constraint'] == 0 )$info_product['Volume_constraint'] = $textbotlang['users']['stateus']['Unlimited'];
     $textin = "
          📇 پیش فاکتور شما:
 👤 نام کاربری: <code>$username_ac</code>
