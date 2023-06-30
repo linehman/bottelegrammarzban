@@ -37,7 +37,8 @@ if ($table_exists) {
         }
     }
 }
-$admin_ids = array_column(mysqli_fetch_all(mysqli_query($connect, "SELECT (id_admin) FROM admin"), MYSQLI_ASSOC), 'id_admin');
+$result = mysqli_query($connect, "SELECT id_admin FROM admin");
+$admin_ids = array_column(mysqli_fetch_all($result, MYSQLI_ASSOC), 'id_admin');
 $keyboard = [
     'keyboard' => [
         [['text' => $datatextbot['text_sell']], ['text' => $datatextbot['text_usertest']]],
@@ -305,7 +306,7 @@ $textbot = json_encode([
 $result = $connect->query("SHOW TABLES LIKE 'product'");
 $table_exists = ($result->num_rows > 0);
 if ($table_exists) {
-        $getdataproduct = mysqli_query($connect, "SELECT * FROM product");
+        $getdataproduct = mysqli_query($connect, "SELECT * FROM product WHERE Location = '$text' OR Location = '/all' ");
         if($setting['two_columns'] =="on"){
         while ($result = mysqli_fetch_assoc($getdataproduct)) {
     $product[] = ['text'=>$result['name_product']];
@@ -342,7 +343,7 @@ $result = $connect->query("SHOW TABLES LIKE 'product'");
 $table_exists = ($result->num_rows > 0);
 if ($table_exists) {
     $product = [];
-    $getdataproduct = mysqli_query($connect, "SELECT * FROM product");
+    $getdataproduct = mysqli_query($connect, "SELECT * FROM product WHERE Location = '$text' or Location = '/all' ");
     while ($row = mysqli_fetch_assoc($getdataproduct)) {
         $product[] = [$row['name_product']];
     }
