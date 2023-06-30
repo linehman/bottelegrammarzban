@@ -330,14 +330,26 @@ try {
     if (!$table_exists) {
         $result = $connect->query("CREATE TABLE product (
         id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        code_product varchar(200)  NULL,
         name_product varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL,
         price_product varchar(2000) NULL,
         Volume_constraint varchar(2000) NULL,
+        Location varchar(1000) NULL,
         Service_time varchar(200) NULL)
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
             echo "table product".mysqli_error($connect);
         }
+    }
+    else{
+        $Check_filde = $connect->query("SHOW COLUMNS FROM product LIKE 'Location'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+           $result = $connect->query("ALTER TABLE product ADD Location VARCHAR(1000)");
+        } 
+        $Check_filde = $connect->query("SHOW COLUMNS FROM product LIKE 'code_product'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+           $result = $connect->query("ALTER TABLE product ADD code_product VARCHAR(200)");
+        } 
     }
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
