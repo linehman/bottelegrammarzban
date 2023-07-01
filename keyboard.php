@@ -123,7 +123,6 @@ $step_payment = json_encode([
     'keyboard' => [
         [['text' => "💳 کارت به کارت"]],
         [['text' => "💵 پرداخت nowpayments"]],
-        [['text' => "💎درگاه پرداخت ارزی (ریالی )"]],
         [['text' => "🏠 بازگشت به منوی اصلی"]]
     ],
     'resize_keyboard' => true
@@ -311,7 +310,9 @@ if ($table_exists) {
         while ($result = mysqli_fetch_assoc($getdataproduct)) {
     $product[] = ['text'=>$result['name_product']];
     }
-    $product = array_chunk($product,2);
+    if ($product !== null) {
+    $product = array_chunk($product, 2);
+}
     $product[] = [['text'=>"🏠 بازگشت به منوی اصلی"]];
     $json_list_product_list = json_encode(['resize_keyboard'=>true,'keyboard'=> $product]);
         }
