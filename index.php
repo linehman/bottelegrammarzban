@@ -86,7 +86,7 @@ foreach ($datatxtbot as $item) {
 }
 #---------channel--------------#
 $tch = '';
-if (isset($channels['link'])) {
+if (isset($channels['link']) && $from_id != 0) {
     $response = json_decode(file_get_contents('https://api.telegram.org/bot' . $APIKEY . "/getChatMember?chat_id=@{$channels['link']}&user_id=$from_id"));
     $tch = $response->result->status;
 }
@@ -1718,7 +1718,7 @@ if ($text  == "📝 تنظیم متن ربات") {
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 } elseif ($text == "دکمه سوالات متداول") {
-    sendmessage($from_id, $textbotlang['Admin']['ManageUser']['ChangeTextGet'] . $datatextbot['text_fq'], $backadmin);
+    sendmessage($from_id, $textbotlang['Admin']['ManageUser']['ChangeTextGet'] . $datatextbot['text_fq'], $backadmin,'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'text_fq';
     $stmt->bind_param("ss", $step, $from_id);
