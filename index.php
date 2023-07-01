@@ -980,8 +980,9 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
         $stmt->execute();
         return;
     }
+    $link_config = "";
+    $text_config = "";
     if ($setting['sublink'] == "✅ لینک اشتراک فعال است.") {
-        $link_confi = "";
         $output_config_link = $data['subscription_url'];
         if (!preg_match('/^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?((\/[^\s\/]+)+)?$/', $output_config_link)) {
             $output_config_link = $marzban_list_get['url_panel'] . "/" . ltrim($output_config_link, "/");
@@ -991,7 +992,6 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
         <code>$output_config_link</code>";
     }
     if ($setting['configManual'] == "✅ ارسال کانفیگ بعد خرید فعال است.") {
-        $text_config = "";
         foreach ($data['links'] as $configs) {
             $config .= "\n\n" . $configs;
         }
@@ -1016,8 +1016,7 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
     🔑 اشتراک شما با موفقیت ساخته شد.
     
 $text_config
-$link_config
-    ";
+$link_config";
     sendmessage($from_id, $textcreatuser, $Shoppinginfo, 'HTML');
     sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET Balance = ? WHERE id = ?");
@@ -2697,7 +2696,7 @@ if ($text == "⏳ زمان سرویس تست") {
 if ($text == "💾 حجم اکانت تست") {
     sendmessage($from_id, "حجم سرویس تست را ارسال کنید.
         زمان فعلی: {$setting['val_usertest']} مگابایت
-        ⚠️ حجم بر حسب مگابایت است.", $backadmin);
+        ⚠️ حجم بر حسب مگابایت است.", $backadmin,'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'val_usertest';
     $stmt->bind_param("ss", $step, $from_id);
