@@ -13,7 +13,7 @@ foreach($rows as $row) {
     $get_username_Check = getuser($row['username'], $Check_token['access_token'], $marzban_list_get['url_panel']);
     if(isset($get_username_Check['status'])){
     if ($get_username_Check['status'] != "active" && isset($get_username_Check['status'])) {
-            sendmessage($row['id_user'], "⭕️ کاربر عزیز کانفیگ تست شما با نام کاربری {$row['username']}  حذف شد⭕️ ", null);
+            sendmessage($row['id_user'], "⭕️ کاربر عزیز کانفیگ تست شما با نام کاربری {$row['username']}  حذف شد⭕️ ", null,'HTML');
         removeuser($Check_token['access_token'], $marzban_list_get['url_panel'], $row['username']);
     }
     }
