@@ -96,19 +96,10 @@ $textbotlang['users']['Balance']['errorpricelimit'] = "❌ خطا
 $textbotlang['users']['Balance']['selectPatment'] = "💵 روش پرداخت خود را انتخاب نمایید";
 $textbotlang['users']['Balance']['nowpayments'] = "❌ خطا 
     کمترین مبلغ برای  پرداخت در این درگاه 1 دلار می باشد.";
-$textbotlang['users']['Balance']['linkpayments'] = "درحال ساخت لینک پرداخت...";
-$textbotlang['users']['Balance']['payments'] = "پرداخت";
-$textbotlang['users']['Balance']['weswap'] = "❌ خطا 
-    کمترین مبلغ برای  پرداخت در این درگاه 2 ترون می باشد";
-$textbotlang['users']['Balance']['errorLinkPayment'] = "❌ خطایی در ساخت لینک پرداخت رخ داده است برای رفع  با پشتیبانی در ارتباط باشید.";
-$textbotlang['users']['Balance']['Confirmpaying']  = "✅ تایید پرداخت";
+$textbotlang['users']['Balance']['linkpayments'] = "درحال ساخت لینک پرداخت...";;
 $textbotlang['users']['Balance']['reject_pay']  = "❌ رد پرداخت";
 $textbotlang['users']['Balance']['Confirmpayadmin']  = "⭕️  پرداخت از قبل تایید شده است";
 $textbotlang['users']['Balance']['Confirmpay']  = "✅ کاربر گرامی پرداخت شما با موفقیت انجام شد و مبلع پرداختی به موجودی شما اضافه گردید";
-$textbotlang['users']['Balance']['expired'] = "زمان لینک پرداخت منقضی شده و قابل بررسی نیست";
-$textbotlang['users']['Balance']['refunded'] = "مبلغ به کیف پول شما بازگشته است";
-$textbotlang['users']['Balance']['waiting'] = "در انتظار تایید پرداخت";
-$textbotlang['users']['Balance']['Failed'] = "⭕️ پرداخت شما تایید نگردیده است";
 $textbotlang['users']['Balance']['Invalid-receipt'] = "رسید نامعتبر است رسید باید فقط عکس باشد";
 $textbotlang['users']['Balance']['Send-receipt'] ="🚀 رسید پرداخت  شما ارسال شد پس از تایید توسط مدیریت مبلغ به کیف پول شما واریز خواهد شد";
 
