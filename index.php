@@ -615,7 +615,7 @@ if ($text == $datatextbot['text_usertest']) {
     elseif ($user['step'] == "createusertest") {
         if($setting['MethodUsername'] == "نام کاربری دلخواه"){
             if (!preg_match('~^[a-z][a-z\d_]{2,32}$~i', $text)) {
-        sendmessage($from_id, $textbotlang['users']['invalidusername'], $backuser);
+        sendmessage($from_id, $textbotlang['users']['invalidusername'], $backuser,'HTML');
         return;
     }
     $name_panel = $user['Processing_value_tow'];
