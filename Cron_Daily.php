@@ -1,5 +1,5 @@
 <?php
-// کرون جاب هر 1 دقیقه تنظیم شود
+// کرون جاب هر 1 روز تنظیم شود
 require_once 'config.php';
 require_once 'apipanel.php';
 require_once 'botapi.php';
@@ -21,7 +21,7 @@ while ($row = mysqli_fetch_assoc($list_service)) {
 نام کاربری : <code>{$row['username']}</code>
 نام سرویس : {$row['Service_location']}
 ";
-sendmessage($row['id_user'], $text, null);
+sendmessage($row['id_user'], $text, null,'HTML');
     }
     if($timeservice <= "167000" && $timeservice >=0){
         $text = "
@@ -30,7 +30,7 @@ sendmessage($row['id_user'], $text, null);
 نام کاربری : <code>{$row['username']}</code>
 نام سرویس : {$row['Service_location']}
 ";
-sendmessage($row['id_user'], $text, null);
+sendmessage($row['id_user'], $text, null,'HTML');
     }
     }
 }
