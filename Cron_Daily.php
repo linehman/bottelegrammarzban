@@ -14,7 +14,7 @@ while ($row = mysqli_fetch_assoc($list_service)) {
     $day = floor($timeservice / 86400) + 1 ;
     $output =  $get_username_Check['data_limit'] - $get_username_Check['used_traffic'];
         $RemainingVolume =formatBytes($output);
-    if($output <= 1073741824 && $output>0 &&  isset($get_username_Check['data_limit'])){
+    if($output <= 1073741824 && $output>0 &&  isset($get_username_Check['data_limit']) && $get_username_Check['status'] == "active"){
         $text = "
 ⭕️ کاربر گرامی از حجم  سرویس تان  $RemainingVolume مانده است
 
