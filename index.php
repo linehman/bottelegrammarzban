@@ -593,6 +593,10 @@ elseif (preg_match('/confirmserivce_(\w+)/', $datain, $dataget)) {
             sendmessage($from_id, $textbotlang['users']['sell']['None-credit'], $keyboard, 'HTML');
             return;
         }
+    $Balance_Low_user = $user['Balance'] - $prodcut['price_product'];
+    $stmt = $connect->prepare("UPDATE user SET Balance = ? WHERE id = ?");
+    $stmt->bind_param("ss", $Balance_Low_user, $from_id);
+    $stmt->execute();
     $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$nameloc['Service_location']}'"));
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $data_useer = getuser($username, $Check_token['access_token'], $marzban_list_get['url_panel']);
@@ -1086,7 +1090,7 @@ $link_config";
                 ['text' => $textbotlang['users']['usertest']['phonenumber'], 'callback_data' => "iduser"],
             ],
             [
-                ['text' => $text, 'callback_data' => "namepanel"],
+                ['text' => $Processing_value, 'callback_data' => "namepanel"],
                 ['text' => $textbotlang['users']['usertest']['namepanel'], 'callback_data' => "namepanel"],
             ],
         ]
@@ -1099,7 +1103,7 @@ $link_config";
     اطلاعات کاربر 👇👇
     ⚜️ نام کاربری کاربر: @$username";
     if (strlen($setting['Channel_Report']) > 0) {
-        sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
+        sendmessage($setting['Channel_Report'], $text_report, $ShoppingReport, 'HTML');
     }
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'home';
@@ -1364,7 +1368,7 @@ if ($text == $datatextbot['text_Discount']) {
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 } elseif ($user['step'] == "get_code_user") {
-    if (!in_array($text, $Discouncode)) {
+    if (!in_array($text, $code_Discount)) {
         sendmessage($from_id, $textbotlang['users']['Discount']['notcode'], null, 'HTML');
         return;
     }
