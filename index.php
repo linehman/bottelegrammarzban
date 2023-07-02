@@ -20,9 +20,60 @@ foreach ($telegram_ip_ranges as $telegram_ip_range) if (!$ok) {
 }
 if (!$ok) die("دسترسی غیرمجاز");
 #-----------function------------#
-function tronWeswap()
+function tronchangeto()
 {
-    return json_decode(file_get_contents('https://api.weswap.digital/api/rate'), true);
+    return json_decode(file_get_contents('https://api.changeto.cards/api/rate'), true);
+}
+function nowPayments($payment, $price_amount, $order_id, $order_description)
+{
+    global $apinowpayments;
+    $curl = curl_init();
+    curl_setopt_array($curl, array(
+        CURLOPT_URL => 'https://api.nowpayments.io/v1/' . $payment,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT_MS => 4500,
+        CURLOPT_ENCODING => '',
+        CURLOPT_SSL_VERIFYPEER => 1,
+        CURLOPT_SSL_VERIFYHOST => 2,
+        CURLOPT_POST => true,
+        CURLOPT_HTTPHEADER => array(
+            'x-api-key:' . $apinowpayments,
+            'Content-Type: application/json'
+        ),
+    ));
+    curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode([
+        'price_amount' => $price_amount,
+        'price_currency' => 'usd',
+        'pay_currency' => 'trx',
+        'order_id' => $order_id,
+        'order_description' => $order_description,
+    ]));
+
+    $response = curl_exec($curl);
+    curl_close($curl);
+    return json_decode($response);
+}
+function StatusPayment($paymentid)
+{
+    global $apinowpayments;
+    $curl = curl_init();
+    curl_setopt_array($curl, array(
+        CURLOPT_URL => 'https://api.nowpayments.io/v1/payment/' . $paymentid,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'GET',
+        CURLOPT_HTTPHEADER => array(
+            'x-api-key:' . $apinowpayments
+        ),
+    ));
+    $response = curl_exec($curl);
+    $response = json_decode($response, true);
+    curl_close($curl);
+    return $response;
 }
 #-------------Variable----------#
 $version = file_get_contents('install/version');
@@ -540,6 +591,7 @@ elseif (preg_match('/confirmserivce_(\w+)/', $datain, $dataget)) {
     $prodcut = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '{$nameloc['name_product']}'"));
         if($user['Balance'] <$prodcut['price_product']){
             sendmessage($from_id, $textbotlang['users']['sell']['None-credit'], $keyboard, 'HTML');
+            return;
         }
     $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$nameloc['Service_location']}'"));
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
@@ -1074,7 +1126,7 @@ if ($text == $datatextbot['text_Add_Balance']) {
     $stmt->execute();
 } elseif ($user['step'] == "getprice") {
     if(!is_numeric($text)) return sendmessage($from_id, $textbotlang['users']['Balance']['errorprice'], null, 'HTML');
-    if ($text > 10000000 or $text < 50000) return sendmessage($from_id, $textbotlang['users']['Balance']['errorpricelimit'],  null, 'HTML');
+    if ($text > 10000000 or $text < 20000) return sendmessage($from_id, $textbotlang['users']['Balance']['errorpricelimit'],  null, 'HTML');
       
     $stmt = $connect->prepare("UPDATE user SET Processing_value = ? WHERE id = ?");
     $stmt->bind_param("ss", $text, $from_id);
@@ -1093,7 +1145,7 @@ if ($text == $datatextbot['text_Add_Balance']) {
         $stmt->execute();
     }
     if ($text == "💵 پرداخت nowpayments") {
-        $price_rate = tronWeswap();
+        $price_rate = tronchangeto();
         $USD = $price_rate['result']['USD'];
         $usdprice = round($Processing_value / $USD, 2);
         if ($usdprice < 2) {
@@ -1131,6 +1183,131 @@ if ($text == $datatextbot['text_Add_Balance']) {
 جهت پرداخت از دکمه زیر استفاده کنید👇🏻
     ";
         sendmessage($from_id, $textnowpayments, $paymentkeyboard, 'HTML');
+    }
+    if ($text == "💎درگاه پرداخت ارزی (ریالی )") {
+        $price_rate = tronchangeto();
+        $trx = $price_rate['result']['TRX'];
+        $usd = $price_rate['result']['USD'];
+        $trxprice = round($Processing_value / $trx, 2);
+        $usdprice = round($Processing_value / $usd, 2);
+        if ($trxprice <= 1) {
+            sendmessage($from_id, $textbotlang['users']['Balance']['changeto'], null, 'HTML');
+            return;
+        }
+        sendmessage($from_id, $textbotlang['users']['Balance']['linkpayments'], $keyboard, 'HTML');
+        $dateacc = date('Y/m/d h:i:s');
+        $randomString = bin2hex(random_bytes(5));
+        $stmt = $connect->prepare("INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status) VALUES (?,?,?,?,?)");
+        $payment_Status = "Unpaid";
+        $stmt->bind_param("sssss", $from_id, $randomString, $dateacc, $Processing_value, $payment_Status);
+        $stmt->execute();
+        $order_description = "weswap_" . $randomString . "_" . $trxprice;
+        $pay = nowPayments('payment', $usdprice, $randomString, $order_description);
+        if (!isset($pay->pay_address)) {
+            $text_error = $pay->message;
+            sendmessage($from_id, $textbotlang['users']['Balance']['errorLinkPayment'], $keyboard, 'HTML');
+            $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+            $step = 'home';
+            $stmt->bind_param("ss", $step, $from_id);
+            $stmt->execute();
+            foreach ($admin_ids as $admin) {
+                $ErrorsLinkPayment = "
+                ⭕️ یک کاربر قصد پرداخت داشت که ساخت لینک پرداخت  با خطا مواجه شده و به کاربر لینک داده نشد
+    ✍️ دلیل خطا : $text_error
+    
+    آیدی کابر : $from_id
+    نام کاربری کاربر : @$username";
+                sendmessage($admin, $ErrorsLinkPayment, $keyboard, 'HTML');
+            }
+            return;
+        }
+        $pay_address = $pay->pay_address;
+        $payment_id = $pay->payment_id;
+        $paymentkeyboard = json_encode([
+            'inline_keyboard' => [
+                [
+                    ['text' => $textbotlang['users']['Balance']['payments'], 'url' => "https://changeto.cards/quick?amount=$trxprice&currency=TRX&address=$pay_address"]
+                ],
+                [
+                    ['text' => $textbotlang['users']['Balance']['Confirmpaying'], 'callback_data' => "Confirmpay_user_{$payment_id}_{$randomString}"]
+                ]
+            ]
+        ]);
+        $pricetoman = number_format($Processing_value, 0);
+        $textnowpayments = "
+        ✅ لینک پرداخت شما ساخته شد.
+    
+    ● مبلغ قابل پرداخت به تومان: $pricetoman تومان
+    ● مبلغ قابل پرداخت به ترون: $trxprice ترون
+    ● نرخ  ارز  ترون:  $trx تومان
+    ● شناسه پرداخت و پیگیری: $randomString
+    
+    ⚠️ لینک پرداخت تا 13 دقیقه اعتبار خواهد داشت، پرداخت های بعد از این زمان رسیدگی نخواهند شد.
+    ❗️ پرداخت  حداکثر ۱۵  دقیقه  زمان  میبرد تا به حساب  ما ارسال  شود  پس  از  ۱۵ دقیقه  دکمه  تایید  پرداخت  را  بزنید  تا مبلغ  به  کیف پول  شما اضافه گردد.";
+        sendmessage($from_id, $textnowpayments, $paymentkeyboard, 'HTML');
+    }
+    
+}
+if (preg_match('/Confirmpay_user_(\w+)_(\w+)/', $datain, $dataget)) {
+    $id_payment = $dataget[1];
+    $id_order = $dataget[2];
+    $Payment_report = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM Payment_report WHERE id_order = '$id_order' LIMIT 1"));
+    if ($Payment_report['payment_Status'] == "paid") {
+        telegram('answerCallbackQuery', array(
+            'callback_query_id' => $callback_query_id,
+            'text' => $textbotlang['users']['Balance']['Confirmpayadmin'],
+            'show_alert' => true,
+            'cache_time' => 5,
+        ));
+        return;
+    }
+    $StatusPayment = StatusPayment($id_payment);
+    if ($StatusPayment['payment_status'] == "finished") {
+        $textchangeto = "";
+        telegram('answerCallbackQuery', array(
+            'callback_query_id' => $callback_query_id,
+            'text' => $textchangeto,
+            'show_alert' => true,
+            'cache_time' => 5,
+        ));
+        $Balance_id = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '{$Payment_report['id_user']}' LIMIT 1"));
+        $stmt = $connect->prepare("UPDATE user SET Balance = ? WHERE id = ?");
+        $Balance_confrim = intval($Balance_id['Balance']) + intval($Payment_report['price']);
+        $stmt->bind_param("ss", $Balance_confrim, $Payment_report['id_user']);
+        $stmt->execute();
+        $stmt = $connect->prepare("UPDATE Payment_report SET payment_Status = ? WHERE id_order = ?");
+        $Status_change = "paid";
+        $stmt->bind_param("ss", $Status_change, $Payment_report['id_order']);
+        $stmt->execute();
+        sendmessage($from_id, $textbotlang['users']['Balance']['Confirmpay'], null, 'HTML');
+    } elseif ($StatusPayment['payment_status'] == "expired") {
+        telegram('answerCallbackQuery', array(
+            'callback_query_id' => $callback_query_id,
+            'text' => $textbotlang['users']['Balance']['expired'],
+            'show_alert' => true,
+            'cache_time' => 5,
+        ));
+    } elseif ($StatusPayment['payment_status'] == "refunded") {
+        telegram('answerCallbackQuery', array(
+            'callback_query_id' => $callback_query_id,
+            'text' => $textbotlang['users']['Balance']['refunded'],
+            'show_alert' => true,
+            'cache_time' => 5,
+        ));
+    } elseif ($StatusPayment['payment_status'] == "waiting") {
+        telegram('answerCallbackQuery', array(
+            'callback_query_id' => $callback_query_id,
+            'text' => $textbotlang['users']['Balance']['waiting'],
+            'show_alert' => true,
+            'cache_time' => 5,
+        ));
+    } else {
+        telegram('answerCallbackQuery', array(
+            'callback_query_id' => $callback_query_id,
+            'text' => $textbotlang['users']['Balance']['Failed'],
+            'show_alert' => true,
+            'cache_time' => 5,
+        ));
     }
 }elseif ($user['step'] == "cart_to_cart_user") {
     if (!$photo) {
