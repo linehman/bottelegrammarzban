@@ -927,7 +927,7 @@ elseif ($user['step'] == "endstepuser") {
     $stmt->execute();
 } 
 elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریافت سرویس") {
-    $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '{$user['Processing_value_one']}' AND Location = '$Processing_value' LIMIT 1"));
+    $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '{$user['Processing_value_one']}' AND Location = '$Processing_value'  or Location = '/all' LIMIT 1"));
     if (empty($info_product['price_product']) || empty($info_product['price_product'])) return;
     if ($info_product['price_product'] > $user['Balance']) {
         sendmessage($from_id, $textbotlang['users']['sell']['None-credit'], $keyboard, 'HTML');
@@ -2613,9 +2613,9 @@ if ($text == "قیمت") {
 #-------------------------#
 if ($text == "نام محصول") {
     sendmessage($from_id, "نام جدید را ارسال کنید", $backadmin, 'HTML');
-    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ? AND Location = ? ");
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'change_name';
-    $stmt->bind_param("sss", $step, $from_id,$user['Processing_value_one']);
+    $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 } elseif ($user['step'] == "change_name") {
     $stmt = $connect->prepare("UPDATE product SET name_product = ? WHERE name_product = ? AND Location = ? ");
