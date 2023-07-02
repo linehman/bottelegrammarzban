@@ -904,7 +904,7 @@ elseif ($user['step'] == "endstepuser") {
     $stmt = $connect->prepare("UPDATE user SET Processing_value_one = ? WHERE id = ?");
     $stmt->bind_param("ss", $loc, $from_id);
     $stmt->execute();
-    $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '$loc' AND Location = '$Processing_value' LIMIT 1"));
+    $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '$loc' AND Location = '$Processing_value'or Location = '/all' LIMIT 1"));
     $randomString = bin2hex(random_bytes(2));
     $username_ac = generateUsername($from_id, $setting['MethodUsername'], $username, $randomString,$text);
     $stmt = $connect->prepare("UPDATE user SET Processing_value_tow = ? WHERE id = ?");
