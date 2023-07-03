@@ -697,6 +697,11 @@ if ($text == $datatextbot['text_usertest']) {
         $protocol = $row['NameProtocol'];
         $nameprotocol[$protocol] = array();
     }
+        if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
+        $nameprotocol['vless'] = array(
+                'flow' => 'xtls-rprx-vision'
+            );
+    }
     $date = strtotime("+" . $setting['time_usertest'] . "hours");
     $timestamp = strtotime(date("Y-m-d H:i:s", $date));
     $expire = $timestamp;
@@ -865,8 +870,9 @@ if ($text == $datatextbot['text_fq']) {
     sendmessage($from_id, $datatextbot['text_dec_fq'], null, 'HTML');
 }
 $dateacc = jdate('Y/m/d');
-$timeacc = jdate('h:i:s');
-if ($text == $datatextbot['text_account']) {
+$current_time = time();
+    $one_hour_later = strtotime('-1 hour', $current_time); 
+    $timeacc = jdate('H:i:s', $one_hour_later); if ($text == $datatextbot['text_account']) {
     $first_name = htmlspecialchars($first_name);
     $Balanceuser = number_format($user['Balance'], 0);
     $text_account = "
@@ -1016,6 +1022,11 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
         $protocol = $row['NameProtocol'];
         $nameprotocol[$protocol] = array();
     }
+    if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
+        $nameprotocol['vless'] = array(
+                'flow' => 'xtls-rprx-vision'
+            );
+    }
     $configuser = adduser($username_ac, $timestamp, $data_limit, $Check_token['access_token'], $marzban_list_get['url_panel'], $nameprotocol);
     $data = json_decode($configuser, true);
     if (!isset($data['username'])) {
@@ -1152,7 +1163,7 @@ if ($text == $datatextbot['text_Add_Balance']) {
         $price_rate = tronchangeto();
         $USD = $price_rate['result']['USD'];
         $usdprice = round($Processing_value / $USD, 2);
-        if ($usdprice < 2) {
+        if ($usdprice <= 1) {
             sendmessage($from_id, $textbotlang['users']['Balance']['nowpayments'], null, 'HTML');
             return;
         }
@@ -1573,7 +1584,9 @@ if ($text == "📯 تنظیمات کانال") {
 #-------------------------#
 if ($text == "📊 آمار ربات") {
     $date = jdate('Y/m/d');
-    $timeacc = jdate('h:i:s');
+    $current_time = time();
+    $one_hour_later = strtotime('-1 hour', $current_time); 
+    $timeacc = jdate('H:i:s', $one_hour_later); 
     $dayListSell =  mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(*) FROM invoice WHERE time_sell = '$date'"));
     $count_usertest =  mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(*) FROM TestAccount"));
     $statistics = mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(id)  FROM user"));
@@ -1594,7 +1607,7 @@ if ($text == "📊 آمار ربات") {
                 ['text' => $textbotlang['Admin']['phpversion'], 'callback_data' => 'phpversion'],
             ],
             [
-                ['text' => $ping[0], 'callback_data' => 'ping'],
+                ['text' => round($ping[0],2), 'callback_data' => 'ping'],
                 ['text' => $textbotlang['Admin']['pingbot'], 'callback_data' => 'ping'],
             ],
             [
@@ -2259,6 +2272,31 @@ if ($datain == "✅  ربات روشن است") {
     $stmt->bind_param("s", $Status);
     $stmt->execute();
     Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['BotStatuson'], null);
+}
+
+//_________________________________________________
+$flow_Status = json_encode([
+    'inline_keyboard' => [
+        [
+            ['text' => $setting['flow'], 'callback_data' => $setting['flow']],
+        ],
+    ]
+]);
+if ($text == "🍀 قابلیت flow") {
+    sendmessage($from_id, $textbotlang['Admin']['Status']['flow'], $flow_Status, 'HTML');
+}
+if ($datain == "flowon") {
+    $stmt = $connect->prepare("UPDATE setting SET flow = ?");
+    $Status = 'offflow';
+    $stmt->bind_param("s", $Status);
+    $stmt->execute();
+    Editmessagetext($from_id, $message_id,  $textbotlang['Admin']['Status']['flowStatusOff'], null);
+} elseif ($datain == "offflow") {
+    $stmt = $connect->prepare("UPDATE setting SET flow = ?");
+    $Status = "flowon";
+    $stmt->bind_param("s", $Status);
+    $stmt->execute();
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['flowStatuson'], null);
 }
 #-----------------[ not user change status ]-----------------#
 $not_user = json_encode([
