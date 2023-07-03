@@ -131,6 +131,7 @@ try {
         limit_usertest_all varchar(600)  NULL,
         time_usertest varchar(600)  NULL,
         val_usertest varchar(600)  NULL,
+        flow varchar(600)  NULL,
         MethodUsername varchar(900)  NULL)
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
@@ -145,12 +146,17 @@ try {
         $configManual = "❌ ارسال کانفیگ دستی خاموش است";
         $configManual = "❌ ارسال کانفیگ دستی خاموش است";
         $MethodUsername ="آیدی عددی + حروف و عدد رندوم";
-$connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,sublink,configManual,NotUser,two_columns,MethodUsername) VALUES ('$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help','$active_phone_iran_text','$sublink','$configManual','offnotuser','off','$MethodUsername')");
+$connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,sublink,configManual,NotUser,two_columns,MethodUsername,flow) VALUES ('$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help','$active_phone_iran_text','$sublink','$configManual','offnotuser','off','$MethodUsername',''offflow)");
     } else {
         $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'configManual'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE setting ADD configManual VARCHAR(200)");
             echo "The configManual field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'flow'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE setting ADD flow VARCHAR(200)");
+            echo "The flow field was added ✅";
         }
         $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'MethodUsername'");
         if (mysqli_num_rows($Check_filde) != 1) {
@@ -226,6 +232,12 @@ $connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_us
         if(!isset($settingsql['configManual'])){
         $stmt = $connect->prepare("UPDATE setting SET configManual = ?");
         $stmt->bind_param("s", $configManual);
+        $stmt->execute();
+        }
+        if(!isset($settingsql['flow'])){
+        $stmt = $connect->prepare("UPDATE setting SET flow = ?");
+        $flow = 'offflow';
+        $stmt->bind_param("s", $flow);
         $stmt->execute();
         }
         if(!isset($settingsql['iran_number'])){
