@@ -256,6 +256,9 @@ $textbotlang['Admin']['Help']['RemoveHelp'] = "✅ آموزش حذف گردید.
 
 $textbotlang['Admin']['Status']['btn'] ="📈 آمار ربات شما";
 $textbotlang['Admin']['Status']['BotTitle'] = "وضعیت ربات";
+$textbotlang['Admin']['Status']['flow'] = "وضعیت فعال بودن قابلیت flow";
+$textbotlang['Admin']['Status']['flowStatusOff'] = "flow غیرفعال شد";
+$textbotlang['Admin']['Status']['flowStatuson'] = "flow روشن شد";
 $textbotlang['Admin']['Status']['BotStatusOff'] = "❌ ربات خاموش گردید ";
 $textbotlang['Admin']['Status']['BotStatuson'] = "🤖 ربات روشن گردید";
 $textbotlang['Admin']['Status']['UsernameTitle'] = "وضعیت دکمه نام کاربری";
