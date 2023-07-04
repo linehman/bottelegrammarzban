@@ -1163,7 +1163,7 @@ if ($text == $datatextbot['text_Add_Balance']) {
         $price_rate = tronchangeto();
         $USD = $price_rate['result']['USD'];
         $usdprice = round($Processing_value / $USD, 2);
-        if ($usdprice <= 1) {
+        if ($usdprice < 1) {
             sendmessage($from_id, $textbotlang['users']['Balance']['nowpayments'], null, 'HTML');
             return;
         }
@@ -1748,7 +1748,7 @@ if ($text == "📨 ارسال پیام به کاربر") {
     $stmt->execute();
 } elseif ($user['step'] == "gettextforsendall") {
     foreach ($users_ids as $id) {
-        sendmessage($id, $text, null);
+        sendmessage($id, $text, null,'html');
     }
     sendmessage($from_id, "✅ پیام برای تمامی کاربران ارسال شد.", $keyboardadmin, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
