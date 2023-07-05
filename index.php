@@ -22,7 +22,7 @@ if (!$ok) die("دسترسی غیرمجاز");
 #-----------function------------#
 function tronchangeto()
 {
-    return json_decode(file_get_contents('https://api.changeto.cards/api/rate'), true);
+    return json_decode(file_get_contents('https://api.weswap.digital/api/rate'), true);
 }
 function nowPayments($payment, $price_amount, $order_id, $order_description)
 {
@@ -141,7 +141,7 @@ if (isset($channels['link']) && $from_id != 0) {
     $response = json_decode(file_get_contents('https://api.telegram.org/bot' . $APIKEY . "/getChatMember?chat_id=@{$channels['link']}&user_id=$from_id"));
     $tch = $response->result->status;
 }
-$connect->query("INSERT IGNORE INTO user (id , step,limit_usertest,User_Status,number,Balance,pagenumber) VALUES ('$from_id', 'none','{$setting['limit_usertest_all']}','Active','none','0','1')");
+if($from_id != 0)$connect->query("INSERT IGNORE INTO user (id , step,limit_usertest,User_Status,number,Balance,pagenumber) VALUES ('$from_id', 'none','{$setting['limit_usertest_all']}','Active','none','0','1')");
 #-----------User_Status------------#
 if ($user['User_Status'] == "block") {
     $textblock = "
@@ -1241,7 +1241,7 @@ if ($text == $datatextbot['text_Add_Balance']) {
         $paymentkeyboard = json_encode([
             'inline_keyboard' => [
                 [
-                    ['text' => $textbotlang['users']['Balance']['payments'], 'url' => "https://changeto.cards/quick?amount=$trxprice&currency=TRX&address=$pay_address"]
+                    ['text' => $textbotlang['users']['Balance']['payments'], 'url' => "https://digiswap.org/quick?amount=$trxprice&address=$pay_address"]
                 ],
                 [
                     ['text' => $textbotlang['users']['Balance']['Confirmpaying'], 'callback_data' => "Confirmpay_user_{$payment_id}_{$randomString}"]
