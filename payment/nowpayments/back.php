@@ -9,6 +9,7 @@ $botapi = $Pathfiles.'/botapi.php';
 require_once $Pathfile;
 require_once $jdf;
 require_once $botapi;
+$apinowpayments = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'apinowpayment'"))['ValuePay'];
 function arzeweswap(){
     
 $curl = curl_init();
