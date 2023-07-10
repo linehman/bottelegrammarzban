@@ -26,7 +26,8 @@ function tronchangeto()
 }
 function nowPayments($payment, $price_amount, $order_id, $order_description)
 {
-    global $apinowpayments;
+    global $connect;
+    $apinowpayments = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'apinowpayment'"))['ValuePay'];
     $curl = curl_init();
     curl_setopt_array($curl, array(
         CURLOPT_URL => 'https://api.nowpayments.io/v1/' . $payment,
@@ -55,7 +56,8 @@ function nowPayments($payment, $price_amount, $order_id, $order_description)
 }
 function StatusPayment($paymentid)
 {
-    global $apinowpayments;
+    global $connect;
+    $apinowpayments = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'apinowpayment'"))['ValuePay'];
     $curl = curl_init();
     curl_setopt_array($curl, array(
         CURLOPT_URL => 'https://api.nowpayments.io/v1/payment/' . $paymentid,
@@ -123,12 +125,10 @@ $datatextbot = array(
     'text_account'  => '',
     'text_sell' => '',
     'text_Add_Balance' => '',
-    'text_cart_to_cart' => '',
     'text_channel' => '',
     'text_Discount' => '',
     'text_Tariff_list' => '',
     'text_dec_Tariff_list' => '',
-    'text_Account_op' => ''
 );
 foreach ($datatxtbot as $item) {
     if (isset($datatextbot[$item['id_text']])) {
@@ -366,14 +366,11 @@ if ($user['step'] == "getusernameinfo") {
     $stmt->execute();
 }
 if ($datain == 'next_page') {
-    $stmt = $connect->prepare("SELECT COUNT(id_user) FROM invoice WHERE id_user = '$from_id'");
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $numpage = $result->fetch_array(MYSQLI_NUM);
+    $numpage =  mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(id_user) FROM invoice WHERE id_user = '$from_id'"));
     $page = $user['pagenumber'];
     $items_per_page  = 5;
     $sum = $user['pagenumber'] * $items_per_page;
-    if ($sum > $numpage[0]) {
+    if ($sum > $numpage['COUNT(id_user)']) {
         $next_page = 1;
     } else {
         $next_page = $page + 1;
@@ -884,7 +881,7 @@ $current_time = time();
         
 📆 $dateacc → ⏰ $timeacc
             ";
-    sendmessage($from_id, $text_account, null, 'HTML');
+    sendmessage($from_id, $text_account, $keyboardPanel, 'HTML');
 }
 if ($text == $datatextbot['text_sell']) {
         $locationproduct = mysqli_query($connect, "SELECT * FROM marzban_panel");
@@ -1125,7 +1122,7 @@ $link_config";
 
 
 #-------------------[ text_Add_Balance ]---------------------#
-if ($text == $datatextbot['text_Add_Balance']) {
+if ($datain == "Add_Balance") {
     if ($setting['get_number'] == "✅ تایید شماره موبایل روشن است" && $user['step'] != "get_number" && $user['number'] == "none") {
         sendmessage($from_id, $textbotlang['users']['number']['Confirming'], $request_contact, 'HTML');
         $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -1152,14 +1149,56 @@ if ($text == $datatextbot['text_Add_Balance']) {
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 } elseif ($user['step'] == "get_step_payment") {
-    if ($text == "💳 کارت به کارت") {
-        sendmessage($from_id, $datatextbot['text_cart_to_cart'], $backuser, 'HTML');
+    if ($datain == "cart_to_offline") {
+$PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'CartDescription'"))['ValuePay'];
+$textcart = "برای افزایش موجودی به صورت دستی، مبلغ $Processing_value  تومان  را به شماره‌ی حساب زیر واریز کنید 👇🏻
+
+==================== 
+$PaySetting
+====================
+
+🌅 عکس رسید خود را در این مرحله ارسال نمایید. 
+
+⚠️ حداکثر واریز مبلغ 10 میلیون تومان می باشد.
+⚠️ امکان برداشت وجه از کیف پول  نیست.
+⚠️ مسئولیت واریز اشتباهی با شماست.";
+        sendmessage($from_id,$textcart, $backuser, 'HTML');
         $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
         $step = 'cart_to_cart_user';
         $stmt->bind_param("ss", $step, $from_id);
         $stmt->execute();
     }
-    if ($text == "💵 پرداخت nowpayments") {
+        if ($datain == "zarinpal") {
+        if ($Processing_value < 50000) {
+            sendmessage($from_id, $textbotlang['users']['Balance']['zarinpal'], null, 'HTML');
+            return;
+        }
+        sendmessage($from_id, $textbotlang['users']['Balance']['linkpayments'], $keyboard, 'HTML');
+        $dateacc = date('Y/m/d h:i:s');
+        $randomString = bin2hex(random_bytes(5));
+        $stmt = $connect->prepare("INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status) VALUES (?,?,?,?,?)");
+        $payment_Status = "Unpaid";
+        $stmt->bind_param("sssss", $from_id, $randomString, $dateacc, $Processing_value, $payment_Status);
+        $stmt->execute();
+        $paymentkeyboard = json_encode([
+            'inline_keyboard' => [
+                [
+                    ['text' => $textbotlang['users']['Balance']['payments'], 'url' => "https://" . "$domainhosts" . "/payment/zarinpal/zarinpal.php?price=$Processing_value&order_description=Add_Balance&order_id=$randomString"],
+                ]
+            ]
+        ]);
+        $Processing_value = number_format($Processing_value, 0);
+        $textnowpayments = "
+        ✅ فاکتور پرداخت ایجاد شد.
+    
+🔢 شماره فاکتور : $randomString
+💰 مبلغ فاکتور : $Processing_value تومان
+
+جهت پرداخت از دکمه زیر استفاده کنید👇🏻";
+        sendmessage($from_id, $textnowpayments, $paymentkeyboard, 'HTML');
+    }
+
+    if ($datain == "nowpayments") {
         $price_rate = tronchangeto();
         $USD = $price_rate['result']['USD'];
         $usdprice = round($Processing_value / $USD, 2);
@@ -1199,7 +1238,7 @@ if ($text == $datatextbot['text_Add_Balance']) {
     ";
         sendmessage($from_id, $textnowpayments, $paymentkeyboard, 'HTML');
     }
-    if ($text == "💎درگاه پرداخت ارزی (ریالی )") {
+    if ($datain == "iranpay") {
         $price_rate = tronchangeto();
         $trx = $price_rate['result']['TRX'];
         $usd = $price_rate['result']['USD'];
@@ -1385,7 +1424,7 @@ if (preg_match('/Confirmpay_user_(\w+)_(\w+)/', $datain, $dataget)) {
 }
 
 #----------------Discount------------------#
-if ($text == $datatextbot['text_Discount']) {
+if ($datain == "Discount") {
     sendmessage($from_id, $textbotlang['users']['Discount']['getcode'], $backuser, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'get_code_user';
@@ -1427,10 +1466,6 @@ if ($text == $datatextbot['text_Discount']) {
 #----------------[  text_Tariff_list  ]------------------#
 if ($text == $datatextbot['text_Tariff_list']) {
     sendmessage($from_id, $datatextbot['text_dec_Tariff_list'], null, 'HTML');
-}
-#----------------[   keyboard Account  ]------------------#
-if ($text == $datatextbot['text_Account_op']) {
-    sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboardPanel, 'HTML');
 }
 #----------------[  admin section  ]------------------#
 $textadmin = ["panel", "/panel", "پنل مدیریت", "ادمین"];
@@ -1605,6 +1640,7 @@ if ($text == "📊 آمار ربات") {
     $statistics = mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(id)  FROM user"));
     $invoice = mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(*)  FROM invoice"));
     $ping = sys_getloadavg();
+    $ping = floatval($ping[0]);
     $keyboardstatistics = json_encode([
         'inline_keyboard' => [
             [
@@ -1620,7 +1656,7 @@ if ($text == "📊 آمار ربات") {
                 ['text' => $textbotlang['Admin']['phpversion'], 'callback_data' => 'phpversion'],
             ],
             [
-                ['text' => round($ping[0],2), 'callback_data' => 'ping'],
+                ['text' => round($ping,2), 'callback_data' => 'ping'],
                 ['text' => $textbotlang['Admin']['pingbot'], 'callback_data' => 'ping'],
             ],
             [
@@ -2020,25 +2056,6 @@ if ($text  == "📝 تنظیم متن ربات") {
     $step = 'home';
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
-} elseif ($text == "📝 تنظیم متن توضیحات شماره کارت") {
-    sendmessage($from_id, $textbotlang['Admin']['ManageUser']['ChangeTextGet'] . $datatextbot['text_cart_to_cart'], $backadmin, 'HTML');
-    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
-    $step = 'text_cart_to_cart';
-    $stmt->bind_param("ss", $step, $from_id);
-    $stmt->execute();
-} elseif ($user['step'] == "text_cart_to_cart") {
-    if (!$text) {
-        sendmessage($from_id, $textbotlang['Admin']['ManageUser']['ErrorText'], $textbot, 'HTML');
-        return;
-    }
-    sendmessage($from_id, $textbotlang['Admin']['ManageUser']['SaveText'], $textbot, 'HTML');
-    $stmt = $connect->prepare("UPDATE textbot SET text = ? WHERE id_text = 'text_cart_to_cart'");
-    $stmt->bind_param("s", $text);
-    $stmt->execute();
-    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
-    $step = 'home';
-    $stmt->bind_param("ss", $step, $from_id);
-    $stmt->execute();
 } elseif ($text == "متن دکمه خرید اشتراک") {
     sendmessage($from_id, $textstart, $textbotlang['Admin']['ManageUser']['ChangeTextGet'] . $datatextbot['text_sell'], 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -2109,25 +2126,6 @@ if ($text  == "📝 تنظیم متن ربات") {
     }
     sendmessage($from_id, $textbotlang['Admin']['ManageUser']['SaveText'], $textbot, 'HTML');
     $stmt = $connect->prepare("UPDATE textbot SET text = ? WHERE id_text = 'text_dec_Tariff_list'");
-    $stmt->bind_param("s", $text);
-    $stmt->execute();
-    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
-    $step = 'home';
-    $stmt->bind_param("ss", $step, $from_id);
-    $stmt->execute();
-} elseif ($text ==  "دکمه حساب کاربری") {
-    sendmessage($from_id, $textbotlang['Admin']['ManageUser']['ChangeTextGet'] . $datatextbot['text_Account_op'], $backadmin, 'HTML');
-    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
-    $step = 'text_Account_op';
-    $stmt->bind_param("ss", $step, $from_id);
-    $stmt->execute();
-} elseif ($user['step'] == "text_Account_op") {
-    if (!$text) {
-        sendmessage($from_id, $textbotlang['Admin']['ManageUser']['ErrorText'], $textbot, 'HTML');
-        return;
-    }
-    sendmessage($from_id, $textbotlang['Admin']['ManageUser']['SaveText'], $textbot, 'HTML');
-    $stmt = $connect->prepare("UPDATE textbot SET text = ? WHERE id_text = 'text_Account_op'");
     $stmt->bind_param("s", $text);
     $stmt->execute();
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -3331,3 +3329,182 @@ if ($text == "💡 روش ساخت نام کاربری") {
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 }
+#----------------[  MANAGE PAYMENT   ]------------------#
+
+if($text == "💵 مالی"){
+        sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboardpaymentManage, 'HTML');
+}
+if($text == "💳 تنظبمات درگاه آفلاین"){
+            sendmessage($from_id, $textbotlang['users']['selectoption'], $CartManage, 'HTML');
+}
+if($text == "💳 تنظیم شماره کارت"){
+    $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'CartDescription'"));
+    $textcart = "💳 شماره کارت خود را ارسال کنید
+
+⭕️ همراه با شماره کارت می توانید نام صاحب کارت هم ارسال نمایید.
+
+💳 شماره کارت فعلی شما : {$PaySetting['ValuePay']}";
+    sendmessage($from_id, $textcart, $backadmin, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'changecard';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif($user['step'] == "changecard"){
+    sendmessage($from_id,$textbotlang['Admin']['SettingPayment']['Savacard'] , $CartManage,'HTML');
+    $stmt = $connect->prepare("UPDATE PaySetting SET ValuePay = ? WHERE NamePay = ?");
+    $namepay = "CartDescription";
+    $stmt->bind_param("ss", $text, $namepay);
+    $stmt->execute();
+}
+if ($text == "🔌 وضعیت درگاه آفلاین") {
+        $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'Cartstatus'"))['ValuePay'];
+    $card_Status = json_encode([
+    'inline_keyboard' => [
+        [
+            ['text' => $PaySetting, 'callback_data' => $PaySetting],
+        ],
+    ]
+]);
+    sendmessage($from_id, $textbotlang['Admin']['Status']['cardTitle'], $card_Status, 'HTML');
+}
+if ($datain == "oncard"){
+    $stmt = $connect->prepare("UPDATE PaySetting SET ValuePay = ? WHERE NamePay = ?");
+    $Status = 'offcard';
+    $where = 'Cartstatus';
+    $stmt->bind_param("ss", $Status,$where);
+    $stmt->execute();
+    Editmessagetext($from_id, $message_id,$textbotlang['Admin']['Status']['cardStatusOff'], null);
+} elseif ($datain == "offcard") {
+    $stmt = $connect->prepare("UPDATE PaySetting SET ValuePay = ? WHERE NamePay = ?");
+    $Status = 'oncard';
+    $where = 'Cartstatus';
+    $stmt->bind_param("ss", $Status,$where);
+    $stmt->execute();
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['cardStatuson'], null);
+}
+if($text == "💵 تنظیمات nowpayment"){
+            sendmessage($from_id, $textbotlang['users']['selectoption'], $NowPaymentsManage, 'HTML');
+}
+
+if($text == "🧩 api nowpayment"){
+    $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'apinowpayment'"))['ValuePay'];
+    $textcart = "⚙️ api سایت nowpayments.io را ارسال نمایید
+
+api nowpayment : {$PaySetting['ValuePay']}";
+    sendmessage($from_id, $textcart, $backadmin, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'apinowpayment';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif($user['step'] == "apinowpayment"){
+    sendmessage($from_id,$textbotlang['Admin']['SettingnowPayment']['Savaapi'] , $NowPaymentsManage,'HTML');
+    $stmt = $connect->prepare("UPDATE PaySetting SET ValuePay = ? WHERE NamePay = ?");
+    $namepay = "apinowpayment";
+    $stmt->bind_param("ss", $text, $namepay);
+    $stmt->execute();
+}
+if ($text == "🔌 وضعیت درگاه nowpayments") {
+        $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'nowpaymentstatus'"))['ValuePay'];
+    $now_Status = json_encode([
+    'inline_keyboard' => [
+        [
+            ['text' => $PaySetting, 'callback_data' => $PaySetting],
+        ],
+    ]
+]);
+    sendmessage($from_id, $textbotlang['Admin']['Status']['nowpaymentsTitle'], $now_Status, 'HTML');
+}
+if ($datain == "onnowpayment"){
+    $stmt = $connect->prepare("UPDATE PaySetting SET ValuePay = ? WHERE NamePay = ?");
+    $Status = 'offnowpayment';
+    $where = 'nowpaymentstatus';
+    $stmt->bind_param("ss", $Status,$where);
+    $stmt->execute();
+    Editmessagetext($from_id, $message_id,$textbotlang['Admin']['Status']['nowpaymentsStatusOff'], null);
+} elseif ($datain == "offnowpayment") {
+    $stmt = $connect->prepare("UPDATE PaySetting SET ValuePay = ? WHERE NamePay = ?");
+    $Status = 'onnowpayment';
+    $where = 'nowpaymentstatus';
+    $stmt->bind_param("ss", $Status,$where);
+    $stmt->execute();
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['nowpaymentsStatuson'], null);
+}
+if ($text == "💎 درگاه دیجی سواپ") {
+        $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'digistatus'"))['ValuePay'];
+    $digi_Status = json_encode([
+    'inline_keyboard' => [
+        [
+            ['text' => $PaySetting, 'callback_data' => $PaySetting],
+        ],
+    ]
+]);
+    sendmessage($from_id, $textbotlang['Admin']['Status']['digiTitle'], $digi_Status, 'HTML');
+}
+if ($datain == "offdigi"){
+    $stmt = $connect->prepare("UPDATE PaySetting SET ValuePay = ? WHERE NamePay = ?");
+    $Status = 'ondigi';
+    $where = 'digistatus';
+    $stmt->bind_param("ss", $Status,$where);
+    $stmt->execute();
+    Editmessagetext($from_id, $message_id,$textbotlang['Admin']['Status']['digiStatuson'], null);
+} elseif ($datain == "ondigi") {
+    $stmt = $connect->prepare("UPDATE PaySetting SET ValuePay = ? WHERE NamePay = ?");
+    $Status = 'offdigi';
+    $where = 'digistatus';
+    $stmt->bind_param("ss", $Status,$where);
+    $stmt->execute();
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['digiStatusOff'], null);
+}
+if($datain == "colselist"){
+    deletemessage($from_id, $message_id);
+}
+// if($text == "🟡  درگاه زرین پال"){
+//     sendmessage($from_id, $textbotlang['users']['selectoption'], $zarinpal, 'HTML');
+// }
+// if($text == "تنظیم مرچنت"){
+//     $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'merchant_id'"));
+//     $textzarinpal = "💳 مرچنت کد خود را از زرین پال دریافت و در این قسمت وارد کنید
+
+// مرچنت کد فعلی شما : {$PaySetting['ValuePay']}";
+//     sendmessage($from_id, $textzarinpal, $backadmin, 'HTML');
+//     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+//     $step = 'merchant_id';
+//     $stmt->bind_param("ss", $step, $from_id);
+//     $stmt->execute();
+// }
+// elseif($user['step'] == "merchant_id"){
+//     sendmessage($from_id,$textbotlang['Admin']['SettingnowPayment']['Savaapi'] , $zarinpal,'HTML');
+//     $stmt = $connect->prepare("UPDATE PaySetting SET ValuePay = ? WHERE NamePay = ?");
+//     $namepay = "merchant_id";
+//     $stmt->bind_param("ss", $text, $namepay);
+//     $stmt->execute();
+// }
+
+// if ($text == "وضعیت درگاه زرین پال") {
+//         $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'statuszarinpal'"))['ValuePay'];
+//     $zarinpal_Status = json_encode([
+//     'inline_keyboard' => [
+//         [
+//             ['text' => $PaySetting, 'callback_data' => $PaySetting],
+//         ],
+//     ]
+// ]);
+//     sendmessage($from_id, $textbotlang['Admin']['Status']['zarinpalTitle'], $zarinpal_Status, 'HTML');
+// }
+// if ($datain == "offzarinpal"){
+//     $stmt = $connect->prepare("UPDATE PaySetting SET ValuePay = ? WHERE NamePay = ?");
+//     $Status = 'onzarinpal';
+//     $where = 'statuszarinpal';
+//     $stmt->bind_param("ss", $Status,$where);
+//     $stmt->execute();
+//     Editmessagetext($from_id, $message_id,$textbotlang['Admin']['Status']['zarinpalStatuson'], null);
+// } elseif ($datain == "onzarinpal") {
+//     $stmt = $connect->prepare("UPDATE PaySetting SET ValuePay = ? WHERE NamePay = ?");
+//     $Status = 'offzarinpal';
+//     $where = 'statuszarinpal';
+//     $stmt->bind_param("ss", $Status,$where);
+//     $stmt->execute();
+//     Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['zarrinpalStatusOff'], null);
+// }
