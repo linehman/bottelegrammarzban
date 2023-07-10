@@ -19,7 +19,6 @@ $datatextbot = array(
     'text_Add_Balance' => '',
     'text_Discount' => '',
     'text_Tariff_list' => '',
-    'text_Account_op' => '',
 
 );
 if ($table_exists) {
@@ -43,7 +42,7 @@ $keyboard = [
     'keyboard' => [
         [['text' => $datatextbot['text_sell']], ['text' => $datatextbot['text_usertest']]],
         [['text' => $datatextbot['text_Purchased_services']]],
-        [['text' => $datatextbot['text_Account_op']],['text' => $datatextbot['text_Tariff_list']]],
+        [['text' => $datatextbot['text_account']],['text' => $datatextbot['text_Tariff_list']]],
         [['text' => $datatextbot['text_support']], ['text' => $datatextbot['text_help']]],
         [['text' => $datatextbot['text_fq']]],
     ],
@@ -54,24 +53,56 @@ $keyboard['keyboard'][] = [
         ['text' => "ادمین"],
     ];
 }
-    $keyboard  = json_encode($keyboard);
+$keyboard  = json_encode($keyboard);
+
+
 $keyboardPanel = json_encode([
-    'keyboard' => [
-        [['text' => $datatextbot['text_Discount']],['text' => $datatextbot['text_account']]],
-        [['text' => $datatextbot['text_Add_Balance']]],
-        [['text' => "🏠 بازگشت به منوی اصلی"]],
+    'inline_keyboard' => [
+        [['text' => $datatextbot['text_Discount'] ,'callback_data' => "Discount"],['text' => $datatextbot['text_Add_Balance'],'callback_data' => "Add_Balance"]],
     ],
     'resize_keyboard' => true
 ]);
 $keyboardadmin = json_encode([
     'keyboard' => [
         [['text' => "🔑 تنظیمات اکانت تست"], ['text' => "📊 بخش گزارشات"]],
-        [['text' => "🏬 بخش فروشگاه"]],
+        [['text' => "🏬 بخش فروشگاه"],['text' => "💵 مالی"]],
         [['text' => "👨‍🔧 بخش ادمین"], ['text' => "📝 تنظیم متن ربات"]],
         [['text' => "👤 خدمات کاربر"]],
         [['text' => "📚 بخش آموزش "], ['text' => "🖥 پنل مرزبان"]],
         [['text' => "⚙️ تنظیمات"]],
         [['text' => "🏠 بازگشت به منوی اصلی"]]
+    ],
+    'resize_keyboard' => true
+]);
+$keyboardpaymentManage = json_encode([
+    'keyboard' => [
+        [['text' => "💳 تنظبمات درگاه آفلاین"]],
+        [['text' => "💵 تنظیمات nowpayment"]],
+        [['text' => "💎 درگاه دیجی سواپ"],['text' => "🟡  درگاه زرین پال"]],
+        [['text' => "🏠 بازگشت به منوی مدیریت"]]
+    ],
+    'resize_keyboard' => true
+]);
+$CartManage = json_encode([
+    'keyboard' => [
+        [['text' => "💳 تنظیم شماره کارت"]],
+        [['text' => "🔌 وضعیت درگاه آفلاین"]],
+        [['text' => "🏠 بازگشت به منوی مدیریت"]]
+    ],
+    'resize_keyboard' => true
+]);
+$zarinpal = json_encode([
+    'keyboard' => [
+        [['text' => "تنظیم مرچنت"],['text' => "وضعیت درگاه زرین پال"]],
+        [['text' => "🏠 بازگشت به منوی مدیریت"]]
+    ],
+    'resize_keyboard' => true
+]);
+$NowPaymentsManage = json_encode([
+    'keyboard' => [
+        [['text' => "🧩 api nowpayment"]],
+        [['text' => "🔌 وضعیت درگاه nowpayments"]],
+        [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true
 ]);
@@ -119,15 +150,37 @@ $valid_Number =  json_encode([
     ],
     'resize_keyboard' => true
 ]);
-$step_payment = json_encode([
-    'keyboard' => [
-        [['text' => "💳 کارت به کارت"]],
-        [['text' => "💵 پرداخت nowpayments"]],
-        [['text' => "💎درگاه پرداخت ارزی (ریالی )"]],
-        [['text' => "🏠 بازگشت به منوی اصلی"]]
-    ],
-    'resize_keyboard' => true
-]);
+$PaySettingcard = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'Cartstatus'"))['ValuePay'];
+$PaySettingnow = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'nowpaymentstatus'"))['ValuePay'];
+$PaySettingdigi = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'digistatus'"))['ValuePay'];
+$PaySettingzarin = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'statuszarinpal'"))['ValuePay'];
+$step_payment = [
+    'inline_keyboard' => []
+    ];
+    if($PaySettingcard == "oncard"){
+        $step_payment['inline_keyboard'][] = [
+            ['text' => "💳 پرداخت آفلاین" ,'callback_data' => "cart_to_offline"],
+    ];
+    }
+   if($PaySettingnow == "onnowpayment"){
+        $step_payment['inline_keyboard'][] = [
+            ['text' => "💵 پرداخت nowpayments", 'callback_data' => "nowpayments" ]
+    ];
+    }
+   if($PaySettingdigi == "ondigi"){
+        $step_payment['inline_keyboard'][] = [
+            ['text' => "💎درگاه پرداخت ارزی (ریالی)" , 'callback_data' => "iranpay" ]
+    ];
+    }
+   if($PaySettingzarin == "onzarinpal"){
+        $step_payment['inline_keyboard'][] = [
+            ['text' => "🟡 درگاه زرین پال" , 'callback_data' => "zarinpal" ]
+    ];
+    }
+    $step_payment['inline_keyboard'][] = [
+            ['text' => "❌ بستن لیست" , 'callback_data' => "colselist" ]
+    ];
+    $step_payment = json_encode($step_payment);
 $User_Services = json_encode([
     'keyboard' => [
         [['text' => "📱 احراز هویت شماره"], ['text' => "📨 ارسال پیام به کاربر"]],
@@ -289,13 +342,12 @@ $textbot = json_encode([
         [['text' => "تنظیم متن شروع"], ['text' => "دکمه سرویس خریداری شده"]],
         [['text' => "دکمه اکانت تست"], ['text' => "دکمه سوالات متداول"]],
         [['text' => "متن دکمه 📚 آموزش"], ['text' => "متن دکمه ☎️ پشتیبانی"]],
-        [['text' => "متن دکمه حساب کاربری"], ['text' => "دکمه افزایش موجودی"]],
+        [['text' => "دکمه افزایش موجودی"]],
         [['text' => "متن دکمه خرید اشتراک"], ['text' => "متن دکمه لیست تعرفه"]],
         [['text' => "متن توضیحات لیست تعرفه"]],
         [['text' => "دکمه حساب کاربری"]],
         [['text' => "متن دکمه سرویس های خریداری شده"]],
         [['text' => "📝 تنظیم متن توضیحات عضویت اجباری"]],
-        [['text' => "📝 تنظیم متن توضیحات شماره کارت"]],
         [['text' => "📝 تنظیم متن توضیحات اطلاعات سرویس"]],
         [['text' => "📝 تنظیم متن توضیحات سوالات متداول"]],
         [['text' => "📝 تنظیم متن توضیحات پشتیبانی"]],
