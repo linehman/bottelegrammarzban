@@ -96,6 +96,8 @@ $textbotlang['users']['Balance']['errorpricelimit'] = "❌ خطا
 $textbotlang['users']['Balance']['selectPatment'] = "💵 روش پرداخت خود را انتخاب نمایید";
 $textbotlang['users']['Balance']['nowpayments'] = "❌ خطا 
     کمترین مبلغ برای  پرداخت در این درگاه 1 دلار می باشد.";
+$textbotlang['users']['Balance']['zarinpal'] = "❌ خطا 
+    کمترین مبلغ برای  پرداخت در این درگاه 5000 تومان می باشد.";
 $textbotlang['users']['Balance']['linkpayments'] = "درحال ساخت لینک پرداخت...";
 $textbotlang['users']['Balance']['payments'] = "پرداخت";
 $textbotlang['users']['Balance']['changeto'] = "❌ خطا 
@@ -170,7 +172,7 @@ $textbotlang['Admin']['getlimitusertest']['setlimitall'] = "محدودیت سا�
 $textbotlang['Admin']['sumuser'] = "👤 تعداد کاربران";
 $textbotlang['Admin']['sumusertest'] = "🖥 مجموع اکانت تست";
 $textbotlang['Admin']['phpversion'] = "👨‍💻 نسخه php هاست";
-$textbotlang['Admin']['pingbot'] = "پینگ ربات";
+$textbotlang['Admin']['pingbot'] = "🚀 پینگ ربات";
 $textbotlang['Admin']['sellservices'] = "🛍 فروش کل ";
 $textbotlang['Admin']['dayListSell'] = "☀️ فروش امروز";
 
@@ -285,6 +287,18 @@ $textbotlang['Admin']['Status']['subStatuson'] = "لینک سابسکرایب ف
 $textbotlang['Admin']['Status']['configTitle'] = "در این قسمت می توانید تعیین کنید که بعد از خرید کاربر کانفیگ های دستی دریافت کند یا خیر";
 $textbotlang['Admin']['Status']['configStatusOff'] = "⭕️ ارسال کانفیگ دستی غیرفعال گردید. از این پس کاربر پس از خرید  کانفیگ دستی دریافت نخواهد کرد.";
 $textbotlang['Admin']['Status']['configStatuson'] = "ارسال کانفیگ بعد خرید فعال شد از این پس کاربران کانفیگ دستی هم دریافت خواهند کرد";
+$textbotlang['Admin']['Status']['cardTitle'] = "در این بخش می توانید درگاه آفلاین را خاموش یا روشن کنید";
+$textbotlang['Admin']['Status']['cardStatusOff'] = "⭕ وضعیت درگاه آفلاین خاموش گردید";
+$textbotlang['Admin']['Status']['cardStatuson'] = "وضعیت درگاه آفلاین روشن گردید";
+$textbotlang['Admin']['Status']['nowpaymentsTitle'] = "در این بخش می توانید درگاه نیوپیمنت  را فعال یا غیرفعال کنید";
+$textbotlang['Admin']['Status']['nowpaymentsStatusOff'] = "⭕ وضعیت درگاه  خاموش گردید";
+$textbotlang['Admin']['Status']['nowpaymentsStatuson'] = "وضعیت درگاه  روشن گردید";
+$textbotlang['Admin']['Status']['digiTitle'] = "در این بخش می توانید درگاه دیجی سوآپ را فعال یا غیرفعال کنید";
+$textbotlang['Admin']['Status']['digiStatusOff'] = "⭕ درگاه  خاموش گردید";
+$textbotlang['Admin']['Status']['digiStatuson'] = "درگاه  روشن گردید";
+$textbotlang['Admin']['Status']['zarinpalTitle'] = "در این بخش می توانید درگاه زرین پال را فعال یا غیرفعال کنید";
+$textbotlang['Admin']['Status']['zarrinpalStatusOff'] = "⭕ درگاه  خاموش گردید";
+$textbotlang['Admin']['Status']['zarinpalStatuson'] = "درگاه  روشن گردید";
 
 
 
@@ -377,3 +391,8 @@ $textbotlang['Admin']['Protocol']['RemovedProtocol'] = "پروتکل با موف
 
 
 $textbotlang['Admin']['AlgortimeUsername']['SaveData'] = "✅روش ساخت نام کاربری با موفقیت آپدیت شد";
+
+
+
+$textbotlang['Admin']['SettingPayment']['Savacard'] = "✅ شماره کارت شما با موفقیت ثبت شد.";
+$textbotlang['Admin']['SettingnowPayment']['Savaapi'] = "✅ تغییرات  با موفقیت ثبت شد";
