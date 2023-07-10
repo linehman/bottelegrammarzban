@@ -546,19 +546,6 @@ try {
 ✅ امکان بازگشت وجه در صورت حل نشدن مشکل از سمت ما وجود دارد.
 
 💡 در صورتی که جواب سوالتون رو نگرفتید میتونید به «پشتیبانی» مراجعه کنید.";
-    $cart_to_cart_dec = "
-برای افزایش موجودی به صورت دستی، مبلغ دلخواه را به شماره‌ی حساب زیر واریز کنید 👇🏻
-
-==================== 
-6037000000000000 - bank
-====================
-
-🌅 عکس رسید خود را در این مرحله ارسال نمایید. 
-
-⚠️ حداکثر واریز مبلغ 10 میلیون تومان می باشد.
-⚠️ امکان برداشت وجه از کیف پول  نیست.
-⚠️ مسئولیت واریز اشتباهی با شماست.
-";
     $text_channel = "   
         ⚠️ کاربر گرامی؛ شما عضو چنل ما نیستید
 از طریق دکمه زیر وارد کانال شده و عضو شوید
@@ -585,7 +572,6 @@ try {
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_account','👨🏻‍💻 مشخصات کاربری')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_sell','🔐 خرید اشتراک')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Add_Balance','💰 افزایش موجودی')");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_cart_to_cart','$cart_to_cart_dec')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_channel','$text_channel')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Discount','🎁 کد هدیه')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Tariff_list','💰 تعرفه اشتراک ها')");
@@ -606,12 +592,44 @@ try {
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_account','👨🏻‍💻 مشخصات کاربری')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_sell','🔐 خرید اشتراک')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_Add_Balance','💰 افزایش موجودی')");
-        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_cart_to_cart','$cart_to_cart_dec')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_channel','$text_channel')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_Discount','🎁 کد هدیه')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_Tariff_list','💰 تعرفه اشتراک ها')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_dec_Tariff_list','تنظیم نشده است')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_Account_op','🎛 حساب کاربری')");
+
+
+    }
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage();
+}
+try {
+    $result = $connect->query("SHOW TABLES LIKE 'PaySetting'");
+    $table_exists = ($result->num_rows > 0);
+    if (!$table_exists) {
+        $result = $connect->query("CREATE TABLE PaySetting (
+        NamePay varchar(500) PRIMARY KEY NOT NULL,
+        ValuePay TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL)
+        ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
+        if (!$result) {
+            echo "table PaySetting".mysqli_error($connect);
+        }
+        $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('CartDescription','603700000000') ");
+        $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('Cartstatus','oncard') ");
+        $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('apinowpayment','0') ");
+        $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('nowpaymentstatus','offnowpayment') ");
+        $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('digistatus','offdigi') ");
+        $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('merchant_id','0') ");
+        $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('statuszarinpal','offzarinpal') ");
+    }
+    else{
+        $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('Cartstatus','oncard') ");
+        $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('CartDescription','603700000000') ");
+        $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('apinowpayment','0')");
+        $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('nowpaymentstatus','offnowpayment')");
+        $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('digistatus','offdigi')");
+        $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('merchant_id','0')");
+        $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('statuszarinpal','offzarinpal')");
 
 
     }
