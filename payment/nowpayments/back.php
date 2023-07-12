@@ -69,7 +69,7 @@ curl_close($curl);
     $stmt->execute();
     sendmessage($Payment_report['id_user'],"💎 کاربر گرامی مبلغ $price تومان به کیف پول شما واریز گردید با تشکر از پرداخت شما.
     
-    🛒 کد پیگیری شما: {$Payment_report['id_order']}",$keyboard);
+    🛒 کد پیگیری شما: {$Payment_report['id_order']}",$keyboard,'HTML');
  }
  }
  else{
