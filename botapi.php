@@ -53,6 +53,12 @@ function Editmessagetext($chat_id, $message_id, $text, $keyboard){
         'reply_markup' => $keyboard
     ]);
 }
+ function deletemessage($chat_id, $message_id){
+  telegram('deletemessage', [
+'chat_id' => $chat_id, 
+'message_id' => $message_id,
+]);
+ }
 #-----------------------------#
 $update = json_decode(file_get_contents("php://input"), true);
 $from_id = $update['message']['from']['id'] ?? $update['callback_query']['from']['id'] ?? 0;
