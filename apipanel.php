@@ -10,7 +10,7 @@ function token_panel($url_panel,$username_panel,$password_panel){
     $options = array(
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST => true,
-        CURLOPT_TIMEOUT_MS, 10,
+        CURLOPT_TIMEOUT_MS => 3000,
         CURLOPT_POSTFIELDS => http_build_query($data_token),
         CURLOPT_HTTPHEADER => array(
             'Content-Type: application/x-www-form-urlencoded',
@@ -47,18 +47,34 @@ function getuser($username,$token,$url_panel)
     $data_useer = json_decode($output, true);
     return $data_useer;
 }
-
 #-----------------------------#
-function adduser($username,$expire,$data_limit,$token,$url_panel)
+function ResetUserDataUsage($username,$token,$url_panel)
+{
+    $usernameac = $username;
+    $url =  $url_panel.'/api/user/' . $usernameac.'/reset';
+    $header_value = 'Bearer ';
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_POST , true);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'Accept: application/json',
+        'Authorization: ' . $header_value .  $token
+    ));
+
+    $output = curl_exec($ch);
+    curl_close($ch);
+    $data_useer = json_decode($output, true);
+    return $data_useer;
+}
+#-----------------------------#
+function adduser($username,$expire,$data_limit,$token,$url_panel,array $protocol)
 {
     $url = $url_panel."/api/user";
     $header_value = 'Bearer ';
     $data = array(
-        "proxies" => array(
-            "vmess" => array( ),
-            "vless" => array(),
-            "trojan" => array()
-        ),
+        "proxies" => $protocol,
         "expire" => $expire,
         "data_limit" => $data_limit,
         "username" => $username
@@ -102,11 +118,79 @@ function Get_System_Stats($url_panel,$token){
     return $Get_System_Stats;
 }
 //----------------------------------
+function removeuser($token,$url_panel,$username)
+{
+    $url =  $url_panel.'/api/user/'.$username;
+    $header_value = 'Bearer ';
 
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+    curl_setopt($ch, CURLOPT_HTTPGET, true);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'Accept: application/json',
+        'Authorization: ' . $header_value .  $token
+    ));
+
+    $output = curl_exec($ch);
+    curl_close($ch);
+    $data_useer = json_decode($output, true);
+    return $data_useer;
+}
+//----------------------------------
+function Modifyuser($token,$url_panel,$username,$expire, $proxies = array())
+{
+$url =  $url_panel.'/api/user/'.$username;
+if(isset($proxies)){
+        $data = array(
+        "proxies" => $proxies
+    );
+}
+    $data = array(
+        "expire" => $expire,
+        "proxies" => $proxies
+    );
+
+    $payload = json_encode($data);
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+$headers = array();
+$headers[] = 'Accept: application/json';
+$headers[] = 'Authorization: Bearer '.$token;
+$headers[] = 'Content-Type: application/json';
+curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+$result = curl_exec($ch);
+curl_close($ch);
+    $data_useer = $result;
+    return $data_useer;
+}
+#-----------------------------------------------#
 function formatBytes($bytes, $precision = 2): string
 {
     $base = log($bytes, 1024);
     $power = $bytes > 0 ? floor($base) : 0;
     $suffixes = ['بایت', 'کیلوبایت', 'مگابایت', 'گیگابایت', 'ترابایت'];
     return round(pow(1024, $base - $power), $precision) . ' ' . $suffixes[$power];
+}
+#---------------------[ ]--------------------------#
+function generateUsername($from_id,$Metode,$username,$randomString,$text)
+{
+    global $connect;
+    if($Metode == "آیدی عددی + حروف و عدد رندوم"){
+        return $from_id."_".$randomString;
+    }
+    elseif($Metode == "نام کاربری + حروف و عدد رندوم"){
+        return $username."_".$randomString;
+    }
+    elseif($Metode == "نام کاربری + عدد به ترتیب"){
+        $statistics = mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(id_user)  FROM invoice WHERE id_user = '$from_id'"));
+        $countInvoice = intval($statistics['COUNT(id_user)']) + 1 ;
+        return $username."_".$countInvoice;
+    }
+    elseif($Metode == "نام کاربری دلخواه")return $text;
 }

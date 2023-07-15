@@ -1,4 +1,5 @@
 <?php
+$NP_id = htmlspecialchars($_GET['NP_id'], ENT_QUOTES, 'UTF-8');
 $rootPath = $_SERVER['DOCUMENT_ROOT'];
 $Pathfile = dirname(dirname($_SERVER['PHP_SELF'], 2));
 $Pathfiles = $rootPath.$Pathfile;
@@ -8,12 +9,13 @@ $botapi = $Pathfiles.'/botapi.php';
 require_once $Pathfile;
 require_once $jdf;
 require_once $botapi;
-function tomantousd(){
+$apinowpayments = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'apinowpayment'"))['ValuePay'];
+function arzeweswap(){
     
 $curl = curl_init();
 
 curl_setopt_array($curl, [
-  CURLOPT_URL => "https://api.tetherland.com/currencies",
+  CURLOPT_URL => "https://api.weswap.digital/api/rate",
   CURLOPT_RETURNTRANSFER => true,
   CURLOPT_ENCODING => "",
   CURLOPT_MAXREDIRS => 10,
@@ -30,7 +32,7 @@ curl_close($curl);
     $response = json_decode($response, true);
 return $response;
 }
-$usdprice = tomantousd();
+$price_rate = arzeweswap();
     if(isset($_GET['NP_id'])){
 $curl = curl_init();
 curl_setopt_array($curl, array(
@@ -52,7 +54,7 @@ curl_close($curl);
  } 
  if($response['payment_status'] == "finished"){
     $payment_status = "پرداخت موفق";
-    $price = intval($usdprice['data']['currencies']['USDT']['price']*$response['price_amount']);
+    $price = intval($price_rate['result']['USD']*$response['price_amount']);
     $dec_payment_status = "از انجام تراکنش متشکریم!";
     $Payment_report = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM Payment_report WHERE id_order = '{$response['order_id']}' LIMIT 1"));
     if($Payment_report['payment_Status'] != "paid"){
@@ -67,7 +69,7 @@ curl_close($curl);
     $stmt->execute();
     sendmessage($Payment_report['id_user'],"💎 کاربر گرامی مبلغ $price تومان به کیف پول شما واریز گردید با تشکر از پرداخت شما.
     
-    🛒 کد پیگیری شما: {$Payment_report['id_order']}",$keyboard);
+    🛒 کد پیگیری شما: {$Payment_report['id_order']}",$keyboard,'HTML');
  }
  }
  else{
@@ -128,7 +130,7 @@ curl_close($curl);
 <body>
     <div class="confirmation-box">
         <h1><?php echo $payment_status ?></h1>
-        <p>شماره تراکنش:<span><?php echo $_GET['NP_id'] ?></span></p>
+        <p>شماره تراکنش:<span><?php echo $NP_id ?></span></p>
         <p>مبلغ پرداختی:  <span><?php echo $response['price_amount'] ?></span> دلار</p>
         <p>تاریخ: <span>  <?php echo jdate('Y/m/d')  ?>  </span></p>
         <p><?php echo $dec_payment_status ?></p>

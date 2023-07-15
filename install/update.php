@@ -1,6 +1,8 @@
 <?php
 global $outputdownload,$outputzip,$Outputfnish,$outputdownload,$outputzip,$Outputfnish,$updated;
+//-----------------------version------------------------------//
 $version = file_get_contents('version');
+//----------------------latestRelease-------------------------------//
 function latestRelease(){
 $url = "https://api.github.com/repos/mahdigholipour3/bottelegrammarzban/releases/latest";
 $curl = curl_init($url);
@@ -14,7 +16,8 @@ return $latestRelease;
 
 }
 $latestRelease = latestRelease();
-$githubUrl = 'https://github.com/mahdigholipour3/bottelegrammarzban/archive/'.$latestRelease['tag_name'].'.zip';
+//-----------------------download file------------------------------//
+$githubUrl = "https://github.com/mahdigholipour3/bottelegrammarzban/archive/".$latestRelease['tag_name'].".zip";
 $filezip = '../file.zip';
 if($version < $latestRelease['tag_name']){
 $fileContent = file_get_contents($githubUrl);
@@ -22,6 +25,7 @@ if ($fileContent !== false) {
     file_put_contents($filezip, $fileContent);
     $outputdownload = "دانلود فایل با موفقیت انجام شد";
 }
+//-----------------------unzip------------------------------//
 $destinationPath = '../';
 $command = "unzip -o $filezip -d $destinationPath";
 $output = shell_exec($command);
@@ -30,29 +34,40 @@ if ($output !== null) {
 } else {
     $outputzip = "استراخ فایل با خطا مواجه شد";
 }
-$sourcePath = '../bottelegrammarzban-'.$latestRelease['tag_name'];
-$destinationPath = '../';
-
-if (!is_dir($destinationPath)) {
-    mkdir($destinationPath);
-}
-$files = scandir($sourcePath);
-$files = array_diff($files, ['.', '..']);
-foreach ($files as $file) {
-    $sourceFile = $sourcePath . '/' . $file;
-    $destinationFile = $destinationPath . '/' . $file;
-    if($file == 'config.php'){
-    unlink($sourceFile);
-    continue;
+//----------------------move------------------------------//
+$sourceDir = '../bottelegrammarzban-'.$latestRelease['tag_name'];
+$source = '../bottelegrammarzban-'.$latestRelease['tag_name'];
+$destinationDir = '../';
+function moveDirectory($source, $destination) {
+    if (!is_dir($destination)) {
+        mkdir($destination, 0777, true);
     }
-    rename($sourceFile, $destinationFile);
+    
+    $dir = opendir($source);
+    
+    while (($file = readdir($dir)) !== false) {
+        if ($file == '.' || $file == '..' || $file == 'config.php') {
+            continue;
+        }
+        
+        $sourcePath = $source . '/' . $file;
+        $destinationPath = $destination . '/' . $file;
+        
+        if (is_dir($sourcePath)) {
+            var_dump(moveDirectory($sourcePath, $destinationPath));
+        } else {
+            var_dump(rename($sourcePath, $destinationPath));
+        }
+    }
+    
+    closedir($dir);
+    rmdir($source);
 }
-require_once 'table.php';
-$Outputfnish = "آپدیت با موفقیت انجام شد";
+
+moveDirectory($sourceDir, $destinationDir);
 unlink($filezip);
-if (is_dir($sourcePath)) {
-rmdir($sourcePath);
-}
+$Outputfnish = "آپدیت با موفقیت انجام شد";
+
 }else{
     $updated  = "نسخه جدیدی منتشر نشده است";
 }

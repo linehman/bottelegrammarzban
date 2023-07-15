@@ -4,6 +4,7 @@ $Pathfile = dirname(dirname($_SERVER['PHP_SELF'], 2));
 $Pathfile = $rootPath.$Pathfile;
 $Pathfile = $Pathfile.'/config.php';
 require_once $Pathfile;
+$apinowpayments = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'apinowpayment'"))['ValuePay'];
 $curl = curl_init();
 curl_setopt_array($curl, array(
   CURLOPT_URL => 'https://api.nowpayments.io/v1/invoice',

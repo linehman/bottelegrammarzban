@@ -14,21 +14,12 @@ function telegram($method, $datas = [])
         return json_decode($res);
     }
 }
-function sendmessageMarkdown($chat_id,$text,$keyboard){
+function sendmessage($chat_id,$text,$keyboard,$parse_mode){
     telegram('sendmessage',[
         'chat_id' => $chat_id,
         'text' => $text,
         'reply_markup' => $keyboard,
-        'parse_mode' => "Markdown",
-        
-        ]);
-}
-function sendmessage($chat_id,$text,$keyboard){
-    telegram('sendmessage',[
-        'chat_id' => $chat_id,
-        'text' => $text,
-        'reply_markup' => $keyboard,
-        'parse_mode' => "HTML",
+        'parse_mode' => $parse_mode,
         
         ]);
 }
@@ -62,6 +53,12 @@ function Editmessagetext($chat_id, $message_id, $text, $keyboard){
         'reply_markup' => $keyboard
     ]);
 }
+ function deletemessage($chat_id, $message_id){
+  telegram('deletemessage', [
+'chat_id' => $chat_id, 
+'message_id' => $message_id,
+]);
+ }
 #-----------------------------#
 $update = json_decode(file_get_contents("php://input"), true);
 $from_id = $update['message']['from']['id'] ?? $update['callback_query']['from']['id'] ?? 0;

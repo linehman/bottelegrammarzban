@@ -124,12 +124,15 @@ try {
         get_number varchar(200)  CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         iran_number varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         sublink varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
+        NotUser varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
+        two_columns varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         configManual varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         Channel_Report varchar(600)  NULL,
         limit_usertest_all varchar(600)  NULL,
         time_usertest varchar(600)  NULL,
         val_usertest varchar(600)  NULL,
-        count_usertest varchar(5000) NOT NULL)
+        flow varchar(600)  NULL,
+        MethodUsername varchar(900)  NULL)
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
             echo "table setting".mysqli_error($connect);
@@ -141,19 +144,41 @@ try {
         $active_help = "❌ آموزش غیرفعال است";
         $sublink = "✅ لینک اشتراک فعال است.";
         $configManual = "❌ ارسال کانفیگ دستی خاموش است";
-$connect->query("INSERT INTO setting (count_usertest,Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,sublink,configManual) VALUES ('0','$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help','$active_phone_iran_text','$sublink','$configManual')");
+        $configManual = "❌ ارسال کانفیگ دستی خاموش است";
+        $MethodUsername ="آیدی عددی + حروف و عدد رندوم";
+$connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,sublink,configManual,NotUser,two_columns,MethodUsername,flow) VALUES ('$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help','$active_phone_iran_text','$sublink','$configManual','offnotuser','off','$MethodUsername','offflow')");
     } else {
         $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'configManual'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE setting ADD configManual VARCHAR(200)");
             echo "The configManual field was added ✅";
         }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'flow'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE setting ADD flow VARCHAR(200)");
+            echo "The flow field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'MethodUsername'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE setting ADD MethodUsername VARCHAR(900)");
+            echo "The MethodUsername field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'two_columns'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE setting ADD two_columns VARCHAR(200)");
+            echo "The two_columns field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'NotUser'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE setting ADD NotUser VARCHAR(200)");
+            echo "The NotUser field was added ✅";
+        }
                 $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'sublink'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE setting ADD sublink VARCHAR(200)");
             echo "The sublink field was added ✅";
         }
-                $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'iran_number'");
+        $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'iran_number'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE setting ADD iran_number VARCHAR(200)");
             echo "The iran_number field was added ✅";
@@ -199,18 +224,49 @@ $connect->query("INSERT INTO setting (count_usertest,Bot_Status,roll_Status,get_
             $connect->query("UPDATE setting SET roll_Status = '✅ روشن '");
             echo "The roll_Status field was added ✅";
         }
+        $settingsql = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM setting"));
         $sublink = "✅ لینک اشتراک فعال است.";
         $active_phone_iran_text = "❌ بررسی شماره ایرانی غیرفعال است";
         $configManual = "❌ ارسال کانفیگ دستی خاموش است";
+        $MethodUsernameupdate = "آیدی عددی + حروف و عدد رندوم";
+        if(!isset($settingsql['configManual'])){
         $stmt = $connect->prepare("UPDATE setting SET configManual = ?");
         $stmt->bind_param("s", $configManual);
         $stmt->execute();
+        }
+        if(!isset($settingsql['flow'])){
+        $stmt = $connect->prepare("UPDATE setting SET flow = ?");
+        $flow = 'offflow';
+        $stmt->bind_param("s", $flow);
+        $stmt->execute();
+        }
+        if(!isset($settingsql['iran_number'])){
         $stmt = $connect->prepare("UPDATE setting SET iran_number = ?");
         $stmt->bind_param("s", $active_phone_iran_text);
         $stmt->execute();
+        }
+        if(!isset($settingsql['sublink'])){
         $stmt = $connect->prepare("UPDATE setting SET sublink = ?");
         $stmt->bind_param("s", $sublink);
         $stmt->execute();
+        }
+        if(!isset($settingsql['NotUser'])){
+        $stmt = $connect->prepare("UPDATE setting SET NotUser = ?");
+        $text = "offnotuser";
+        $stmt->bind_param("s", $text);
+        $stmt->execute();
+        }
+        if(!isset($settingsql['two_columns'])){
+        $stmt = $connect->prepare("UPDATE setting SET two_columns = ?");
+        $text = "off";
+        $stmt->bind_param("s", $text);
+        $stmt->execute();
+        }
+        if(!isset($settingsql['MethodUsername'])){
+        $stmt = $connect->prepare("UPDATE setting SET MethodUsername = ?");
+        $stmt->bind_param("s", $MethodUsernameupdate);
+        $stmt->execute();
+        }
     }
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
@@ -286,14 +342,26 @@ try {
     if (!$table_exists) {
         $result = $connect->query("CREATE TABLE product (
         id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        code_product varchar(200)  NULL,
         name_product varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL,
         price_product varchar(2000) NULL,
         Volume_constraint varchar(2000) NULL,
+        Location varchar(1000) NULL,
         Service_time varchar(200) NULL)
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
             echo "table product".mysqli_error($connect);
         }
+    }
+    else{
+        $Check_filde = $connect->query("SHOW COLUMNS FROM product LIKE 'Location'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+           $result = $connect->query("ALTER TABLE product ADD Location VARCHAR(1000)");
+        } 
+        $Check_filde = $connect->query("SHOW COLUMNS FROM product LIKE 'code_product'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+           $result = $connect->query("ALTER TABLE product ADD code_product VARCHAR(200)");
+        } 
     }
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
@@ -310,6 +378,7 @@ try {
         id_user varchar(200) NULL,
         username varchar(2000) NULL,
         Service_location varchar(2000) NULL,
+        time_sell varchar(2000) NULL,
         name_product varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL,
         price_product varchar(2000) NULL,
         Volume varchar(2000) NULL,
@@ -318,6 +387,12 @@ try {
         if (!$result) {
             echo "table invoice".mysqli_error($connect);
         }
+    }
+    else{
+     $Check_filde = $connect->query("SHOW COLUMNS FROM invoice LIKE 'time_sell'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+           $result = $connect->query("ALTER TABLE invoice ADD time_sell VARCHAR(2000)");
+        }    
     }
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
@@ -382,6 +457,45 @@ try {
 }
 //-----------------------------------------------------------------
 try {
+
+    $result = $connect->query("SHOW TABLES LIKE 'TestAccount'");
+    $table_exists = ($result->num_rows > 0);
+
+    if (!$table_exists) {
+        $result =  $connect->query("CREATE TABLE  TestAccount (
+        id_invoice varchar(200) PRIMARY KEY,
+        id_user varchar(200) NULL,
+        username varchar(200) NULL,
+        Service_location varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin
+ NULL,
+        time_sell varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin
+ NULL)
+        ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
+        if (!$result) {
+            echo "table TestAccount".mysqli_error($connect);
+        }
+    }
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage();
+}
+//-----------------------------------------------------------------
+try {
+
+    $result = $connect->query("SHOW TABLES LIKE 'protocol'");
+    $table_exists = ($result->num_rows > 0);
+
+    if (!$table_exists) {
+        $result =  $connect->query("CREATE TABLE  protocol (
+        NameProtocol varchar(200) PRIMARY KEY Not NULL)");
+        if (!$result) {
+            echo "table protocol".mysqli_error($connect);
+        }
+    }
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage();
+}
+//-----------------------------------------------------------------
+try {
     $result = $connect->query("SHOW TABLES LIKE 'textbot'");
     $table_exists = ($result->num_rows > 0);
     $support_dec = "📬 در صورتی که نتوانستید پاسخ سوالات و مشکلات خود را در بخش «سوالات متداول» پیدا کنید، جهت ارتباط بیشتر می توانید به بخش پشتیبانی پیام بدید.";
@@ -432,24 +546,10 @@ try {
 ✅ امکان بازگشت وجه در صورت حل نشدن مشکل از سمت ما وجود دارد.
 
 💡 در صورتی که جواب سوالتون رو نگرفتید میتونید به «پشتیبانی» مراجعه کنید.";
-    $cart_to_cart_dec = "
-برای افزایش موجودی به صورت دستی، مبلغ دلخواه را به شماره‌ی حساب زیر واریز کنید 👇🏻
-
-==================== 
-6037000000000000 - bank
-====================
-
-🌅 عکس رسید خود را در این مرحله ارسال نمایید. 
-
-⚠️ حداکثر واریز مبلغ 10 میلیون تومان می باشد.
-⚠️ امکان برداشت وجه از کیف پول  نیست.
-⚠️ مسئولیت واریز اشتباهی با شماست.
-";
     $text_channel = "   
         ⚠️ کاربر گرامی؛ شما عضو چنل ما نیستید
 از طریق دکمه زیر وارد کانال شده و عضو شوید
-پس از عضویت متن زیر را ارسال کنید
-/start";
+پس از عضویت دکمه بررسی عضویت را کلیک کنید";
     if (!$table_exists) {
         $result = $connect->query("CREATE TABLE textbot (
         id_text varchar(600) PRIMARY KEY NOT NULL,
@@ -471,14 +571,16 @@ try {
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_account','👨🏻‍💻 مشخصات کاربری')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_sell','🔐 خرید اشتراک')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Add_Balance','💰 افزایش موجودی')");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_cart_to_cart','$cart_to_cart_dec')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_channel','$text_channel')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Discount','🎁 کد هدیه')");
+        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Tariff_list','💰 تعرفه اشتراک ها')");
+        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_dec_Tariff_list','تنظیم نشده است')");
+        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Account_op','🎛 حساب کاربری')");
     }
     else{
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_start','سلام خوش آمدید')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_usertest','🔑 اکانت تست')");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Purchased_services','🛍 مشاهده سرویس های خریداری شده')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_Purchased_services','🛍 مشاهده سرویس های خریداری شده')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_support','☎️ پشتیبانی')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_dec_support','$support_dec')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_help','📚 آموزش')");
@@ -489,9 +591,46 @@ try {
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_account','👨🏻‍💻 مشخصات کاربری')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_sell','🔐 خرید اشتراک')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_Add_Balance','💰 افزایش موجودی')");
-        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_cart_to_cart','$cart_to_cart_dec')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_channel','$text_channel')");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Discount','🎁 کد هدیه')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_Discount','🎁 کد هدیه')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_Tariff_list','💰 تعرفه اشتراک ها')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_dec_Tariff_list','تنظیم نشده است')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_Account_op','🎛 حساب کاربری')");
+
+
+    }
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage();
+}
+try {
+    $result = $connect->query("SHOW TABLES LIKE 'PaySetting'");
+    $table_exists = ($result->num_rows > 0);
+    if (!$table_exists) {
+        $result = $connect->query("CREATE TABLE PaySetting (
+        NamePay varchar(500) PRIMARY KEY NOT NULL,
+        ValuePay TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL)
+        ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
+        if (!$result) {
+            echo "table PaySetting".mysqli_error($connect);
+        }
+        $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('CartDescription','603700000000') ");
+        $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('Cartstatus','oncard') ");
+        $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('apinowpayment','0') ");
+        $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('nowpaymentstatus','offnowpayment') ");
+        $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('digistatus','offdigi') ");
+        $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('merchant_id','0') ");
+        $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('statuszarinpal','offzarinpal') ");
+    }
+    else{
+        $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('Cartstatus','oncard') ");
+        $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('CartDescription','603700000000') ");
+        $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('apinowpayment','0')");
+        $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('nowpaymentstatus','offnowpayment')");
+        $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('digistatus','offdigi')");
+        $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('merchant_id','0')");
+        $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('statuszarinpal','offzarinpal')");
+
+
     }
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
