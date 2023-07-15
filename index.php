@@ -20,6 +20,15 @@ foreach ($telegram_ip_ranges as $telegram_ip_range) if (!$ok) {
 }
 if (!$ok) die("دسترسی غیرمجاز");
 #-----------function------------#
+function generateUUID() {
+    $data = openssl_random_pseudo_bytes(16);
+    $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
+    $data[8] = chr(ord($data[8]) & 0x3f | 0x80); 
+
+    $uuid = vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+
+    return $uuid;
+}
 function tronchangeto()
 {
     return json_decode(file_get_contents('https://api.weswap.digital/api/rate'), true);
@@ -153,6 +162,20 @@ if ($user['User_Status'] == "block") {
     return;
 }
 #-----------Channel------------#
+if($datain == "confirmchannel"){
+    if(!in_array($tch, ['member', 'creator', 'administrator'])){
+        telegram('answerCallbackQuery', array(
+            'callback_query_id' => $callback_query_id,
+            'text' => $textbotlang['users']['channel']['notconfirmed'],
+            'show_alert' => true,
+            'cache_time' => 5,
+        ));
+    }else{
+        deletemessage($from_id, $message_id);
+        sendmessage($from_id, $textbotlang['users']['channel']['confirmed'], $keyboard, 'html');
+    }
+        return;
+}
 if (empty($channels['Channel_lock'])) {
     $channels['Channel_lock'] = "off";
     $channels['link'] = $textbotlang['users']['channel']['link'];
@@ -162,6 +185,9 @@ if (!in_array($tch, ['member', 'creator', 'administrator']) && $channels['Channe
         'inline_keyboard' => [
             [
                 ['text' => $textbotlang['users']['channel']['text_join'], 'url' => "https://t.me/" . $channels['link']],
+            ],
+            [
+                ['text' => $textbotlang['users']['channel']['confirmjoin'], 'callback_data' => "confirmchannel"],
             ],
         ]
     ]);
@@ -518,6 +544,7 @@ if (preg_match('/settings_(\w+)/', $datain, $dataget)) {
                 ['text' => $textbotlang['users']['stateus']['config'], 'callback_data' => 'config_'.$username],
             ],[
                 ['text' => $textbotlang['users']['extend']['title'], 'callback_data' => 'extend_'.$username],
+                ['text' => $textbotlang['users']['changelink']['btntitle'], 'callback_data' => 'changelink_'.$username],
             ],
             [
                 ['text' => $textbotlang['users']['stateus']['backservice'], 'callback_data' => "product_" . $username],
@@ -618,7 +645,37 @@ elseif (preg_match('/confirmserivce_(\w+)/', $datain, $dataget)) {
     ]);
     sendmessage($from_id,$textbotlang['users']['extend']['thanks'],$keyboardextendfnished, 'HTML');
 }
+elseif (preg_match('/changelink_(\w+)/', $datain, $dataget)) {
+    $username = $dataget[1];
+    $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$username'"));
+            $keyboardextend = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $textbotlang['users']['changelink']['confirm'], 'callback_data' => "confirmchange_".$username],
+            ]
+        ]
+    ]);
+    sendmessage($from_id,$textbotlang['users']['changelink']['warnchange'], $keyboardextend, 'HTML');
+}
+elseif (preg_match('/confirmchange_(\w+)/', $datain, $dataget)) {
+    $username = $dataget[1];
+    $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$username'"));
+    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$nameloc['Service_location']}'"));
+    $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
+    $Allowedusername = getuser($username_ac, $Check_token['access_token'], $marzban_list_get['url_panel']);
+    $nameprotocolsql = mysqli_query($connect, "SELECT * FROM protocol");
+    $nameprotocol = array();
+    while ($row = mysqli_fetch_assoc($nameprotocolsql)) {
+        $protocol = $row['NameProtocol'];
+        $nameprotocol[$protocol] = array(
+            "id" => generateUUID() ,
+            "status" => "active"
+            );
+    }
+    Modifyuser($Check_token['access_token'], $marzban_list_get['url_panel'],$username,$Allowedusername['expire'],$nameprotocol);
+    Editmessagetext($from_id, $message_id,  $textbotlang['users']['changelink']['confirmed'], null);
 
+}
 
 #-----------usertest------------#
 if ($text == $datatextbot['text_usertest']) {
@@ -1183,7 +1240,7 @@ $PaySetting
         $paymentkeyboard = json_encode([
             'inline_keyboard' => [
                 [
-                    ['text' => $textbotlang['users']['Balance']['payments'], 'url' => "https://" . "$domainhosts" . "/payment/zarinpal/zarinpal.php?price=$Processing_value&order_description=Add_Balance&order_id=$randomString"],
+                    ['text' => $textbotlang['users']['Balance']['payments'], 'url' => "https://" . "$domainhosts" . "/payment/zarinpal/zarinpal.php?price=$Processing_value&order_id=$randomString"],
                 ]
             ]
         ]);
@@ -3391,7 +3448,7 @@ if($text == "🧩 api nowpayment"){
     $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'apinowpayment'"))['ValuePay'];
     $textcart = "⚙️ api سایت nowpayments.io را ارسال نمایید
 
-api nowpayment : {$PaySetting['ValuePay']}";
+api nowpayment :$PaySetting";
     sendmessage($from_id, $textcart, $backadmin, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'apinowpayment';
@@ -3460,51 +3517,51 @@ if ($datain == "offdigi"){
 if($datain == "colselist"){
     deletemessage($from_id, $message_id);
 }
-// if($text == "🟡  درگاه زرین پال"){
-//     sendmessage($from_id, $textbotlang['users']['selectoption'], $zarinpal, 'HTML');
-// }
-// if($text == "تنظیم مرچنت"){
-//     $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'merchant_id'"));
-//     $textzarinpal = "💳 مرچنت کد خود را از زرین پال دریافت و در این قسمت وارد کنید
+if($text == "🟡  درگاه زرین پال"){
+    sendmessage($from_id, $textbotlang['users']['selectoption'], $zarinpal, 'HTML');
+}
+if($text == "تنظیم مرچنت"){
+    $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'merchant_id'"));
+    $textzarinpal = "💳 مرچنت کد خود را از زرین پال دریافت و در این قسمت وارد کنید
 
-// مرچنت کد فعلی شما : {$PaySetting['ValuePay']}";
-//     sendmessage($from_id, $textzarinpal, $backadmin, 'HTML');
-//     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
-//     $step = 'merchant_id';
-//     $stmt->bind_param("ss", $step, $from_id);
-//     $stmt->execute();
-// }
-// elseif($user['step'] == "merchant_id"){
-//     sendmessage($from_id,$textbotlang['Admin']['SettingnowPayment']['Savaapi'] , $zarinpal,'HTML');
-//     $stmt = $connect->prepare("UPDATE PaySetting SET ValuePay = ? WHERE NamePay = ?");
-//     $namepay = "merchant_id";
-//     $stmt->bind_param("ss", $text, $namepay);
-//     $stmt->execute();
-// }
+مرچنت کد فعلی شما : {$PaySetting['ValuePay']}";
+    sendmessage($from_id, $textzarinpal, $backadmin, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'merchant_id';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif($user['step'] == "merchant_id"){
+    sendmessage($from_id,$textbotlang['Admin']['SettingnowPayment']['Savaapi'] , $zarinpal,'HTML');
+    $stmt = $connect->prepare("UPDATE PaySetting SET ValuePay = ? WHERE NamePay = ?");
+    $namepay = "merchant_id";
+    $stmt->bind_param("ss", $text, $namepay);
+    $stmt->execute();
+}
 
-// if ($text == "وضعیت درگاه زرین پال") {
-//         $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'statuszarinpal'"))['ValuePay'];
-//     $zarinpal_Status = json_encode([
-//     'inline_keyboard' => [
-//         [
-//             ['text' => $PaySetting, 'callback_data' => $PaySetting],
-//         ],
-//     ]
-// ]);
-//     sendmessage($from_id, $textbotlang['Admin']['Status']['zarinpalTitle'], $zarinpal_Status, 'HTML');
-// }
-// if ($datain == "offzarinpal"){
-//     $stmt = $connect->prepare("UPDATE PaySetting SET ValuePay = ? WHERE NamePay = ?");
-//     $Status = 'onzarinpal';
-//     $where = 'statuszarinpal';
-//     $stmt->bind_param("ss", $Status,$where);
-//     $stmt->execute();
-//     Editmessagetext($from_id, $message_id,$textbotlang['Admin']['Status']['zarinpalStatuson'], null);
-// } elseif ($datain == "onzarinpal") {
-//     $stmt = $connect->prepare("UPDATE PaySetting SET ValuePay = ? WHERE NamePay = ?");
-//     $Status = 'offzarinpal';
-//     $where = 'statuszarinpal';
-//     $stmt->bind_param("ss", $Status,$where);
-//     $stmt->execute();
-//     Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['zarrinpalStatusOff'], null);
-// }
+if ($text == "وضعیت درگاه زرین پال") {
+        $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'statuszarinpal'"))['ValuePay'];
+    $zarinpal_Status = json_encode([
+    'inline_keyboard' => [
+        [
+            ['text' => $PaySetting, 'callback_data' => $PaySetting],
+        ],
+    ]
+]);
+    sendmessage($from_id, $textbotlang['Admin']['Status']['zarinpalTitle'], $zarinpal_Status, 'HTML');
+}
+if ($datain == "offzarinpal"){
+    $stmt = $connect->prepare("UPDATE PaySetting SET ValuePay = ? WHERE NamePay = ?");
+    $Status = 'onzarinpal';
+    $where = 'statuszarinpal';
+    $stmt->bind_param("ss", $Status,$where);
+    $stmt->execute();
+    Editmessagetext($from_id, $message_id,$textbotlang['Admin']['Status']['zarinpalStatuson'], null);
+} elseif ($datain == "onzarinpal") {
+    $stmt = $connect->prepare("UPDATE PaySetting SET ValuePay = ? WHERE NamePay = ?");
+    $Status = 'offzarinpal';
+    $where = 'statuszarinpal';
+    $stmt->bind_param("ss", $Status,$where);
+    $stmt->execute();
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['zarrinpalStatusOff'], null);
+}
