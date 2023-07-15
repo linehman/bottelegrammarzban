@@ -1,4 +1,4 @@
-<?php
+    <?php
 // کرون جاب هر 1 روز تنظیم شود
 require_once 'config.php';
 require_once 'apipanel.php';
@@ -25,12 +25,15 @@ sendmessage($row['id_user'], $text, null,'HTML');
     }
     if($timeservice <= "167000" && $timeservice >0){
         $text = "
-⭕️ کاربر گرامی به پایان زمان سرویس تان $day روز مانده است
+⭕️ کاربر گرامی به پایان زمان سرویس تان $day روز مانده  است در صورت تمدید نکردن تا 72 ساعت معلق می ماند و پس از آن سرویس تان حذف خواهد شد.
 
 نام کاربری : <code>{$row['username']}</code>
 نام سرویس : {$row['Service_location']}
 ";
 sendmessage($row['id_user'], $text, null,'HTML');
+    }
+    if($day == "-3"){
+                removeuser($Check_token['access_token'], $marzban_list_get['url_panel'], $row['username']);
     }
     }
 }
