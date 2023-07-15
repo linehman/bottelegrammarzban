@@ -2114,7 +2114,7 @@ if ($text  == "📝 تنظیم متن ربات") {
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 } elseif ($text == "متن دکمه خرید اشتراک") {
-    sendmessage($from_id, $textstart, $textbotlang['Admin']['ManageUser']['ChangeTextGet'] . $datatextbot['text_sell'], 'HTML');
+    sendmessage($from_id, $textbotlang['Admin']['ManageUser']['ChangeTextGet'] . $datatextbot['text_sell'],$backadmin, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'text_sell';
     $stmt->bind_param("ss", $step, $from_id);
