@@ -549,8 +549,7 @@ try {
     $text_channel = "   
         ⚠️ کاربر گرامی؛ شما عضو چنل ما نیستید
 از طریق دکمه زیر وارد کانال شده و عضو شوید
-پس از عضویت متن زیر را ارسال کنید
-/start";
+پس از عضویت دکمه بررسی عضویت را کلیک کنید";
     if (!$table_exists) {
         $result = $connect->query("CREATE TABLE textbot (
         id_text varchar(600) PRIMARY KEY NOT NULL,
