@@ -8,6 +8,7 @@ fi
 wait
 
 echo -e "\e[32mInstalling mirza script ... \033[0m\n"
+echo -e "\e[32m mirzapanel by mahdi \033[0m\n"
 
 sudo apt update && apt upgrade -y
 echo -e "\e[92mThe server was successfully updated ...\033[0m\n"
@@ -177,12 +178,10 @@ wait
         read YOUR_CHAT_ID
         printf "\e[33m[+] \e[36mDomain: \033[0m"
         read YOUR_DOMAIN
-        printf "\e[33m[+] \e[36mapinowpayments: \033[0m"
-        read YOUR_NOWPAYMENT
         printf "\e[33m[+] \e[36musernamebot: \033[0m"
         read YOUR_BOTNAME
         echo " "
-        if [ "$YOUR_BOT_TOKEN" = "" ] || [ "$YOUR_DOMAIN" = "" ] || [ "$YOUR_CHAT_ID" = "" ] || [ "$YOUR_NOWPAYMENT" = "" ] || [ "$YOUR_BOTNAME" = "" ]; then
+        if [ "$YOUR_BOT_TOKEN" = "" ] || [ "$YOUR_DOMAIN" = "" ] || [ "$YOUR_CHAT_ID" = "" ] || [ "$YOUR_BOTNAME" = "" ]; then
            exit
         fi
 
@@ -210,7 +209,6 @@ wait
         echo -e "${ASAS}dbname = '${dbname}';" >> /var/www/html/bottelegrammarzban/config.php
         echo -e "${ASAS}domainhosts = '${YOUR_DOMAIN}/bottelegrammarzban';" >> /var/www/html/bottelegrammarzban/config.php
         echo -e "${ASAS}adminnumber = '${YOUR_CHAT_ID}';" >> /var/www/html/bottelegrammarzban/config.php
-        echo -e "${ASAS}apinowpayments = '${YOUR_NOWPAYMENT}';" >> /var/www/html/bottelegrammarzban/config.php
         echo -e "${ASAS}usernamebot = '${YOUR_BOTNAME}';" >> /var/www/html/bottelegrammarzban/config.php
         echo -e "${ASAS}connect = mysqli_connect("localhost", ${ASAS}usernamedb, ${ASAS}passworddb, ${ASAS}dbname);" >> /var/www/html/bottelegrammarzban/config.php
         echo -e "if (${ASAS}connect->connect_error) {" >> /var/www/html/bottelegrammarzban/config.php
@@ -222,7 +220,7 @@ wait
         sleep 1
 
         curl -F "url=https://${YOUR_DOMAIN}/bottelegrammarzban/index.php" "https://api.telegram.org/bot${YOUR_BOT_TOKEN}/setWebhook"
-        MESSAGE="✅ The bot is installed!"
+        MESSAGE="✅ The bot is installed! for start bot send comment /start"
         curl -s -X POST "https://api.telegram.org/bot${YOUR_BOT_TOKEN}/sendMessage" -d chat_id="${YOUR_CHAT_ID}" -d text="$MESSAGE"
 
         sleep 1
