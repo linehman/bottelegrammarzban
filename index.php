@@ -963,11 +963,10 @@ if (mysqli_num_rows($locationproduct) == 0) {
     $stmt->execute();
 } 
 elseif ($user['step'] == "get_product") {
-            $nullproduct = mysqli_query($connect, "SELECT * FROM product");
-
-if (mysqli_num_rows($nullproduct) == 0) {
-    sendmessage($from_id, $textbotlang['Admin']['Product']['nullpProduct'], null, 'HTML');
-    return;
+    $nullproduct = mysqli_query($connect, "SELECT * FROM product");
+    if (mysqli_num_rows($nullproduct) == 0) {
+        sendmessage($from_id, $textbotlang['Admin']['Product']['nullpProduct'], null, 'HTML');
+        return;
 }
     if (!in_array($text, $marzban_list)) {
         sendmessage($from_id, $textbotlang['users']['sell']['Service-Location'], null, 'HTML');
@@ -2646,6 +2645,11 @@ if ($text == "📣 تنظیم کانال گزارش") {
 if ($text == "🏬 بخش فروشگاه") {
     sendmessage($from_id, $textbotlang['users']['selectoption'], $shopkeyboard, 'HTML');
 } elseif ($text == "🛍 اضافه کردن محصول") {
+        $locationproduct = mysqli_query($connect, "SELECT * FROM marzban_panel");
+    if (mysqli_num_rows($locationproduct) == 0) {
+    sendmessage($from_id, $textbotlang['Admin']['managepanel']['nullpaneladmin'], null, 'HTML');
+    return;
+}
     sendmessage($from_id, $textbotlang['Admin']['Product']['AddProductStepOne'], $backadmin, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'get_limit';
