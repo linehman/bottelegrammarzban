@@ -209,6 +209,7 @@ $textbotlang['Admin']['managepanel']['addedpanel'] = "تبریک پنل شما �
 $textbotlang['Admin']['managepanel']['GetRemoveNamePanel'] = "پنلی که میخواهید حذف کنید را انتخاب کنید.";
 $textbotlang['Admin']['managepanel']['RemovedPanel'] = "پنل با موفقیت حذف گردید";
 $textbotlang['Admin']['managepanel']['nullpanel'] = "⭕️ موقعیتی یافت نشد برای رفع مشکل با پشتیبانی در ارتباط باشید";
+$textbotlang['Admin']['managepanel']['nullpaneladmin'] = "پنل تعریف نشده است ابتدا پنل را تعریف کنید سپس محصول اضافه کنید";
 
 
 
