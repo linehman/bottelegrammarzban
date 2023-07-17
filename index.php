@@ -2792,11 +2792,10 @@ if (preg_match('/reject_pay_(\w+)/', $datain, $datagetr)) {
     sendmessage($from_id, $textbotlang['Admin']['Payment']['Reasonrejecting'], $backadmin, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = "reject-dec";
-    $stmt->bind_param("ss", $step, $Payment_report['id_user']);
+    $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
     Editmessagetext($from_id, $message_id, $text, null);
 } elseif ($user['step'] == "reject-dec") {
-    sendmessage($Processing_value, $text, null, 'HTML');
     $stmt = $connect->prepare("UPDATE Payment_report SET dec_not_confirmed = ? WHERE id_order = ?");
     $stmt->bind_param("ss", $text, $user['Processing_value_one']);
     $stmt->execute();
@@ -2804,8 +2803,8 @@ if (preg_match('/reject_pay_(\w+)/', $datain, $datagetr)) {
         ✍️ $text
         🛒 کد پیگیری پرداخت: {$user['Processing_value_one']}
         ";
-    sendmessage($Processing_value, $text_reject, null, 'HTML');
     sendmessage($from_id, $textbotlang['Admin']['Payment']['Rejected'], $keyboardadmin, 'HTML');
+    sendmessage($Processing_value, $text_reject, null, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = "home";
     $stmt->bind_param("ss", $step, $from_id);
