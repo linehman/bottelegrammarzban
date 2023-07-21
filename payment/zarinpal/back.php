@@ -83,6 +83,7 @@ $response = json_decode($response,true);
     sendmessage($Payment_report['id_user'],"💎 کاربر گرامی مبلغ $price تومان به کیف پول شما واریز گردید با تشکر از پرداخت شما.
     
     🛒 کد پیگیری شما: {$Payment_report['id_order']}",$keyboard,'HTML');
+    deletemessage($from_id, $message_id);
  }
  }
  else{
