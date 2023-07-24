@@ -824,6 +824,8 @@ if ($text == $datatextbot['text_usertest']) {
     
     <code>$output_config_link</code>
     <code>$text_config</code>";
+
+    
     sendmessage($from_id, $textcreatuser, $usertestinfo, 'HTML');
     sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
