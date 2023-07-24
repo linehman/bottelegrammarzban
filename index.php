@@ -644,6 +644,15 @@ elseif (preg_match('/confirmserivce_(\w+)/', $datain, $dataget)) {
         ]
     ]);
     sendmessage($from_id,$textbotlang['users']['extend']['thanks'],$keyboardextendfnished, 'HTML');
+     $text_report = "⭕️ یک کاربر سرویس خود را تمدید کرد.
+
+اطلاعات کاربر : 
+🪪 آیدی عددی : $from_id
+🛍 نام محصول :  {$prodcut['name_product']}
+💰 مبلغ تمدید :  {$prodcut['price_product']} تومان"; 
+     if (strlen($setting['Channel_Report']) > 0) {    
+         sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
+         }
 }
 elseif (preg_match('/changelink_(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
@@ -824,8 +833,6 @@ if ($text == $datatextbot['text_usertest']) {
     
     <code>$output_config_link</code>
     <code>$text_config</code>";
-
-    
     sendmessage($from_id, $textcreatuser, $usertestinfo, 'HTML');
     sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -931,13 +938,15 @@ $current_time = time();
     $timeacc = jdate('H:i:s', $one_hour_later); if ($text == $datatextbot['text_account']) {
     $first_name = htmlspecialchars($first_name);
     $Balanceuser = number_format($user['Balance'], 0);
+    $countorder =  mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(id_user) FROM invoice WHERE id_user = '$from_id'"));
     $text_account = "
 👨🏻‍💻 وضعیت حساب کاربری شما:
         
 👤 نام: $first_name
 🕴🏻 شناسه کاربری: <code>$from_id</code>
 💰 موجودی: $Balanceuser تومان
-        
+🛍 تعداد سرویس های خریداری شده : {$countorder['COUNT(id_user)']}
+
 📆 $dateacc → ⏰ $timeacc
             ";
     sendmessage($from_id, $text_account, $keyboardPanel, 'HTML');
@@ -1033,8 +1042,9 @@ elseif ($user['step'] == "endstepuser") {
 👤 نام کاربری: <code>$username_ac</code>
 🔐 نام سرویس: {$info_product['name_product']}
 📆 مدت اعتبار: {$info_product['Service_time']} روز
-💶 قیمت: {$info_product['price_product']} هزار تومان
+💶 قیمت: {$info_product['price_product']}  تومان
 👥 حجم اکانت: {$info_product['Volume_constraint']} گیگ
+💵 موجودی کیف پول شما : {$user['Balance']}
           
 💰 سفارش شما آماده پرداخت است.  ";
     sendmessage($from_id, $textin, $payment, 'HTML');
@@ -1226,7 +1236,7 @@ $PaySetting
         $stmt->bind_param("ss", $step, $from_id);
         $stmt->execute();
     }
-        if ($datain == "zarinpal") {
+    if ($datain == "zarinpal") {
         if ($Processing_value < 50000) {
             sendmessage($from_id, $textbotlang['users']['Balance']['zarinpal'], null, 'HTML');
             return;
@@ -1255,7 +1265,6 @@ $PaySetting
 جهت پرداخت از دکمه زیر استفاده کنید👇🏻";
         sendmessage($from_id, $textnowpayments, $paymentkeyboard, 'HTML');
     }
-
     if ($datain == "nowpayments") {
         $price_rate = tronchangeto();
         $USD = $price_rate['result']['USD'];
@@ -2773,9 +2782,18 @@ if (preg_match('/Confirm_pay_(\w+)/', $datain, $dataget)) {
               به موجودی کاربر مبلغ {$Payment_report['price']} اضافه گردید.
             ";
     sendmessage($from_id, $textconfrom, null, 'HTML');
-    sendmessage($Payment_report['id_user'], "💎 کاربر گرامی مبلغ{$Payment_report['price']} تومان به کیف پول شما واریز گردید با تشکر از پرداخت شما.
+    sendmessage($Payment_report['id_user'], "💎 کاربر گرامی مبلغ {$Payment_report['price']} تومان به کیف پول شما واریز گردید با تشکر از پرداخت شما.
         
         🛒 کد پیگیری شما: {$Payment_report['id_order']}", null, 'HTML');
+             $text_report = "📣 یک ادمین رسید پرداخت کارت به کارت را تایید کرد.
+
+اطلاعات :
+👤آیدی عددی  ادمین تایید کننده : $from_id
+💰 مبلغ پرداخت : {$Payment_report['price']}
+"; 
+     if (strlen($setting['Channel_Report']) > 0) {    
+         sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
+         }
 }
 #-------------------------#
 if (preg_match('/reject_pay_(\w+)/', $datain, $datagetr)) {
@@ -3472,6 +3490,10 @@ elseif($user['step'] == "apinowpayment"){
     $namepay = "apinowpayment";
     $stmt->bind_param("ss", $text, $namepay);
     $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
 }
 if ($text == "🔌 وضعیت درگاه nowpayments") {
         $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'nowpaymentstatus'"))['ValuePay'];
@@ -3547,6 +3569,10 @@ elseif($user['step'] == "merchant_id"){
     $stmt = $connect->prepare("UPDATE PaySetting SET ValuePay = ? WHERE NamePay = ?");
     $namepay = "merchant_id";
     $stmt->bind_param("ss", $text, $namepay);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 }
 
