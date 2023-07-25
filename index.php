@@ -1240,7 +1240,7 @@ $PaySetting
         $stmt->execute();
     }
     if ($datain == "zarinpal") {
-        if ($Processing_value < 50000) {
+        if ($Processing_value < 5000) {
             sendmessage($from_id, $textbotlang['users']['Balance']['zarinpal'], null, 'HTML');
             return;
         }
