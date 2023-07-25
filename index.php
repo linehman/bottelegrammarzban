@@ -2893,7 +2893,7 @@ elseif ($user['step'] == "selectlocedite") {
     $stmt->execute();
 } elseif ($user['step'] == "change_filde") {
     if (!in_array($text, $name_product)) {
-        sendmessage($from_id, $textbotlang['users']['sell']['error-product'], null);
+        sendmessage($from_id, $textbotlang['users']['sell']['error-product'], null,'HTML');
         return;
     }
     $stmt = $connect->prepare("UPDATE user SET Processing_value = ? WHERE id = ?");
@@ -3383,6 +3383,13 @@ if ($text == "❌ حذف سرویس کاربر") {
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 } elseif ($user['step'] == "removeservice") {
+    $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '{$text}' LIMIT 1"));
+    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$info_product['Service_location']}'"));
+    $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
+    $get_username_Check = getuser($text, $Check_token['access_token'], $marzban_list_get['url_panel']);
+    if(isset($get_username_Check['status'])){
+        removeuser($Check_token['access_token'], $marzban_list_get['url_panel'], $text);
+    }
     $stmt = $connect->prepare("DELETE FROM invoice WHERE username = ?");
     $stmt->bind_param("s", $text);
     $stmt->execute();
