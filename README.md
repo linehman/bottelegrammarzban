@@ -1,8 +1,8 @@
 
 
-<h1 align="center"/>ربات  میرزا پنل</h1>
+<h1 align="center"/>Bot Mirza Panel</h1>
 
-<p align="center">رباتی برای فروش vpn با قابلیت ساخت خودکار</p>
+<p align="center">bot for VPN Sale with Auto Build</p>
 
 <br/>
 <p align="center">
@@ -112,7 +112,7 @@ panel
 # کمک مالی
 اگر میرزا را برای شما مفید بوده و می‌خواهید از توسعه آن حمایت کنید، می‌توانید در یکی از طریق یکی از شبکه های کریپتو زیر کمک مالی کنید:
 
-- شبکه TRX (TRC20): `TLYPZq8m7EXKyZuhJDQ2vmjH2fpoa9XuJT`
-- شبکه USDT(TRC20): `TMRaoveUu1pprEvaibk7w3DqVFhEpbfwjz`
+- شبکه TRX (TRC20): `TJxoQEyCEs36Cf8R9MjapFsT6vpm9aRArS`
+- شبکه TON: `EQA0KjWeODV8CDloEp_d3fBJ71xHMVv77ydQWjVr-fAtZSqw`
 
 از حمایت شما متشکرم!

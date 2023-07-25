@@ -166,7 +166,7 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
 $result = curl_exec($ch);
 curl_close($ch);
-    $data_useer = $result;
+     $data_useer = json_decode($result, true);
     return $data_useer;
 }
 #-----------------------------------------------#

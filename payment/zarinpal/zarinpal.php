@@ -48,7 +48,7 @@ if($response['data']['code'] == "100"){
     header('Location: https://www.zarinpal.com/pg/StartPay/'.$response['data']['authority']);
     $stmt = $connect->prepare("UPDATE Payment_report SET dec_not_confirmed = ? WHERE id_order = ?");
     $confrim = $response['data']['authority'];
-    $stmt->bind_param("ss", $confrim, $id_order);
+    $stmt->bind_param("ss", $confrim, $order_id);
     $stmt->execute();
 }
 else{
