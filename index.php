@@ -1057,11 +1057,14 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
     $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '{$user['Processing_value_one']}' AND (Location = '$Processing_value'  or Location = '/all') LIMIT 1"));
     if (empty($info_product['price_product']) || empty($info_product['price_product'])) return;
     if ($info_product['price_product'] > $user['Balance']) {
-        sendmessage($from_id, $textbotlang['users']['sell']['None-credit'], $keyboard, 'HTML');
-        $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
-        $step = 'home';
-        $stmt->bind_param("ss", $step, $from_id);
-        $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET Processing_value = ? WHERE id = ?");
+    $stmt->bind_param("ss", $info_product['price_product'], $from_id);
+    $stmt->execute();
+    sendmessage($from_id, $textbotlang['users']['sell']['None-credit'], $step_payment, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'get_step_payment';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
         return;
     }
     $username_ac = $user['Processing_value_tow'];
@@ -2776,7 +2779,7 @@ if (preg_match('/Confirm_pay_(\w+)/', $datain, $dataget)) {
     $Status_change = "paid";
     $stmt->bind_param("ss", $Status_change, $Payment_report['id_order']);
     $stmt->execute();
-
+    $Payment_report['price'] = number_format($Payment_report['price'],0);
     $textconfrom = "
             💵 پرداخت با موفقیت تایید گردید.
               به موجودی کاربر مبلغ {$Payment_report['price']} اضافه گردید.
