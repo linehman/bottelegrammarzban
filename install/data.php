@@ -10,13 +10,9 @@ $domain = $_SERVER['HTTP_HOST'];
 $path = dirname($_SERVER['REQUEST_URI'],2);
 $domain_hosts = $domain . $path;
 $fileContent = file_get_contents('../config.php');
-// تغییر مقدار nowpaymentkey
-$patternapi = '/\$apinowpayments\s*=\s*".*?";/';
-$newFileContent = preg_replace($patternapi, '$apinowpayments = "'.$nowpaymentkey.'";', $fileContent);
-
 // تغییر مقدار $idbot
 $patternidbot = '/\$usernamebot\s*=\s*".*?";/';
-$newFileContent = preg_replace($patternidbot, '$usernamebot = "'.$idbot.'";', $newFileContent);
+$newFileContent = preg_replace($patternidbot, '$usernamebot = "'.$idbot.'";', $fileContent);
 
 // تغییر مقدار $domainhost
 $patterndomain = '/\$domainhosts\s*=\s*".*?";/';
