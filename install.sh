@@ -212,7 +212,7 @@ wait
         echo -e "${ASAS}usernamebot = '${YOUR_BOTNAME}';" >> /var/www/html/bottelegrammarzban/config.php
         echo -e "${ASAS}connect = mysqli_connect('localhost', ${ASAS}usernamedb, ${ASAS}passworddb, ${ASAS}dbname);" >> /var/www/html/bottelegrammarzban/config.php
         echo -e "if (${ASAS}connect->connect_error) {" >> /var/www/html/bottelegrammarzban/config.php
-        echo -e "die('اتصال به دیتابیس ناموفق بود: ' . ${ASAS}connect->connect_error);" >> /var/www/html/bottelegrammarzban/config.php
+        echo -e "die(' The connection to the database failed:' . ${ASAS}connect->connect_error);" >> /var/www/html/bottelegrammarzban/config.php
         echo -e "}" >> /var/www/html/bottelegrammarzban/config.php
         echo -e "mysqli_set_charset(${ASAS}connect, 'utf8mb4');" >> /var/www/html/bottelegrammarzban/config.php
         echo -e "?>" >> /var/www/html/bottelegrammarzban/config.php
