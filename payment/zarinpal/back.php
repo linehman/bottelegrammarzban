@@ -63,7 +63,7 @@ $response = json_decode($response,true);
 			"-53" => "پرداخت متعلق به این مرچنت کد نیست.",
 			"-54" => "اتوریتی نامعتبر است.",
     ][$response['errors']['code']];
- if($response['errors']['code'] == "100"){
+ if($response['data']['message'] == "Verified"){
     $price = $Payment_report['price'];
     $dec_payment_status = "از انجام تراکنش متشکریم!";
     if($Payment_report['payment_Status'] != "paid"){
