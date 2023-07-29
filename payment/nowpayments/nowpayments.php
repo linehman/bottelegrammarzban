@@ -32,5 +32,9 @@ curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode([
 $response = curl_exec($curl);
 curl_close($curl);
 $res = json_decode($response);
-header('Location: '.$res->invoice_url);
- 
+var_dump($res);
+if($res->status == false){
+    echo 'An error has occurred: Erorr Code : '.$res->statusCode."</br>Error description : ".$res->message;
+    return;
+    }
+ header('Location: '.$res->invoice_url);
