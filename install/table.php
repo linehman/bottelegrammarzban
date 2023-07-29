@@ -132,6 +132,7 @@ try {
         time_usertest varchar(600)  NULL,
         val_usertest varchar(600)  NULL,
         flow varchar(600)  NULL,
+        Extra_volume varchar(600)  NULL,
         MethodUsername varchar(900)  NULL)
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
@@ -152,6 +153,11 @@ $connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_us
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE setting ADD configManual VARCHAR(200)");
             echo "The configManual field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'Extra_volume'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE setting ADD Extra_volume VARCHAR(200)");
+            echo "The Extra_volume field was added ✅";
         }
         $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'flow'");
         if (mysqli_num_rows($Check_filde) != 1) {
