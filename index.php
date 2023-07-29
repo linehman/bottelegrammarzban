@@ -554,6 +554,7 @@ if (preg_match('/settings_(\w+)/', $datain, $dataget)) {
             ],
             [
                 ['text' => $textbotlang['users']['qrcode']['manageservice']['getqrcodelink'], 'callback_data' => 'qrcodelink_'.$username],
+                ['text' => $textbotlang['users']['Extra_volume']['sellextra'], 'callback_data' => 'Extra_volume_'.$username],
                 ],
             [
                 ['text' => $textbotlang['users']['stateus']['backservice'], 'callback_data' => "product_" . $username],
@@ -623,8 +624,15 @@ elseif (preg_match('/confirmserivce_(\w+)/', $datain, $dataget)) {
     $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$username'"));
     $prodcut = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '{$nameloc['name_product']}'"));
         if($user['Balance'] <$prodcut['price_product']){
-            sendmessage($from_id, $textbotlang['users']['sell']['None-credit'], $keyboard, 'HTML');
-            return;
+    $stmt = $connect->prepare("UPDATE user SET Processing_value = ? WHERE id = ?");
+    $stmt->bind_param("ss", $prodcut['price_product'], $from_id);
+    $stmt->execute();
+    sendmessage($from_id, $textbotlang['users']['sell']['None-credit'], $step_payment, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'get_step_payment';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+        return;
         }
     $Balance_Low_user = $user['Balance'] - $prodcut['price_product'];
     $stmt = $connect->prepare("UPDATE user SET Balance = ? WHERE id = ?");
@@ -641,7 +649,10 @@ elseif (preg_match('/confirmserivce_(\w+)/', $datain, $dataget)) {
     $date = strtotime("+" . $prodcut['Service_time'] . "day");
     $newDate = strtotime(date("Y-m-d H:i:s", $date));
     }
-    $Modifyuser =Modifyuser($Check_token['access_token'],$marzban_list_get['url_panel'],$username,$newDate);
+        $datam = array(
+        "expire" => $newDate
+        );
+    $Modifyuser =Modifyuser($Check_token['access_token'],$marzban_list_get['url_panel'],$username,$datam);
             $keyboardextendfnished = json_encode([
         'inline_keyboard' => [
             [
@@ -690,7 +701,10 @@ elseif (preg_match('/confirmchange_(\w+)/', $datain, $dataget)) {
             "status" => "active"
             );
     }
-    Modifyuser($Check_token['access_token'], $marzban_list_get['url_panel'],$username,$Allowedusername['expire'],$nameprotocol);
+        $datam = array(
+        "proxies" => $nameprotocol
+        );
+    Modifyuser($Check_token['access_token'], $marzban_list_get['url_panel'],$username,$datam);
     Editmessagetext($from_id, $message_id,  $textbotlang['users']['changelink']['confirmed'], null);
 
 }
@@ -711,6 +725,94 @@ elseif (preg_match('/qrcodelink_(\w+)/', $datain, $dataget)) {
     sendphoto($from_id, "https://$domainhosts/$rand.png", $textbotlang['users']['qrcode']['manageservice']['getqrcodelink']);
     unlink("$rand.png");
     unlink("qrcode.png");
+}
+elseif (preg_match('/Extra_volume_(\w+)/', $datain, $dataget)) {
+    $username = $dataget[1];
+    $stmt = $connect->prepare("UPDATE user SET Processing_value = ? WHERE id = ?");
+    $stmt->bind_param("ss", $username, $from_id);
+    $stmt->execute();
+    $textextra = " ⭕️ مقدار حجمی که میخواهید خریداری کنید را ارسال کنید.
+
+⚠️ هر گیگ حجم اضافه  {$setting['Extra_volume']} است.";
+    sendmessage($from_id, $textextra, $backuser, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'getvolumeextra';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif($user['step'] == "getvolumeextra"){
+        if (!ctype_digit($text)) {
+        sendmessage($from_id, $textbotlang['Admin']['Product']['Invalidvolume'], $backuser, 'HTML');
+        return;
+    }
+    $priceextra = $setting['Extra_volume']*$text;
+    $textextra = "📇 فاکتور خرید حجم اضافه برای شما ایجاد شد.
+
+💰 قیمت هر گیگابایت حجم اضافه :  {$setting['Extra_volume']} تومان
+📝 مبلغ  فاکتور شما :  $priceextra تومان
+📥 حجم اضافه درخواستی : $text  گیگابایت
+
+✅ جهت پرداخت و اضافه شدن حجم، روی دکمه زیر کلیک کنید.";
+        $keyboardsetting = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $textbotlang['users']['Extra_volume']['extracheck'], 'callback_data' => 'confirmaextra_'.$priceextra],
+            ]
+        ]
+    ]);
+    sendmessage($from_id,$textextra, $keyboardsetting, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif (preg_match('/confirmaextra_(\w+)/', $datain, $dataget)) {
+    $volume = $dataget[1];
+    $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$Processing_value'"));
+        if($user['Balance'] <$volume){
+    $stmt = $connect->prepare("UPDATE user SET Processing_value = ? WHERE id = ?");
+    $stmt->bind_param("ss", $volume, $from_id);
+    $stmt->execute();
+    sendmessage($from_id, $textbotlang['users']['sell']['None-credit'], $step_payment, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'get_step_payment';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+        return;
+        }
+    $Balance_Low_user = $user['Balance'] - $volume;
+    $stmt = $connect->prepare("UPDATE user SET Balance = ? WHERE id = ?");
+    $stmt->bind_param("ss", $Balance_Low_user, $from_id);
+    $stmt->execute();
+    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$nameloc['Service_location']}'"));
+    $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
+    $data_useer = getuser($Processing_value, $Check_token['access_token'], $marzban_list_get['url_panel']);
+    $data_limit = $data_useer['data_limit'] + ($volume/$setting['Extra_volume'] *  pow(1024, 3));
+    $datam = array(
+        "data_limit" => $data_limit
+        );
+     Modifyuser($Check_token['access_token'],$marzban_list_get['url_panel'],$Processing_value,$datam);
+            $keyboardextrafnished = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $textbotlang['users']['stateus']['backlist'], 'callback_data' => "backorder"],
+            ],
+            [
+                ['text' => $textbotlang['users']['stateus']['backservice'], 'callback_data' => "product_" . $Processing_value],
+]
+        ]
+    ]);
+    sendmessage($from_id, $textbotlang['users']['Extra_volume']['extraadded'], $keyboardextrafnished, 'HTML');
+    $volumes  =  $volume/$setting['Extra_volume'];
+     $text_report = "⭕️ یک کاربر حجم اضافه خریده است
+
+اطلاعات کاربر : 
+🪪 آیدی عددی : $from_id
+🛍 حجم خریداری شده  : $volumes
+💰 مبلغ پرداختی : $volume تومان"; 
+     if (strlen($setting['Channel_Report']) > 0) {    
+         sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
+         }
 }
 
 #-----------usertest------------#
@@ -1773,6 +1875,7 @@ if ($text == "📊 آمار ربات") {
     $timeacc = jdate('H:i:s', $one_hour_later); 
     $dayListSell =  mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(*) FROM invoice WHERE time_sell = '$date'"));
     $count_usertest =  mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(*) FROM TestAccount"));
+    $Balanceall =  mysqli_fetch_assoc(mysqli_query($connect, "SELECT SUM(Balance) FROM user"));
     $statistics = mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(id)  FROM user"));
     $invoice = mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(*)  FROM invoice"));
     $ping = sys_getloadavg();
@@ -1802,6 +1905,10 @@ if ($text == "📊 آمار ربات") {
             [
                 ['text' => $dayListSell['COUNT(*)'], 'callback_data' => 'dayListSell'],
                 ['text' => $textbotlang['Admin']['dayListSell'], 'callback_data' => 'dayListSell'],
+            ],
+                        [
+                ['text' => $Balanceall['SUM(Balance)'], 'callback_data' => 'Balanceall'],
+                ['text' => $textbotlang['Admin']['Balanceall'], 'callback_data' => 'Balanceall'],
             ],
         ]
     ]);
@@ -2798,10 +2905,6 @@ if ($text == "📱 احراز هویت شماره") {
     sendmessage($from_id, $textbotlang['users']['selectoption'], $valid_Number, 'HTML');
 }
 #-------------------------#
-if ($text == "📊 بخش گزارشات") {
-    sendmessage($from_id, $textbotlang['users']['selectoption'], $reports, 'HTML');
-}
-#-------------------------#
 if ($text == "🔑 تنظیمات اکانت تست") {
     sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard_usertest, 'HTML');
 }
@@ -3710,5 +3813,26 @@ if($text == "❌ حذف پنل"){
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['RemovedPanel'], $keyboardmarzban, 'HTML');
     $stmt = $connect->prepare("DELETE FROM marzban_panel WHERE name_panel = ?");
     $stmt->bind_param("s", $Processing_value);
+    $stmt->execute();
+}
+if($text == "➕ تنظیم قیمت حجم اضافه"){
+    sendmessage($from_id, $textbotlang['users']['Extra_volume']['SetPrice'].$setting['Extra_volume'], $backadmin, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'GetPriceExtra';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif($user['step'] == "GetPriceExtra"){
+        if (!ctype_digit($text)) {
+        sendmessage($from_id, $textbotlang['Admin']['Balance']['Invalidprice'], $backadmin, 'HTML');
+        return;
+    }
+    $stmt = $connect->prepare("UPDATE setting SET Extra_volume = ?");
+    $stmt->bind_param("s", $text);
+    $stmt->execute();
+    sendmessage($from_id, $textbotlang['users']['Extra_volume']['ChangedPrice'], $shopkeyboard, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 }
