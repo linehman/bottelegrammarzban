@@ -5,9 +5,9 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
+| 3.7.x   | :white_check_mark: |
 | 3.6.x   | :white_check_mark: |
-| 3.4.x   | :white_check_mark: |
-| < 3.4.0   | :x:                |
+| < 3.5.0   | :x:                |
 
 ## Reporting a Vulnerability
 
@@ -15,5 +15,5 @@ To report problems, you can contact us through the following communication metho
 
 email : mahdigholipour@outlook.com
 
-telegram id : https://t.me/mahdigh9
+group telegram : https://t.me/mirzapanelgroup
 
