@@ -6,6 +6,7 @@ require_once 'apipanel.php';
 require_once 'jdf.php';
 require_once 'keyboard.php';
 require_once 'text.php';
+require_once 'qrcode/lib/qrlib.php';
 #-----------telegram_ip_ranges------------#
 $telegram_ip_ranges = [
     ['lower' => '149.154.160.0', 'upper' => '149.154.175.255'],
@@ -29,6 +30,11 @@ function generateUUID() {
 
     return $uuid;
 }
+function createqrcode($textqrcode){
+            QRcode::png($textqrcode, "qrcode.png", QR_ECLEVEL_Q, 20, 2, false, 0xFFFFFF, 0x000000, 1200);
+            header("Content-Type: image/png");
+             return readfile("qrcode.png");
+        }
 function tronchangeto()
 {
     return json_decode(file_get_contents('https://api.weswap.digital/api/rate'), true);
@@ -547,6 +553,9 @@ if (preg_match('/settings_(\w+)/', $datain, $dataget)) {
                 ['text' => $textbotlang['users']['changelink']['btntitle'], 'callback_data' => 'changelink_'.$username],
             ],
             [
+                ['text' => $textbotlang['users']['qrcode']['manageservice']['getqrcodelink'], 'callback_data' => 'qrcodelink_'.$username],
+                ],
+            [
                 ['text' => $textbotlang['users']['stateus']['backservice'], 'callback_data' => "product_" . $username],
             ]
         ]
@@ -684,6 +693,24 @@ elseif (preg_match('/confirmchange_(\w+)/', $datain, $dataget)) {
     Modifyuser($Check_token['access_token'], $marzban_list_get['url_panel'],$username,$Allowedusername['expire'],$nameprotocol);
     Editmessagetext($from_id, $message_id,  $textbotlang['users']['changelink']['confirmed'], null);
 
+}
+elseif (preg_match('/qrcodelink_(\w+)/', $datain, $dataget)) {
+    $username = $dataget[1];
+    $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$username'"));
+    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$nameloc['Service_location']}'"));
+    $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
+    $data_useer = getuser($username, $Check_token['access_token'], $marzban_list_get['url_panel']);
+    $subscriptionurl = $data_useer['subscription_url'];
+    if (!preg_match('/^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?((\/[^\s\/]+)+)?$/', $subscriptionurl)) {
+        $subscriptionurl = $marzban_list_get['url_panel'] . "/" . ltrim($subscriptionurl, "/");
+    }
+    createqrcode($subscriptionurl);
+    $qrconfig = file_get_contents('qrcode.png');
+    $rand = rand(1111,9999);
+    file_put_contents("$rand.png",$qrconfig);
+    sendphoto($from_id, "https://$domainhosts/$rand.png", $textbotlang['users']['qrcode']['manageservice']['getqrcodelink']);
+    unlink("$rand.png");
+    unlink("qrcode.png");
 }
 
 #-----------usertest------------#
@@ -833,8 +860,25 @@ if ($text == $datatextbot['text_usertest']) {
     
     <code>$output_config_link</code>
     <code>$text_config</code>";
+if ($setting['sublink'] == "✅ لینک اشتراک فعال است.") {
+createqrcode($output_config_link);
+$qrconfig = file_get_contents('qrcode.png');
+$rand = rand(1111,9999);
+file_put_contents("$rand.png",$qrconfig);
+        telegram('sendphoto', [
+            'chat_id' => $from_id,
+            'photo' => "https://$domainhosts/$rand.png",
+            'reply_markup' => $usertestinfo,
+            'caption' => $textcreatuser,
+            'parse_mode' => "HTML",
+        ]);
+    sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
+unlink("$rand.png");
+unlink("qrcode.png");
+}else{
     sendmessage($from_id, $textcreatuser, $usertestinfo, 'HTML');
     sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
+}
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'home';
     $stmt->bind_param("ss", $step, $from_id);
@@ -1147,13 +1191,30 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
         ]
     ]);
     $textcreatuser = "
-    👤 نام کاربری شما : <code>$username_ac</code>
-    🔑 اشتراک شما با موفقیت ساخته شد.
+👤 نام کاربری شما : <code>$username_ac</code>
+🔑 اشتراک شما با موفقیت ساخته شد.
     
 $text_config
 $link_config";
+if ($setting['sublink'] == "✅ لینک اشتراک فعال است.") {
+createqrcode($output_config_link);
+$qrconfig = file_get_contents('qrcode.png');
+$rand = rand(1111,9999);
+file_put_contents("$rand.png",$qrconfig);
+        telegram('sendphoto', [
+            'chat_id' => $from_id,
+            'photo' => "https://$domainhosts/$rand.png",
+            'reply_markup' => $Shoppinginfo,
+            'caption' => $textcreatuser,
+            'parse_mode' => "HTML",
+        ]);
+            sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
+unlink("$rand.png");
+unlink("qrcode.png");
+}else{
     sendmessage($from_id, $textcreatuser, $Shoppinginfo, 'HTML');
     sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
+}
     $stmt = $connect->prepare("UPDATE user SET Balance = ? WHERE id = ?");
     $Balance_prim = $user['Balance'] - $info_product['price_product'];
     $stmt->bind_param("ss", $Balance_prim, $from_id);
@@ -1476,14 +1537,13 @@ if (preg_match('/Confirmpay_user_(\w+)_(\w+)/', $datain, $dataget)) {
     $textsendrasid = "
             ⭕️ یک پرداخت جدید انجام شده است .
         
-        👤 شناسه کاربر: $from_id
-        🛒 کد پیگیری پرداخت: $randomString
-        ⚜️ نام کاربری: $username
-        💸 مبلغ پرداختی: $Processing_value تومان
+👤 شناسه کاربر: $from_id
+🛒 کد پیگیری پرداخت: $randomString
+⚜️ نام کاربری: $username
+💸 مبلغ پرداختی: $Processing_value تومان
         
-        توضیحات: $caption
-        ✍️ در صورت درست بودن رسید پرداخت را تایید نمایید.
-        ";
+توضیحات: $caption
+✍️ در صورت درست بودن رسید پرداخت را تایید نمایید.";
     foreach ($admin_ids as $id_admin) {
         telegram('sendphoto', [
             'chat_id' => $id_admin,
@@ -1803,6 +1863,10 @@ if ($text == "🖥 اضافه کردن پنل  مرزبان") {
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 } elseif ($user['step'] == "add_name_panel") {
+    if(in_array($text,$marzban_list)){
+    sendmessage($from_id, $textbotlang['Admin']['managepanel']['Repeatpanel'], $backadmin, 'HTML');
+    return;
+    }
     $stmt = $connect->prepare("INSERT INTO marzban_panel (name_panel) VALUES (?)");
     $stmt->bind_param("s", $text);
     $stmt->execute();
@@ -1845,22 +1909,6 @@ if ($text == "🖥 اضافه کردن پنل  مرزبان") {
     $stmt->execute();
     $stmt = $connect->prepare("UPDATE marzban_panel SET  password_panel = ? WHERE name_panel = ?");
     $stmt->bind_param("ss", $text, $Processing_value);
-    $stmt->execute();
-}
-if ($text == "❌ حذف پنل") {
-    sendmessage($from_id, $textbotlang['Admin']['managepanel']['GetRemoveNamePanel'], $json_list_marzban_panel, 'HTML');
-    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
-    $step = 'removepanel';
-    $stmt->bind_param("ss", $step, $from_id);
-    $stmt->execute();
-} elseif ($user['step'] == "removepanel") {
-    sendmessage($from_id, $textbotlang['Admin']['managepanel']['RemovedPanel'], $keyboardmarzban, 'HTML');
-    $stmt = $connect->prepare("DELETE FROM marzban_panel WHERE name_panel = ?");
-    $stmt->bind_param("s", $text);
-    $stmt->execute();
-    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
-    $step = 'home';
-    $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 }
 if ($text == "📨 ارسال پیام به کاربر") {
@@ -2864,7 +2912,7 @@ if ($text == "❌ حذف محصول") {
         sendmessage($from_id, $textbotlang['users']['sell']['error-product'], null, 'HTML');
         return;
     }
-    $stmt = $connect->prepare("DELETE FROM product WHERE name_product = ? AND Location= ? or Location= '/all'");
+    $stmt = $connect->prepare("DELETE FROM product WHERE name_product = ? AND (Location= ? or Location= '/all')");
     $stmt->bind_param("ss", $text,$user['Processing_value']);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['Product']['RemoveedProduct'], $shopkeyboard, 'HTML');
@@ -2938,6 +2986,9 @@ if ($text == "نام محصول") {
     $stmt->execute();
 } elseif ($user['step'] == "change_name") {
     $stmt = $connect->prepare("UPDATE product SET name_product = ? WHERE name_product = ? AND Location = ? ");
+    $stmt->bind_param("sss", $text, $Processing_value,$user['Processing_value_one']);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE invoice SET name_product = ? WHERE name_product = ? AND Service_location = ? ");
     $stmt->bind_param("sss", $text, $Processing_value,$user['Processing_value_one']);
     $stmt->execute();
     sendmessage($from_id, "✅نام محصول بروزرسانی شد", $shopkeyboard, 'HTML');
@@ -3169,7 +3220,7 @@ $help_Status = json_encode([
 if ($text == "💡 وضعیت بخش آموزش") {
     sendmessage($from_id, $textbotlang['Admin']['Status']['HelpTitle'], $help_Status, 'HTML');
 }
-if ($datain == "✅آموزش فعال است") {
+if ($datain == "✅ آموزش فعال است") {
     $stmt = $connect->prepare("UPDATE setting SET help_Status = ?");
     $Status = '❌ آموزش غیرفعال است';
     $stmt->bind_param("s", $Status);
@@ -3611,4 +3662,53 @@ if ($datain == "offzarinpal"){
     $stmt->bind_param("ss", $Status,$where);
     $stmt->execute();
     Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['zarrinpalStatusOff'], null);
+}
+if($text == "✏️ ویرایش پنل"){
+    sendmessage($from_id, $textbotlang['Admin']['managepanel']['getloc'], $json_list_marzban_panel, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'GetLocationEdit';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif($user['step'] == "GetLocationEdit"){
+    $stmt = $connect->prepare("UPDATE user SET Processing_value = ? WHERE id = ?");
+    $stmt->bind_param("ss", $text, $from_id);
+    $stmt->execute();
+    sendmessage($from_id, $textbotlang['users']['selectoption'], $optionMarzban, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif($text == "✍️ نام پنل"){
+    sendmessage($from_id, $textbotlang['Admin']['managepanel']['GetNameNew'], $backadmin, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'GetNameNew';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif($user['step'] == "GetNameNew"){
+    sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedNmaePanel'], $optionMarzban, 'HTML');
+    $stmt = $connect->prepare("UPDATE marzban_panel SET name_panel = ? WHERE name_panel = ?");
+    $stmt->bind_param("ss", $text, $Processing_value);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE invoice SET Service_location = ? WHERE Service_location = ?");
+    $stmt->bind_param("ss", $text, $Processing_value);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE product SET Location = ? WHERE Location = ?");
+    $stmt->bind_param("ss", $text, $Processing_value);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET Processing_value = ? WHERE id = ?");
+    $stmt->bind_param("ss", $text, $from_id);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+if($text == "❌ حذف پنل"){
+    sendmessage($from_id, $textbotlang['Admin']['managepanel']['RemovedPanel'], $keyboardmarzban, 'HTML');
+    $stmt = $connect->prepare("DELETE FROM marzban_panel WHERE name_panel = ?");
+    $stmt->bind_param("s", $Processing_value);
+    $stmt->execute();
 }
