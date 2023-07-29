@@ -2,7 +2,7 @@
 
 <p align="center">Bot for VPN Sale with Auto Build</p>
 
-<h1 align="center"/>[فارسی](https://github.com/mahdigholipour3/bottelegrammarzban/blob/main/README_fa.md)</h1>
+[فارسی](https://github.com/mahdigholipour3/bottelegrammarzban/blob/main/README_fa.md)
 
 
 
