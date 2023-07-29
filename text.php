@@ -72,9 +72,12 @@ $textbotlang['users']['extend']['thanks'] = "با تشکر از تمدید سر�
  
 ⬅️ برای بازگشت به لیست سرویس های خود یا مشاهده اطلاعات روی دکمه های زیر کلیک کنید";
 
-
-
-
+$textbotlang['users']['Extra_volume']['SetPrice'] = "⭕️ قیمتی که می خواهید برای هرگیگ حجم اضافه تعیین کنید را ارسال کنید.
+قیمت فعلی :";
+$textbotlang['users']['Extra_volume']['ChangedPrice'] = "✅ مبلغ با موفقیت ذخیره گردید.";
+$textbotlang['users']['Extra_volume']['sellextra'] = "➕ خرید حجم اضافه";
+$textbotlang['users']['Extra_volume']['extraadded'] = "✅ حجم با موفقیت به سرویس شما اضافه گردید.";
+$textbotlang['users']['Extra_volume']['extracheck'] = "تایید و دریافت حجم اضافه";
 
 $textbotlang['users']['usertest']['limitwarning'] = "⚠️ محدودیت ساخت اشتراک تست شما به پایان رسید.";
 $textbotlang['users']['usertest']['errorcreat'] = "❌ خطایی در ساخت اشتراک رخ داده است برای رفع مشکل با پشتیبانی در ارتباط باشد.";
@@ -188,7 +191,7 @@ $textbotlang['Admin']['phpversion'] = "👨‍💻 نسخه php هاست";
 $textbotlang['Admin']['pingbot'] = "🚀 پینگ ربات";
 $textbotlang['Admin']['sellservices'] = "🛍 فروش کل ";
 $textbotlang['Admin']['dayListSell'] = "☀️ فروش امروز";
-
+$textbotlang['Admin']['Balanceall'] = "💰 موجودی کل کاربران";
 
 
 $textbotlang['Admin']['managepanel']['selectpanel'] = "پنل خود را انتخاب کنید";
