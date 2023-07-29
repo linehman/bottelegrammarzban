@@ -1,1 +1,1 @@
-echo "illegal access";
+<?php echo "illegal access";
