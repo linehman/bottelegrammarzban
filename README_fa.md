@@ -1,8 +1,8 @@
 
 
-<h1 align="center"/>Bot Mirza Panel</h1>
+<h1 align="center"/>ربات میرزا پنل</h1>
 
-<p align="center">bot for VPN Sale with Auto Build</p>
+<p align="center">ربات فروش خودکار مخصوص پنل مرزبان</p>
 
 <br/>
 <p align="center">
