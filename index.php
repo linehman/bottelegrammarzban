@@ -1729,7 +1729,23 @@ if (!in_array($from_id, $admin_ids)) {
 if (in_array($text, $textadmin)) {
     $text_admin = "
     سلام مدیر عزیز به پنل ادمین خوش امدی گلم😍
-    نسخه فعلی ربات شما : $version";
+⭕️ نسخه فعلی ربات شما : $version
+📡 لینک گروه : @mirzapanelgroup
+❓راهنمایی : 
+1 - برای اضافه کردن پنل دکمه پنل مرزبان  را زده و دکمه اضافه کردن پنل را بزنید.
+2 - از بخش فروشگاه می توانید محصول ، کد تخفیف اضافه کنید و قیمت حجم اضافه را تعیین کنید.
+3- از دکمه مالی میتوانید وضعیت درگاه و مرچنت ها را تنظیم کنید
+4-  درگاه ارزی ریالی باید فقط api nowpayments را تنظیم کنید و تمام تنظیمات کیف پول و... داخل سایت nowpayments است
+
+💰برای دونیت دادن به ما از کیف پول های ارز دیجیتال زیر می توانید استفاده کنید.
+
+TRX(TRC20):
+
+TJxoQEyCEs36Cf8R9MjapFsT6vpm9aRArS
+
+TON
+
+EQA0KjWeODV8CDloEp_d3fBJ71xHMVv77ydQWjVr-fAtZSqw";
     sendmessage($from_id, $text_admin, $keyboardadmin, 'HTML');
 }
 if ($text == "🏠 بازگشت به منوی مدیریت") {
