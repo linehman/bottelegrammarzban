@@ -162,7 +162,8 @@ $textbotlang['Admin']['Back-Admin'] = "به پنل ادمین بازگشتید!"
 $textbotlang['Admin']['not-user'] = "کاربری با این شناسه یافت نشد";
 
 
-$textbotlang['Admin']['channel']['join-channel-on'] = "عضویت اجباری روشن گردید";
+$textbotlang['Admin']['channel']['join-channel-on'] = "عضویت اجباری روشن گردید
+❌❌  برای کار کردن  عضویت اجباری ربات باید ادمین کانال باشد.";
 $textbotlang['Admin']['channel']['join-channel-off'] = "عضویت اجباری خاموش گردید";
 $textbotlang['Admin']['channel']['changechannel'] = "برای تنظیم کانال عضویت اجباری لطفا آیدی کانال خود را بدون @ وارد نمایید.
     کانال فعلی شما: @";
