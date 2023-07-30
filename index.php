@@ -1709,6 +1709,9 @@ if ($datain == "Discount") {
 if ($text == $datatextbot['text_Tariff_list']) {
     sendmessage($from_id, $datatextbot['text_dec_Tariff_list'], null, 'HTML');
 }
+if($datain == "colselist"){
+    deletemessage($from_id, $message_id);
+}
 #----------------[  admin section  ]------------------#
 $textadmin = ["panel", "/panel", "پنل مدیریت", "ادمین"];
 if (!in_array($from_id, $admin_ids)) {
@@ -3730,9 +3733,6 @@ if ($datain == "offdigi"){
     $stmt->bind_param("ss", $Status,$where);
     $stmt->execute();
     Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['digiStatusOff'], null);
-}
-if($datain == "colselist"){
-    deletemessage($from_id, $message_id);
 }
 if($text == "🟡  درگاه زرین پال"){
     sendmessage($from_id, $textbotlang['users']['selectoption'], $zarinpal, 'HTML');
