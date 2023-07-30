@@ -1410,9 +1410,10 @@ $PaySetting
         sendmessage($from_id, $textbotlang['users']['Balance']['linkpayments'], $keyboard, 'HTML');
         $dateacc = date('Y/m/d h:i:s');
         $randomString = bin2hex(random_bytes(5));
-        $stmt = $connect->prepare("INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status) VALUES (?,?,?,?,?)");
+        $stmt = $connect->prepare("INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status,Payment_Method) VALUES (?,?,?,?,?,?)");
         $payment_Status = "Unpaid";
-        $stmt->bind_param("sssss", $from_id, $randomString, $dateacc, $Processing_value, $payment_Status);
+        $Payment_Method = "zarinpal";
+        $stmt->bind_param("ssssss", $from_id, $randomString, $dateacc, $Processing_value, $payment_Status,$Payment_Method);
         $stmt->execute();
         $paymentkeyboard = json_encode([
             'inline_keyboard' => [
@@ -1442,9 +1443,10 @@ $PaySetting
         sendmessage($from_id, $textbotlang['users']['Balance']['linkpayments'], $keyboard, 'HTML');
         $dateacc = date('Y/m/d h:i:s');
         $randomString = bin2hex(random_bytes(5));
-        $stmt = $connect->prepare("INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status) VALUES (?,?,?,?,?)");
+        $stmt = $connect->prepare("INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status,Payment_Method) VALUES (?,?,?,?,?,?)");
         $payment_Status = "Unpaid";
-        $stmt->bind_param("sssss", $from_id, $randomString, $dateacc, $Processing_value, $payment_Status);
+        $Payment_Method = "Nowpayments";
+        $stmt->bind_param("ssssss", $from_id, $randomString, $dateacc, $Processing_value, $payment_Status,$Payment_Method);
         $stmt->execute();
         $paymentkeyboard = json_encode([
             'inline_keyboard' => [
@@ -1484,9 +1486,10 @@ $PaySetting
         sendmessage($from_id, $textbotlang['users']['Balance']['linkpayments'], $keyboard, 'HTML');
         $dateacc = date('Y/m/d h:i:s');
         $randomString = bin2hex(random_bytes(5));
-        $stmt = $connect->prepare("INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status) VALUES (?,?,?,?,?)");
+        $stmt = $connect->prepare("INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status,Payment_Method) VALUES (?,?,?,?,?,?)");
         $payment_Status = "Unpaid";
-        $stmt->bind_param("sssss", $from_id, $randomString, $dateacc, $Processing_value, $payment_Status);
+        $Payment_Method = "Currency Rial gateway";
+        $stmt->bind_param("ssssss", $from_id, $randomString, $dateacc, $Processing_value, $payment_Status,$Payment_Method);
         $stmt->execute();
         $order_description = "weswap_" . $randomString . "_" . $trxprice;
         $pay = nowPayments('payment', $usdprice, $randomString, $order_description);
@@ -1513,7 +1516,7 @@ $PaySetting
         $paymentkeyboard = json_encode([
             'inline_keyboard' => [
                 [
-                    ['text' => $textbotlang['users']['Balance']['payments'], 'url' => "https://digiswap.org/quick?amount=$trxprice&address=$pay_address"]
+                    ['text' => $textbotlang['users']['Balance']['payments'], 'url' => "https://changeto.technology/quick/?amount=$trxprice&currency=TRX&address=$pay_address"]
                 ],
                 [
                     ['text' => $textbotlang['users']['Balance']['Confirmpaying'], 'callback_data' => "Confirmpay_user_{$payment_id}_{$randomString}"]
@@ -1622,9 +1625,10 @@ if (preg_match('/Confirmpay_user_(\w+)_(\w+)/', $datain, $dataget)) {
     }
     $dateacc = date('Y/m/d h:i:s');
     $randomString = bin2hex(random_bytes(5));
-    $stmt = $connect->prepare("INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status) VALUES (?,?,?,?,?)");
+    $stmt = $connect->prepare("INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status,Payment_Method) VALUES (?,?,?,?,?,?)");
     $payment_Status = "Unpaid";
-    $stmt->bind_param("sssss", $from_id, $randomString, $dateacc, $Processing_value, $payment_Status);
+    $Payment_Method = "cart to cart";
+    $stmt->bind_param("ssssss", $from_id, $randomString, $dateacc, $Processing_value, $payment_Status,$Payment_Method);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['users']['Balance']['Send-receipt'], $keyboard, 'HTML');
     $Confirm_pay = json_encode([
