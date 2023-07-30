@@ -1,6 +1,5 @@
 <?php
 /*
-pv  => @gholipour3
 channel => @mirzapanel
 */
 //-----------------------------database-------------------------------
