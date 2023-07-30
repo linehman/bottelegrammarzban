@@ -417,10 +417,18 @@ try {
         time varchar(200)  NULL,
         price varchar(2000) NULL,
         dec_not_confirmed varchar(2000) NULL,
+        Payment_Method varchar(400) NULL,
         payment_Status varchar(2000) NULL)");
         if (!$result) {
             echo "table Payment_report".mysqli_error($connect);
         }
+    }
+    else{
+      $Check_filde = $connect->query("SHOW COLUMNS FROM Payment_report LIKE 'Payment_Method'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE Payment_report ADD Payment_Method VARCHAR(1000)");
+            echo "The Payment_Method field was added ✅";
+        }   
     }
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
