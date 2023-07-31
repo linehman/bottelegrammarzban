@@ -307,14 +307,14 @@ if ($table_exists) {
             'keyboard' => [],
             'resize_keyboard' => true,
         ];
-        $help_arr['keyboard'][] = [
-            ['text' => "🏠 بازگشت به منوی اصلی"],
-        ];
         foreach ($help as $button) {
             $help_arr['keyboard'][] = [
                 ['text' => $button[0]]
             ];
         }
+                $help_arr['keyboard'][] = [
+            ['text' => "🏠 بازگشت به منوی اصلی"],
+        ];
         $json_list_help = json_encode($help_arr);
     }
 }
