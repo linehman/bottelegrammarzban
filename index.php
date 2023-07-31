@@ -860,7 +860,7 @@ if ($text == $datatextbot['text_usertest']) {
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 }
-    elseif ($user['step'] == "createusertest") {
+elseif ($user['step'] == "createusertest") {
         if($setting['MethodUsername'] == "نام کاربری دلخواه"){
             if (!preg_match('~^[a-z][a-z\d_]{2,32}$~i', $text)) {
         sendmessage($from_id, $textbotlang['users']['invalidusername'], $backuser,'HTML');
@@ -1004,7 +1004,7 @@ unlink("qrcode.png");
                 ['text' => $textbotlang['users']['usertest']['phonenumber'], 'callback_data' => "iduser"],
             ],
             [
-                ['text' => $text, 'callback_data' => "namepanel"],
+                ['text' => $name_panel, 'callback_data' => "namepanel"],
                 ['text' => $textbotlang['users']['usertest']['namepanel'], 'callback_data' => "namepanel"],
             ],
         ]
@@ -3038,8 +3038,9 @@ if ($text == "❌ حذف محصول") {
         sendmessage($from_id, $textbotlang['users']['sell']['error-product'], null, 'HTML');
         return;
     }
-    $stmt = $connect->prepare("DELETE FROM product WHERE name_product = ? AND (Location= ? or Location= '/all')");
-    $stmt->bind_param("ss", $text,$user['Processing_value']);
+    $stmt = $connect->prepare("DELETE FROM product WHERE name_product = ? AND (Location= ? or Location= ?)");
+    $ydf = '/all';
+    $stmt->bind_param("sss", $text,$user['Processing_value'],$ydf);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['Product']['RemoveedProduct'], $shopkeyboard, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
