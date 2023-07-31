@@ -1955,13 +1955,22 @@ if ($user['step'] == "get_panel") {
     if (isset($Check_token['access_token'])) {
         $System_Stats = Get_System_Stats($marzban_list_get['url_panel'], $Check_token['access_token']);
         $active_users = $System_Stats['users_active'];
+        $total_user = $System_Stats['total_user'];
+        $mem_total = round($System_Stats['mem_total']/pow(1024, 3),1);
+        $mem_used = round($System_Stats['mem_used']/pow(1024, 3),1);
+        $bandwidth =formatBytes($System_Stats['outgoing_bandwidth']+$System_Stats['incoming_bandwidth']);
         $Condition_marzban = "";
         $text_marzban = "
                 اطلاعات پنل شما👇:
                      
-    🖥 وضعیت اتصال پنل مرزبان: ✅ پنل متصل است
-    👤 تعداد کاربران فعال: $active_users
-                ";
+🖥 وضعیت اتصال پنل مرزبان: ✅ پنل متصل است
+👥  تعداد کل کاربران: $total_user
+👤 تعداد کاربران فعال: $active_users
+📡 نسخه پنل مرزبان :  {$System_Stats['version']}
+💻 مصرف کل  رم پنل مرزبان  : $mem_total گیگابایت
+💻 مصرف رم پنل مرزبان  : $mem_used گیگابایت
+🌐 ترافیک کل مصرف شده  ( آپلود / دانلود) : $bandwidth
+";
     } elseif ($Check_token['detail'] == "Incorrect username or password") {
         $text_marzban = "❌ نام کاربری یا رمز عبور پنل اشتباه است";
     } else {
