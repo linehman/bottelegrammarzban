@@ -624,8 +624,9 @@ elseif (preg_match('/confirmserivce_(\w+)/', $datain, $dataget)) {
     $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$username'"));
     $prodcut = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '{$nameloc['name_product']}'"));
         if($user['Balance'] <$prodcut['price_product']){
+    $Balance_prim = $info_product['price_product'] - $user['Balance'];
     $stmt = $connect->prepare("UPDATE user SET Processing_value = ? WHERE id = ?");
-    $stmt->bind_param("ss", $prodcut['price_product'], $from_id);
+    $stmt->bind_param("ss", $Balance_prim, $from_id);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['users']['sell']['None-credit'], $step_payment, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -770,8 +771,9 @@ elseif (preg_match('/confirmaextra_(\w+)/', $datain, $dataget)) {
     $volume = $dataget[1];
     $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$Processing_value'"));
         if($user['Balance'] <$volume){
+    $Balance_prim = $volume - $user['Balance'];
     $stmt = $connect->prepare("UPDATE user SET Processing_value = ? WHERE id = ?");
-    $stmt->bind_param("ss", $volume, $from_id);
+    $stmt->bind_param("ss", $Balance_prim, $from_id);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['users']['sell']['None-credit'], $step_payment, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -1203,8 +1205,9 @@ elseif ($user['step'] == "payment" && $text == "💰 پرداخت و دریاف�
     $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '{$user['Processing_value_one']}' AND (Location = '$Processing_value'  or Location = '/all') LIMIT 1"));
     if (empty($info_product['price_product']) || empty($info_product['price_product'])) return;
     if ($info_product['price_product'] > $user['Balance']) {
+    $Balance_prim = $info_product['price_product'] - $user['Balance'];
     $stmt = $connect->prepare("UPDATE user SET Processing_value = ? WHERE id = ?");
-    $stmt->bind_param("ss", $info_product['price_product'], $from_id);
+    $stmt->bind_param("ss", $Balance_prim, $from_id);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['users']['sell']['None-credit'], $step_payment, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -1956,8 +1959,8 @@ if ($user['step'] == "get_panel") {
         $System_Stats = Get_System_Stats($marzban_list_get['url_panel'], $Check_token['access_token']);
         $active_users = $System_Stats['users_active'];
         $total_user = $System_Stats['total_user'];
-        $mem_total = round($System_Stats['mem_total']/pow(1024, 3),1);
-        $mem_used = round($System_Stats['mem_used']/pow(1024, 3),1);
+        $mem_total = formatBytes($System_Stats['mem_total']);
+        $mem_used = formatBytes($System_Stats['mem_used']);
         $bandwidth =formatBytes($System_Stats['outgoing_bandwidth']+$System_Stats['incoming_bandwidth']);
         $Condition_marzban = "";
         $text_marzban = "
@@ -1967,8 +1970,8 @@ if ($user['step'] == "get_panel") {
 👥  تعداد کل کاربران: $total_user
 👤 تعداد کاربران فعال: $active_users
 📡 نسخه پنل مرزبان :  {$System_Stats['version']}
-💻 مصرف کل  رم پنل مرزبان  : $mem_total گیگابایت
-💻 مصرف رم پنل مرزبان  : $mem_used گیگابایت
+💻 مصرف کل  رم پنل مرزبان  : $mem_total
+💻 مصرف رم پنل مرزبان  : $mem_used
 🌐 ترافیک کل مصرف شده  ( آپلود / دانلود) : $bandwidth
 ";
     } elseif ($Check_token['detail'] == "Incorrect username or password") {
