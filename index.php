@@ -1054,13 +1054,6 @@ if ($text == $datatextbot['text_support']) {
     $stmt->execute();
 } elseif ($user['step'] == 'gettextpm') {
     sendmessage($from_id, $textbotlang['users']['support']['sendmessageadmin'], $keyboard, 'HTML');
-    $textsendadmin = "
-        📥 یک پیام از کاربر دریافت شد برای پاسخ روی دکمه زیر کلیک کنید  و پیام خود را ارسال کنید.
-    
-    آیدی عددی : $from_id
-    نام کاربری کاربر : @$username
-     📝 متن پیام : $text
-        ";
     $Response = json_encode([
         'inline_keyboard' => [
             [
@@ -1069,7 +1062,32 @@ if ($text == $datatextbot['text_support']) {
         ]
     ]);
     foreach ($admin_ids as $id_admin) {
-        sendmessage($id_admin, $textsendadmin, $Response, 'HTML');
+        if($text){
+             $textsendadmin = "
+        📥 یک پیام از کاربر دریافت شد برای پاسخ روی دکمه زیر کلیک کنید  و پیام خود را ارسال کنید.
+    
+    آیدی عددی : $from_id
+    نام کاربری کاربر : @$username
+     📝 متن پیام : $text
+        ";
+            sendmessage($id_admin, $textsendadmin, $Response, 'HTML');
+        }
+        if($photo){
+             $textsendadmin = "
+        📥 یک پیام از کاربر دریافت شد برای پاسخ روی دکمه زیر کلیک کنید  و پیام خود را ارسال کنید.
+    
+    آیدی عددی : $from_id
+    نام کاربری کاربر : @$username
+     📝 متن پیام : $caption
+        ";
+                    telegram('sendphoto', [
+            'chat_id' => $id_admin,
+            'photo' => $photoid,
+            'reply_markup' => $Response,
+            'caption' => $textsendadmin,
+            'parse_mode' => "HTML",
+        ]);
+        }
     }
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'home';
@@ -3721,7 +3739,7 @@ if ($datain == "onnowpayment"){
     $stmt->execute();
     Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['nowpaymentsStatuson'], null);
 }
-if ($text == "💎 درگاه دیجی سواپ") {
+if ($text == "💎 درگاه ارزی ریالی") {
         $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'digistatus'"))['ValuePay'];
     $digi_Status = json_encode([
     'inline_keyboard' => [
