@@ -139,19 +139,9 @@ function removeuser($token,$url_panel,$username)
     return $data_useer;
 }
 //----------------------------------
-function Modifyuser($token,$url_panel,$username,$expire, $proxies = array())
+function Modifyuser($token,$url_panel,$username,array $data)
 {
 $url =  $url_panel.'/api/user/'.$username;
-if(isset($proxies)){
-        $data = array(
-        "proxies" => $proxies
-    );
-}
-    $data = array(
-        "expire" => $expire,
-        "proxies" => $proxies
-    );
-
     $payload = json_encode($data);
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);
